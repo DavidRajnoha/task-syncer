@@ -12,12 +12,20 @@ public class Project {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
-    @OneToMany(targetEntity = Issue.class)
+    @OneToMany(targetEntity = Issue.class, mappedBy = "project")
     private List<Issue> issues;
 
+    @OneToMany(targetEntity = Endpoint.class, mappedBy = "project")
+    private List<Endpoint> endpoints;  // todo: resolve one to many or many to many or shared endpoints across projects
+
     public Project() {}
+
+    public Project(String name) {
+        this.name = name;
+    }
 
 
     public Long getId() {
@@ -43,5 +51,13 @@ public class Project {
 
     public void setIssues(List<Issue> issues) {
         this.issues = issues;
+    }
+
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
+    }
+
+    public void setEndpoints(List<Endpoint> endpoints) {
+        this.endpoints = endpoints;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Set;
  * @author Filip Cap
  */
 @Entity(name = "issue")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"rid", "type"})})
 public class Issue {
     public static final String GITHUB_ISSUE = "github-issue";
     public static final String GITLAB_ISSUE = "gitlab-issue";
@@ -22,15 +23,22 @@ public class Issue {
     private String title;
     private String description;
     private boolean opened;
+
+    @Column(name = "rid")
     private String rid;
+
     private String riid;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Card card;
+
+    @ManyToOne(targetEntity = Project.class, optional = false, fetch = FetchType.LAZY)
+    private Project project;
 
     @Transient
     private Set<Label> labels;
 
+    @Column(name = "type")
     private String type;
 
     public Issue() {}
@@ -120,5 +128,13 @@ public class Issue {
 
     public void setCard(Card card) {
         this.card = card;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

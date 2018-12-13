@@ -121,15 +121,9 @@
             <artifactId>trello-java-wrapper</artifactId>
             <version>0.8</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.trello</groupId>
-            <artifactId>spring-swagger-trello-api-client</artifactId>
-            <version>1.0.0</version>
-        </dependency>
         <!--end: services' api providers-->
 
-
+        <!--should provide new code hotswap-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

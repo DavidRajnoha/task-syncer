@@ -17,11 +17,13 @@ public class Card {
 
     private String description;
 
+    @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
     private String cuid;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Issue issue;
 
     public Card() {}
