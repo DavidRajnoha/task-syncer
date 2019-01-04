@@ -18,8 +18,12 @@ public class Project {
     @OneToMany(targetEntity = Issue.class, mappedBy = "project")
     private List<Issue> issues;
 
+    @Transient
     @OneToMany(targetEntity = Endpoint.class, mappedBy = "project")
     private List<Endpoint> endpoints;  // todo: resolve one to many or many to many or shared endpoints across projects
+
+
+    private String boardId;
 
     public Project() {}
 
@@ -59,5 +63,13 @@ public class Project {
 
     public void setEndpoints(List<Endpoint> endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public String getBoardId() {
+        return boardId;
+    }
+
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
 }

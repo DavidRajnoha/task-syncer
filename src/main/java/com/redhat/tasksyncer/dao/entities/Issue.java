@@ -2,6 +2,10 @@ package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.Label;
 import org.gitlab.api.models.GitlabIssue;
+import org.gitlab4j.api.Constants;
+import org.gitlab4j.api.webhook.IssueEvent;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueState;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -11,7 +15,7 @@ import java.util.Set;
  * @author Filip Cap
  */
 @Entity(name = "issue")
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"rid", "type"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"rid", "type"})})  //todo: there might be more instances of gitlab with non-disjoint IDs
 public class Issue {
     public static final String GITHUB_ISSUE = "github-issue";
     public static final String GITLAB_ISSUE = "gitlab-issue";
@@ -41,6 +45,8 @@ public class Issue {
     @Column(name = "type")
     private String type;
 
+    // todo: add last edit datetime
+
     public Issue() {}
 
     public Issue(String rid, String iid, String title, String description, boolean opened, Set<Label> labels, String type) {
@@ -59,10 +65,54 @@ public class Issue {
                 String.valueOf(gli.getIid()),
                 gli.getTitle(),
                 gli.getDescription(),
-                gli.getState().equals(GitlabIssue.STATE_OPENED),
+                gli.getState().equals(GitlabIssue.STATE_OPENED),  // todo: or state reopened
                 new HashSet<>(),
                 Issue.GITLAB_ISSUE
         );
+
+    }
+
+    public Issue(IssueEvent.ObjectAttributes attributes) {
+        this(
+                String.valueOf(attributes.getId()),
+                String.valueOf(attributes.getIid()),
+                attributes.getTitle(),
+                attributes.getDescription(),
+                attributes.getState().equals(GitlabIssue.STATE_OPENED),  // todo: or state reopened
+                new HashSet<>(),
+                Issue.GITLAB_ISSUE
+        );
+    }
+
+    public Issue(GHIssue issue) {
+        this(
+                String.valueOf(issue.getId()),  //TODO: assure id is unique and not confused with number
+                String.valueOf(issue.getNumber()),
+                issue.getTitle(),
+                issue.getBody(),
+                issue.getState() == GHIssueState.OPEN,  // todo: or state reopened
+                new HashSet<>(),
+                Issue.GITHUB_ISSUE
+        );
+    }
+
+    public Issue(org.gitlab4j.api.models.Issue issue) {
+        this(
+                String.valueOf(issue.getId()),
+                String.valueOf(issue.getIid()),
+                issue.getTitle(),
+                issue.getDescription(),
+                issue.getState() == Constants.IssueState.OPENED || issue.getState() == Constants.IssueState.REOPENED,
+                new HashSet<>(),
+                Issue.GITLAB_ISSUE
+        );
+    }
+
+    public void updateLocally(Issue i) {
+        this.title = i.title;
+        this.description = i.description;
+        this.opened = i.opened;
+        this.labels = new HashSet<>(i.labels);
 
     }
 

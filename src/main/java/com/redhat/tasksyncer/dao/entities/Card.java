@@ -23,7 +23,7 @@ public class Card {
     @Column(nullable = false)
     private String cuid;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false, mappedBy = "card")
     private Issue issue;
 
     public Card() {}
@@ -34,6 +34,18 @@ public class Card {
         this.cuid = card.getId();
         this.type = TRELLO_CARD;
 
+    }
+
+    public Card(Issue issue) {
+        this.title = issue.getTitle();
+        this.description = issue.getDescription();
+        // todo: determine type
+        this.issue = issue;
+    }
+
+    public void updateLocally(Card card) {
+        title = card.title;
+        description = card.description;
     }
 
     public Long getId() {
