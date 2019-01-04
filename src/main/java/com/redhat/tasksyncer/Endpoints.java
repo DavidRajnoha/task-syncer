@@ -270,9 +270,9 @@ public class Endpoints {
                 trelloCard = list.createCard(trelloCard);
 
                 Card c = new Card(trelloCard);
+                c = cardRepository.save(c);  // must be this order otherwise fails
                 i.setCard(c); // issue is owner of issue-card join
 
-                cardRepository.save(c);  // must be this order otherwise fails
                 issueRepository.save(i);
             }
 
@@ -301,20 +301,24 @@ public class Endpoints {
                 trelloApi.updateCard(trelloCard);
 
             } else {  // its new issue
+
+
                 i.setProject(project);
-                i.setCard(new Card(i));
-
-                i = issueRepository.save(i);  //todo should also save card entity
-
-                List<TList> lists = trelloApi.getBoardLists(project.getBoardId());
-                TList list = lists.get(0);  // todo: add card to proper column according to state
-
 
                 com.julienvey.trello.domain.Card trelloCard = new com.julienvey.trello.domain.Card();
                 trelloCard.setName(i.getTitle());
                 trelloCard.setDesc(i.getDescription());
 
+                List<TList> lists = trelloApi.getBoardLists(project.getBoardId());
+                TList list = lists.get(0);  // todo: add card to proper column according to state
                 trelloCard = list.createCard(trelloCard);
+
+                Card c = new Card(trelloCard);
+
+                c = cardRepository.save(c);  // must be this order otherwise fails
+                i.setCard(c); // issue is owner of issue-card join
+
+                i = issueRepository.save(i);
 
 
             }

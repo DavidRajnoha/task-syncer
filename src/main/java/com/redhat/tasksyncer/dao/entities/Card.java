@@ -40,7 +40,7 @@ public class Card {
         this.title = issue.getTitle();
         this.description = issue.getDescription();
         // todo: determine type
-        this.issue = issue;
+//        this.issue = issue;
     }
 
     public void updateLocally(Card card) {
