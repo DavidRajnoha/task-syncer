@@ -1,7 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.Label;
-import org.gitlab.api.models.GitlabIssue;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.kohsuke.github.GHIssue;
@@ -59,26 +58,13 @@ public class Issue {
         this.type = type;
     }
 
-    public Issue(GitlabIssue gli) {
-        this(
-                String.valueOf(gli.getId()),
-                String.valueOf(gli.getIid()),
-                gli.getTitle(),
-                gli.getDescription(),
-                gli.getState().equals(GitlabIssue.STATE_OPENED),  // todo: or state reopened
-                new HashSet<>(),
-                Issue.GITLAB_ISSUE
-        );
-
-    }
-
     public Issue(IssueEvent.ObjectAttributes attributes) {
         this(
                 String.valueOf(attributes.getId()),
                 String.valueOf(attributes.getIid()),
                 attributes.getTitle(),
                 attributes.getDescription(),
-                attributes.getState().equals(GitlabIssue.STATE_OPENED),  // todo: or state reopened
+                attributes.getState().equals(Constants.IssueState.OPENED.toValue()),  // todo: or state reopened
                 new HashSet<>(),
                 Issue.GITLAB_ISSUE
         );

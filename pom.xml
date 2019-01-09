@@ -104,15 +104,9 @@
         <!--</dependency>-->
 
         <!--services' api providers-->
-        <dependency>  <!-- todo: remove dependency -->
-            <groupId>org.gitlab</groupId>
-            <artifactId>java-gitlab-api</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-
         <!-- requires java8+ -->
         <dependency>
-            <groupId>org.gitlab4j</groupId>  <!-- todo: migrate everything to this client -->
+            <groupId>org.gitlab4j</groupId>
             <artifactId>gitlab4j-api</artifactId>
             <version>4.9.11</version>
         </dependency>
