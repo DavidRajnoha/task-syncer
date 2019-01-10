@@ -35,8 +35,8 @@ public class Issue {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Card card;
 
-    @ManyToOne(targetEntity = Project.class, optional = false, fetch = FetchType.LAZY)
-    private Project project;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private AbstractRepository repository;
 
     @Transient
     private Set<Label> labels;
@@ -166,11 +166,11 @@ public class Issue {
         this.card = card;
     }
 
-    public Project getProject() {
-        return project;
+    public Repository getRepository() {
+        return repository;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setRepository(AbstractRepository repository) {
+        this.repository = repository;
     }
 }
