@@ -94,7 +94,7 @@ public class Issue {
         );
     }
 
-    public void updateLocally(Issue i) {
+    public void updateProperties(Issue i) {
         this.title = i.title;
         this.description = i.description;
         this.opened = i.opened;

@@ -19,6 +19,8 @@ import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +32,13 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Filip Cap
  */
 @RestController
 @PropertySource("classpath:other.properties")
+@ComponentScan(basePackages = "com.redhat.tasksyncer.dao.entities")
 public class Endpoints {
     public static final String OK = "OK";
 
@@ -98,35 +100,26 @@ public class Endpoints {
     }
 
     private void updateBoard(Project project, HttpServletRequest request) throws GitLabApiException {
-        GitlabWebhookIssueDecoder d = new GitlabWebhookIssueDecoder();
-        Issue i = d.decode(request);
+        Issue newIssue = new GitlabWebhookIssueDecoder().decode(request);
 
-        Issue old = issueRepository.findByRidAndType(i.getRid(), i.getType())
-                .orElse(i);
+        Issue oldIssue = project.getIssue(newIssue)
+                .orElse(newIssue);
 
-        if(old.getId() != null) {  // there exists such issue
-            old.updateLocally(i);
-            old.getCard().updateLocally(new Card(i));
-            old = issueRepository.save(old);  // todo: it should also save card entity
+        if(oldIssue.getId() != null) {  // there exists such issue
+            oldIssue.updateProperties(newIssue);
+            oldIssue.getCard().updateProperties(new Card(newIssue));
+            oldIssue = issueRepository.save(oldIssue);  // todo: it should also save card entity
 
-            Board b = trelloApi.getBoard(project.getBoard().getBoardId());
-            com.julienvey.trello.domain.Card trelloCard = new com.julienvey.trello.domain.Card();
-            Card myCard = old.getCard();
-
-            trelloCard.setId(myCard.getCuid());
-            trelloCard.setDesc(myCard.getDescription());
-            trelloCard.setName(myCard.getTitle());
-
-            trelloApi.updateCard(trelloCard);
+            project.getBoard().update(oldIssue.getCard());
 
         } else {  // its new issue
 
 
-            i.setRepository((AbstractRepository) project.getRepository());  // todo: rework to remove type casting
+            newIssue.setRepository((AbstractRepository) project.getRepository());  // todo: rework to remove type casting
 
             com.julienvey.trello.domain.Card trelloCard = new com.julienvey.trello.domain.Card();
-            trelloCard.setName(i.getTitle());
-            trelloCard.setDesc(i.getDescription());
+            trelloCard.setName(newIssue.getTitle());
+            trelloCard.setDesc(newIssue.getDescription());
 
             List<TList> lists = trelloApi.getBoardLists(project.getBoard().getBoardId());
             TList list = lists.get(0);  // todo: add card to proper column according to state
@@ -135,9 +128,9 @@ public class Endpoints {
             Card c = new Card(trelloCard);
 
             c = cardRepository.save(c);  // must be this order otherwise fails
-            i.setCard(c); // issue is owner of issue-card join
+            newIssue.setCard(c); // issue is owner of issue-card join
 
-            i = issueRepository.save(i);
+            newIssue = issueRepository.save(newIssue);
         }
     }
 
@@ -156,6 +149,7 @@ public class Endpoints {
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
+        project = BeanUtil.inject(project);
         updateBoard(project, request);
         return OK;
     }

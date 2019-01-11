@@ -1,18 +1,23 @@
 package com.redhat.tasksyncer.dao.entities;
 
 
+import com.redhat.tasksyncer.BeanUtil;
 import com.redhat.tasksyncer.dao.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.dao.IssueRepository;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Filip Cap
@@ -39,9 +44,16 @@ public class Project {
     @Autowired
     private AbstractBoardRepository boardRepository;
 
+    @Transient
+    @Autowired
+    private IssueRepository issueRepository;
+
     @PostConstruct
     public void init() {
         gitlabApi = new GitLabApi(gitlabURL, Constants.TokenType.PRIVATE, gitlabAuthKey);
+
+        repository = BeanUtil.inject(repository);
+        board = BeanUtil.inject(board);
     }
 
 // --- end of transient values ---------------------------------------
@@ -66,10 +78,10 @@ public class Project {
     private String repoNamespace;
     private String repoName;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(optional = false)
     private AbstractRepository repository;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(optional = false)
     private AbstractBoard board;
 
     public Project() {}
@@ -174,5 +186,9 @@ public class Project {
 
         this.board = boardRepository.save(b);  // todo: user boardtype to determine type
 //        this.boardType = boardType;
+    }
+
+    public Optional<Issue> getIssue(Issue issue) {
+        return issueRepository.findByRidAndType(issue.getRid(), issue.getType()).map(BeanUtil::inject);
     }
 }

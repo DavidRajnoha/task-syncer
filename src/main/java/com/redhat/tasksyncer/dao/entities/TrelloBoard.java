@@ -8,6 +8,7 @@ import com.redhat.tasksyncer.dao.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.Entity;
@@ -60,17 +61,26 @@ public class TrelloBoard extends AbstractBoard {
 
     @Override
     public Card update(Card card) {
-        List<TList> lists = trelloApi.getBoardLists(boardId);
-        TList list = lists.get(0);  // todo: add card to proper column according to state
+        if(card.getId() == null) {
+            List<TList> lists = trelloApi.getBoardLists(boardId);
+            TList list = lists.get(0);  // todo: add card to proper column according to state
+
+            com.julienvey.trello.domain.Card trelloCard = new com.julienvey.trello.domain.Card();
+            trelloCard.setName(card.getTitle());
+            trelloCard.setDesc(card.getDescription());
+
+            trelloCard = list.createCard(trelloCard);
+
+            return new Card(trelloCard);
+        }
 
         com.julienvey.trello.domain.Card trelloCard = new com.julienvey.trello.domain.Card();
         trelloCard.setName(card.getTitle());
         trelloCard.setDesc(card.getDescription());
+        trelloCard.setId(card.getCuid());
+        trelloApi.updateCard(trelloCard);
 
-        trelloCard = list.createCard(trelloCard);
-
-        return new Card(trelloCard);
-
+        return card;
     }
 
     @Override

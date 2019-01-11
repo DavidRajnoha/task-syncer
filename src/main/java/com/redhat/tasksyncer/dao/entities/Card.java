@@ -43,7 +43,7 @@ public class Card {
 //        this.issue = issue;
     }
 
-    public void updateLocally(Card card) {
+    public void updateProperties(Card card) {
         title = card.title;
         description = card.description;
     }
