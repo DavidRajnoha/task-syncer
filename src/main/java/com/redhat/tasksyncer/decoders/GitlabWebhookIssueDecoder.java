@@ -1,13 +1,12 @@
 package com.redhat.tasksyncer.decoders;
 
-import com.redhat.tasksyncer.dao.entities.Issue;
+import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.gitlab4j.api.webhook.WebHookListener;
 import org.gitlab4j.api.webhook.WebHookManager;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * @author Filip Cap
@@ -25,7 +24,7 @@ public class GitlabWebhookIssueDecoder {
         });
     }
 
-    public Issue decode(HttpServletRequest request) throws GitLabApiException {
+    public GitlabIssue decode(HttpServletRequest request) throws GitLabApiException {
         webHookManager.handleEvent(request);
 
         IssueEvent ie = this.ie;
@@ -33,9 +32,11 @@ public class GitlabWebhookIssueDecoder {
 
         IssueEvent.ObjectAttributes oa = ie.getObjectAttributes();
 
-        Issue i = new Issue(oa);
-        i.setType(Issue.GITLAB_ISSUE);
+        GitlabIssue issue = new GitlabIssue();
+        issue.setRemoteIssueId(oa.getId().toString());
+        issue.setTitle(oa.getTitle());
+        issue.setDescription(oa.getDescription());
 
-        return i;
+        return issue;
     }
 }

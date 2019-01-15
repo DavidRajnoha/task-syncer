@@ -10,11 +10,18 @@ import javax.persistence.Inheritance;
  */
 @Entity
 @Inheritance
-public abstract class AbstractBoard implements Board {
+public abstract class AbstractBoard {
+
     @Id
     @GeneratedValue
     private Long id;
 
+    private String boardName;
+    private String remoteBoardId;
+
+
+    public AbstractBoard() {
+    }
 
     public Long getId() {
         return id;
@@ -22,5 +29,25 @@ public abstract class AbstractBoard implements Board {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getRemoteBoardId() {
+        return remoteBoardId;
+    }
+
+    public void setRemoteBoardId(String remoteBoardId) {
+        this.remoteBoardId = remoteBoardId;
+    }
+
+    public String getBoardName() {
+        return boardName;
+    }
+
+    public void setBoardName(String boardName) {
+        this.boardName = boardName;
+    }
+
+    public boolean isCreated() {
+        return remoteBoardId != null && !remoteBoardId.isEmpty();
     }
 }
