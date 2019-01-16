@@ -9,6 +9,10 @@ import javax.persistence.*;
 @Inheritance
 public abstract class AbstractIssue {
 
+    public static final String STATE_OPENED = "opened";
+    public static final String STATE_CLOSED = "closed";
+    public static final String STATE_REOPENED = "reopened";
+
     @Id
     @GeneratedValue
     private Long id;
@@ -16,6 +20,8 @@ public abstract class AbstractIssue {
     private String title;
     private String description;
     private String remoteIssueId;
+
+    private String state;
 
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
     private AbstractRepository repository;
@@ -29,6 +35,7 @@ public abstract class AbstractIssue {
     public void updateProperties(AbstractIssue issue) {
         title = issue.title;
         description = issue.description;
+        state = issue.state;
     }
 
     public Long getId() {
@@ -77,5 +84,13 @@ public abstract class AbstractIssue {
 
     public void setCard(AbstractCard card) {
         this.card = card;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

@@ -32,11 +32,6 @@ public class GitlabWebhookIssueDecoder {
 
         IssueEvent.ObjectAttributes oa = ie.getObjectAttributes();
 
-        GitlabIssue issue = new GitlabIssue();
-        issue.setRemoteIssueId(oa.getId().toString());
-        issue.setTitle(oa.getTitle());
-        issue.setDescription(oa.getDescription());
-
-        return issue;
+        return GitlabIssue.ObjectToGitlabIssueConverter.convert(oa);
     }
 }

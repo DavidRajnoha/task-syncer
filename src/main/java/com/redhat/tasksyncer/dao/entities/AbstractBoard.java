@@ -1,9 +1,7 @@
 package com.redhat.tasksyncer.dao.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * @author Filip Cap
@@ -18,6 +16,9 @@ public abstract class AbstractBoard {
 
     private String boardName;
     private String remoteBoardId;
+
+    @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board")
+    private List<AbstractColumn> columns;
 
 
     public AbstractBoard() {
@@ -49,5 +50,13 @@ public abstract class AbstractBoard {
 
     public boolean isCreated() {
         return remoteBoardId != null && !remoteBoardId.isEmpty();
+    }
+
+    public List<AbstractColumn> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<AbstractColumn> columns) {
+        this.columns = columns;
     }
 }

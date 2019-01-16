@@ -20,6 +20,9 @@ public abstract class AbstractCard {
     @OneToOne(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, optional = false, mappedBy = "card")
     private AbstractIssue issue;
 
+    @ManyToOne(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, optional = false)
+    private AbstractColumn column;
+
 
     public AbstractCard() {
     }
@@ -67,5 +70,13 @@ public abstract class AbstractCard {
 
     public void setIssue(AbstractIssue issue) {
         this.issue = issue;
+    }
+
+    public AbstractColumn getColumn() {
+        return column;
+    }
+
+    public void setColumn(AbstractColumn column) {
+        this.column = column;
     }
 }

@@ -18,6 +18,7 @@ public class ProjectAccessor {
 
     private AbstractIssueRepository issueRepository;
     private AbstractCardRepository cardRepository;
+    private AbstractColumnRepository columnRepository;
     private ProjectRepository projectRepository;
     private AbstractRepositoryRepository repositoryRepository;
     private AbstractBoardRepository boardRepository;
@@ -27,13 +28,14 @@ public class ProjectAccessor {
     private String gitlabURL;
     private String gitlabAuthKey;
 
-    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken, String gitlabURL, String gitlabAuthKey) {
+    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken, String gitlabURL, String gitlabAuthKey) {
         this.project = project;
 
         this.boardRepository = boardRepository;
         this.repositoryRepository = repositoryRepository;
         this.issueRepository = issueRepository;
         this.cardRepository = cardRepository;
+        this.columnRepository = columnRepository;
         this.projectRepository = projectRepository;
         this.trelloApplicationKey = trelloApplicationKey;
         this.trelloAccessToken = trelloAccessToken;
@@ -43,7 +45,7 @@ public class ProjectAccessor {
 
     public BoardAccessor getBoard() {
         if(board == null)
-            board = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository); // todo generify
+            board = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository); // todo generify
 
         return board;
     }
@@ -59,7 +61,7 @@ public class ProjectAccessor {
         TrelloBoard board = new TrelloBoard();
         board.setBoardName(name);
 
-        this.board = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository);
+        this.board = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
 
         AbstractBoard b = this.board.createItself();
         project.setBoard(b);  // todo: maybe propagate to boardAccessor if created
@@ -105,7 +107,10 @@ public class ProjectAccessor {
 
         if(oldIssue.getId() != null) {  // there exists such issue
             oldIssue.updateProperties(newIssue);
-            oldIssue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(newIssue));
+
+            List<AbstractColumn> columns = getBoard().getColumns();  // for now we assume that there exists such column for mapping
+
+            oldIssue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(newIssue, columns));
 
             this.getBoard().update(oldIssue.getCard());
 
@@ -117,7 +122,9 @@ public class ProjectAccessor {
         // its new issue
 
         newIssue.setRepository(project.getRepository());
-        AbstractCard c = this.getBoard().update(TrelloCard.IssueToCardConverter.convert(newIssue));  // todo use generic converter
+
+        List<AbstractColumn> columns = getBoard().getColumns();  // for now we assume that there exists such column for mapping
+        AbstractCard c = this.getBoard().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
         newIssue.setCard(c);
 
         this.getRepository().saveIssue(newIssue);

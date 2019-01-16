@@ -58,6 +58,9 @@ public class Endpoints {
     @Autowired
     private AbstractCardRepository cardRepository;
 
+    @Autowired
+    private AbstractColumnRepository columnRepository;
+
 
 
     @RequestMapping(path = "/project/{projectName}/hook",
@@ -74,7 +77,7 @@ public class Endpoints {
         // todo: determine which decoder to use
         AbstractIssue newIssue = new GitlabWebhookIssueDecoder().decode(request);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
         projectAccessor.update(newIssue);
 
         return OK;
@@ -96,7 +99,7 @@ public class Endpoints {
         Project project = new Project();
         project.setName(projectName);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
         projectAccessor.initialize(GitlabRepository.class.getName(), repoNamespace, repoName, TrelloCard.class.getName(), boardName);
         projectAccessor.doInitialSync();
 
