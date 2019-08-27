@@ -116,6 +116,7 @@ public class ProjectAccessor {
 
             this.getRepository().saveIssue(oldIssue); // this should also save card entity since issue is owner of join
 
+
             return;
         }
 

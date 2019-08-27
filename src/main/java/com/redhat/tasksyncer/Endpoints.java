@@ -7,6 +7,7 @@ import com.redhat.tasksyncer.dao.entities.GitlabRepository;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.entities.TrelloCard;
 import com.redhat.tasksyncer.dao.repositories.*;
+import com.redhat.tasksyncer.decoders.GithubWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.GitlabWebhookIssueDecoder;
 
 import org.gitlab4j.api.GitLabApiException;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * @author Filip Cap
@@ -80,6 +83,26 @@ public class Endpoints {
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
         projectAccessor.update(newIssue);
 
+        return OK;
+    }
+
+
+    //TODO: Move gitHubHook into the hook and determine which decoder to use
+    @RequestMapping(path = "/github/project/{projectName}/hook",
+                    consumes = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.POST
+    )
+    public String gitHubHook(@PathVariable String projectName,
+                             HttpServletRequest request
+    ) throws IOException {
+        Project project = projectRepository.findProjectByName(projectName)
+                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+
+        AbstractIssue newIssue = new GithubWebhookIssueDecoder().decode(request);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        projectAccessor.update(newIssue);
+
+        System.out.println("GitHubEventChanged");
         return OK;
     }
 

@@ -17,6 +17,9 @@ public abstract class AbstractBoard {
     private String boardName;
     private String remoteBoardId;
 
+    @OneToOne
+    private Project project;
+
     @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board")
     private List<AbstractColumn> columns;
 
