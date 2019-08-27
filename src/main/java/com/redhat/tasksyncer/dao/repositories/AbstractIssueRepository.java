@@ -10,5 +10,5 @@ import java.util.Optional;
  * @author Filip Cap
  */
 public interface AbstractIssueRepository extends CrudRepository<AbstractIssue, Long> {
-    Optional<GitlabIssue> findByRemoteIssueId(String remoteIssueId);  // todo: rework
+    Optional<AbstractIssue> findByRemoteIssueId(String remoteIssueId);  // todo: rework
 }
