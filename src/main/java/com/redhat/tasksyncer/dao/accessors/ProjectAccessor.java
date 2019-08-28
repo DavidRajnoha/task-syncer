@@ -143,12 +143,14 @@ public class ProjectAccessor {
     }
 
     public void connectGithub(java.net.URL webHookUrl, String repoName) throws IOException {
-        GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-        GHRepository githubRepository = gitHub.getRepository(repoName);
-        Set<GHEvent> events = new HashSet<>();
-        events.add(GHEvent.ISSUES);
-        githubRepository.createWebHook(webHookUrl, events);
+        GithubRepository githubRepository = new GithubRepository();
+        githubRepository.setRepositoryName(repoName);
+        githubRepository.setGithubPassword(gitHubPassword);
+        githubRepository.setGithubUsername(gitHubUsername);
 
+        GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
+
+        githubRepositoryAccessor.createWebhook(webHookUrl);
 
     }
 }
