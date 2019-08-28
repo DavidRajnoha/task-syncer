@@ -43,6 +43,7 @@ public class ProjectAccessor {
         this.gitlabAuthKey = gitlabAuthKey;
     }
 
+
     public BoardAccessor getBoard() {
         if(board == null)
             board = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository); // todo generify
