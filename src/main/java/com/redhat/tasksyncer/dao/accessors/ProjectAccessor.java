@@ -3,8 +3,14 @@ package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
+import org.kohsuke.github.GHEvent;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Filip Cap
@@ -14,7 +20,7 @@ public class ProjectAccessor {
     private Project project;
 
     private BoardAccessor board;
-    private RepositoryAccessor repository;
+    private RepositoryAccessor gitlabRepository;
 
     private AbstractIssueRepository issueRepository;
     private AbstractCardRepository cardRepository;
@@ -27,8 +33,11 @@ public class ProjectAccessor {
     private String trelloAccessToken;
     private String gitlabURL;
     private String gitlabAuthKey;
+    private String gitHubPassword;
+    private String gitHubUsername;
 
-    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken, String gitlabURL, String gitlabAuthKey) {
+    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken, String gitlabURL, String gitlabAuthKey,
+                           String gitHubUsername, String gitHubPassword) {
         this.project = project;
 
         this.boardRepository = boardRepository;
@@ -41,6 +50,8 @@ public class ProjectAccessor {
         this.trelloAccessToken = trelloAccessToken;
         this.gitlabURL = gitlabURL;
         this.gitlabAuthKey = gitlabAuthKey;
+        this.gitHubUsername = gitHubUsername;
+        this.gitHubPassword = gitHubPassword;
     }
 
 
@@ -51,11 +62,11 @@ public class ProjectAccessor {
         return board;
     }
 
-    public RepositoryAccessor getRepository() {
-        if(repository == null)
-            repository = new GitlabRepositoryAccessor((GitlabRepository) project.getRepository(), repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);  // todo generify
+    public RepositoryAccessor getGitlabRepository() {
+        if(gitlabRepository == null)
+            gitlabRepository = new GitlabRepositoryAccessor((GitlabRepository) project.getRepository(), repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);  // todo generify
 
-        return repository;
+        return gitlabRepository;
     }
 
     private BoardAccessor createBoard(String boardType, String name) {
@@ -86,16 +97,16 @@ public class ProjectAccessor {
         repository.setRepositoryNamespace(repoNamespace);
         repository.setRepositoryName(repoName);
 
-        this.repository = new GitlabRepositoryAccessor(repository, repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);
+        this.gitlabRepository = new GitlabRepositoryAccessor(repository, repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);
 
-        AbstractRepository r = this.repository.createItself();
+        AbstractRepository r = this.gitlabRepository.createItself();
         project.setRepository(r);  // todo: maybe propagate to repositoryAccessor if created
 
-        return this.repository;
+        return this.gitlabRepository;
     }
 
     public void doInitialSync() throws Exception {
-        List<AbstractIssue> issues = getRepository().downloadAllIssues();
+        List<AbstractIssue> issues = getGitlabRepository().downloadAllIssues();
 
         for(AbstractIssue i : issues) {
             this.update(i);
@@ -103,7 +114,7 @@ public class ProjectAccessor {
     }
 
     public void update(AbstractIssue newIssue) {
-        AbstractIssue oldIssue = this.getRepository().getIssue(newIssue)
+        AbstractIssue oldIssue = issueRepository.findByRemoteIssueId(newIssue.getRemoteIssueId())
                 .orElse(newIssue);
 
         if(oldIssue.getId() != null) {  // there exists such issue
@@ -115,8 +126,7 @@ public class ProjectAccessor {
 
             this.getBoard().update(oldIssue.getCard());
 
-            this.getRepository().saveIssue(oldIssue); // this should also save card entity since issue is owner of join
-
+            issueRepository.save(oldIssue);
 
             return;
         }
@@ -129,7 +139,16 @@ public class ProjectAccessor {
         AbstractCard c = this.getBoard().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
         newIssue.setCard(c);
 
-        this.getRepository().saveIssue(newIssue);
+        issueRepository.save(newIssue);
+    }
+
+    public void connectGithub(java.net.URL webHookUrl, String repoName) throws IOException {
+        GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+        GHRepository githubRepository = gitHub.getRepository(repoName);
+        Set<GHEvent> events = new HashSet<>();
+        events.add(GHEvent.ISSUES);
+        githubRepository.createWebHook(webHookUrl, events);
+
 
     }
 }

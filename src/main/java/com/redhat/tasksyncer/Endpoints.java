@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Logger;
 
 /**
@@ -46,6 +48,15 @@ public class Endpoints {
     @Value("${trello.token}")
     private String trelloAccessToken;
 
+    @Value("${githubWebhookURL}")
+    private String githubWebhookURLString;
+
+    @Value("${githubUsername}")
+    private String githubUserName;
+
+    @Value("${githubPassword}")
+    private String githubPassword;
+
     @Autowired
     private AbstractBoardRepository boardRepository;
 
@@ -64,6 +75,8 @@ public class Endpoints {
     @Autowired
     private AbstractColumnRepository columnRepository;
 
+    public Endpoints() {
+    }
 
 
     @RequestMapping(path = "/project/{projectName}/hook",
@@ -80,7 +93,8 @@ public class Endpoints {
         // todo: determine which decoder to use
         AbstractIssue newIssue = new GitlabWebhookIssueDecoder().decode(request);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
+                githubUserName, githubPassword);
         projectAccessor.update(newIssue);
 
         return OK;
@@ -99,7 +113,8 @@ public class Endpoints {
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         AbstractIssue newIssue = new GithubWebhookIssueDecoder().decode(request);
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
+                githubUserName, githubPassword);
         projectAccessor.update(newIssue);
 
         System.out.println("GitHubEventChanged");
@@ -122,7 +137,8 @@ public class Endpoints {
         Project project = new Project();
         project.setName(projectName);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
+                githubUserName, githubPassword);
         projectAccessor.initialize(GitlabRepository.class.getName(), repoNamespace, repoName, TrelloCard.class.getName(), boardName);
         projectAccessor.doInitialSync();
 
@@ -131,6 +147,21 @@ public class Endpoints {
         return OK;
     }
 
+    @RequestMapping(path = "/project/{projectName}/connect/github/{repoName}",
+            method = RequestMethod.PUT
+    )
+    public String connectGithub(@PathVariable String projectName,
+                                @PathVariable String repoName) throws IOException {
+    Project project = projectRepository.findProjectByName(projectName)
+            .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
-    ///COMIT TESTING
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
+                githubUserName, githubPassword);
+
+        URL githubWebhookURL = new URL(githubWebhookURLString);
+        projectAccessor.connectGithub(githubWebhookURL,githubUserName + "/" + repoName);
+
+    return OK;
+    }
+
 }

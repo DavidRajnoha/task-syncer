@@ -62,11 +62,10 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
 
     @Override
     public AbstractIssue saveIssue(AbstractIssue issue) {
-        // todo: maybe propagate to repository state e.g. add to IssueList?
-        return issueRepository.save(issue);
+        return null;
     }
 
     public Optional<AbstractIssue> getIssue(AbstractIssue issue) {
-        return issueRepository.findByRemoteIssueId(issue.getRemoteIssueId()).map(i -> (AbstractIssue) i);
+        return null;
     }
 }
