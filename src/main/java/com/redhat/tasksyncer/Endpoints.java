@@ -154,11 +154,14 @@ public class Endpoints {
     Project project = projectRepository.findProjectByName(projectName)
             .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-                githubUserName, githubPassword);
+    //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
+    ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
+        githubUserName, githubPassword);
 
-        URL githubWebhookURL = new URL(githubWebhookURLString);
-        projectAccessor.connectGithub(githubWebhookURL,githubUserName + "/" + repoName);
+    //Creates a webhook to this app in the github repository based on the repoName PathVariable
+    //TODO: assure that the webhook points to this app, now impossible due to ngrok
+    //And also conducts synchronization of the github issues with the local issueRepository and trello
+    projectAccessor.connectGithub(githubWebhookURLString,githubUserName + "/" + repoName);
 
     return OK;
     }

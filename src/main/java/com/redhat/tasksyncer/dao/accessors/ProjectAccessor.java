@@ -8,6 +8,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,6 +107,11 @@ public class ProjectAccessor {
         return this.gitlabRepository;
     }
 
+    /**
+     * Method takes takes object that extends the RepositoryAccessor abstract class and uses the downloadAllIssues()
+     * method to get a list of issues from that particular repository, than updates all of these issues in issueRepository and
+     * in Trello
+     * */
     public void doSync(RepositoryAccessor repositoryAccessor) throws Exception {
         List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
 
@@ -143,16 +149,23 @@ public class ProjectAccessor {
         issueRepository.save(newIssue);
     }
 
-    public void connectGithub(java.net.URL webHookUrl, String repoName) throws Exception {
+    public void connectGithub(String webHookUrl, String repoName) throws Exception {
+
+        //Creates a new githubRepository Object, now only acting as a container to pass repoName, UserName and Pass to the gitHubRepositoryAccessor
+        //TODO: Decide what exactly is the function of the gitHubRepository entity, implement saving it, change Project's field repository to List<repository>, one project can have multiple of them
         GithubRepository githubRepository = new GithubRepository();
         githubRepository.setRepositoryName(repoName);
         githubRepository.setGithubPassword(gitHubPassword);
         githubRepository.setGithubUsername(gitHubUsername);
 
+        //Creates new Accessor that is used for the commmunication with the particular githubrepository
         GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
 
-        githubRepositoryAccessor.createWebhook(webHookUrl);
+        //Creating webhook in the desired repository
+        githubRepositoryAccessor.createWebhook(new URL(webHookUrl));
         System.out.println("webHook Created");
+
+        //Synchronization of the issues from github to local repository and trello
         doSync(githubRepositoryAccessor);
         System.out.println("Issues Synced");
 

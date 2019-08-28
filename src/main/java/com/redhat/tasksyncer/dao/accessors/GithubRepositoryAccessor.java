@@ -33,6 +33,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         this.repositoryRepository = repositoryRepository;
         this.issueRepository = issueRepository;
 
+        //GitHub object used to communicate with Github and ghRepository are created along with the Accessor
         gitHub = GitHub.connectUsingPassword(repository.getGithubUsername(), repository.getGithubPassword());
         ghRepository = gitHub.getRepository(repository.getRepositoryName());
 
@@ -70,7 +71,9 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     }
 
     public void createWebhook(URL webHookUrl) throws IOException {
+        //using library to set Webhook to the webhookURL from argument (should be URL pointing to this app's endpoint
         Set<GHEvent> events = new HashSet<>();
+        //The webhook is triggered by all issues events - not comments!!
         events.add(GHEvent.ISSUES);
         ghRepository.createWebHook(webHookUrl, events);
     }
