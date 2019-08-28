@@ -85,10 +85,11 @@ public class ProjectAccessor {
         project = projectRepository.save(project);
     }
 
-    public void initialize(String repoType, String repoNamespace, String repoName, String boardType, String boardName) {
+    public void initialize(String repoType, String repoNamespace, String repoName, String boardType, String boardName) throws Exception {
         // todo : maybe check whether not already initialised?
         createBoard(boardType, boardName);
         createRepository(repoType, repoNamespace, repoName);
+        doSync(gitlabRepository);
     }
 
     private RepositoryAccessor createRepository(String repoType, String repoNamespace, String repoName) {
@@ -105,8 +106,8 @@ public class ProjectAccessor {
         return this.gitlabRepository;
     }
 
-    public void doInitialSync() throws Exception {
-        List<AbstractIssue> issues = getGitlabRepository().downloadAllIssues();
+    public void doSync(RepositoryAccessor repositoryAccessor) throws Exception {
+        List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
 
         for(AbstractIssue i : issues) {
             this.update(i);
@@ -142,7 +143,7 @@ public class ProjectAccessor {
         issueRepository.save(newIssue);
     }
 
-    public void connectGithub(java.net.URL webHookUrl, String repoName) throws IOException {
+    public void connectGithub(java.net.URL webHookUrl, String repoName) throws Exception {
         GithubRepository githubRepository = new GithubRepository();
         githubRepository.setRepositoryName(repoName);
         githubRepository.setGithubPassword(gitHubPassword);
@@ -151,6 +152,9 @@ public class ProjectAccessor {
         GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
 
         githubRepositoryAccessor.createWebhook(webHookUrl);
+        System.out.println("webHook Created");
+        doSync(githubRepositoryAccessor);
+        System.out.println("Issues Synced");
 
     }
 }

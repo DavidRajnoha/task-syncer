@@ -1,16 +1,13 @@
 package com.redhat.tasksyncer.dao.accessors;
 
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.AbstractRepository;
-import com.redhat.tasksyncer.dao.entities.GithubRepository;
-import com.redhat.tasksyncer.dao.entities.GitlabRepository;
+import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
-import org.kohsuke.github.GHEvent;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
+import org.gitlab4j.api.models.Issue;
+import org.gitlab4j.api.models.Project;
+import org.kohsuke.github.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GithubRepositoryAccessor extends RepositoryAccessor {
 
@@ -47,7 +46,12 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
 
     @Override
     public List<AbstractIssue> downloadAllIssues() throws Exception {
-        return null;
+        Stream<GHIssue> issuesStream = ghRepository.getIssues(GHIssueState.ALL)
+                .stream();
+
+        return issuesStream
+                .map(GithubIssue.ObjectToGithubIssueConverter::convert)
+                .collect(Collectors.toList());
     }
 
     @Override

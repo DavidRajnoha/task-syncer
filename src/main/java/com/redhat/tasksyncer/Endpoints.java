@@ -140,7 +140,6 @@ public class Endpoints {
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
                 githubUserName, githubPassword);
         projectAccessor.initialize(GitlabRepository.class.getName(), repoNamespace, repoName, TrelloCard.class.getName(), boardName);
-        projectAccessor.doInitialSync();
 
         projectAccessor.save(); // todo: make it transactional
 
@@ -151,7 +150,7 @@ public class Endpoints {
             method = RequestMethod.PUT
     )
     public String connectGithub(@PathVariable String projectName,
-                                @PathVariable String repoName) throws IOException {
+                                @PathVariable String repoName) throws Exception {
     Project project = projectRepository.findProjectByName(projectName)
             .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
