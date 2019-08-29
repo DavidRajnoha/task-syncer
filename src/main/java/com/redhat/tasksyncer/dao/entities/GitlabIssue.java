@@ -1,5 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.webhook.IssueEvent;
@@ -13,7 +14,7 @@ import java.util.Objects;
 @Entity
 public class GitlabIssue extends AbstractIssue {
     public GitlabIssue() {
-        super();
+        super(IssueType.GITLAB);
     }
 
     public static class ObjectToGitlabIssueConverter {

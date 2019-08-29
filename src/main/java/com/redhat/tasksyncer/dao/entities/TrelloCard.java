@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 public class TrelloCard extends AbstractCard {
+    
     public TrelloCard() {
         super();
     }
@@ -20,7 +21,7 @@ public class TrelloCard extends AbstractCard {
             TrelloCard card = new TrelloCard();
 
             card.setTitle(issue.getTitle());
-            card.setDescription(issue.getDescription());
+            card.setDescription(issue.getIssueType() + "\n" + issue.getDescription());
 
             // todo: use mapping to determine proper column
             if(issue.getState().equals(AbstractIssue.STATE_OPENED) || issue.getState().equals(AbstractIssue.STATE_REOPENED)) {

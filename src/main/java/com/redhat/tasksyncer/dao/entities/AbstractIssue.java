@@ -1,5 +1,7 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.redhat.tasksyncer.dao.enumerations.IssueType;
+
 import javax.persistence.*;
 
 /**
@@ -23,13 +25,16 @@ public abstract class AbstractIssue {
 
     private String state;
 
+    private IssueType issueType;
+
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
     private AbstractRepository repository;
 
     @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, optional = false)
     private AbstractCard card;
 
-    public AbstractIssue() {
+    public AbstractIssue(IssueType issueType) {
+        this.issueType = issueType;
     }
 
     public void updateProperties(AbstractIssue issue) {
@@ -92,5 +97,9 @@ public abstract class AbstractIssue {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public IssueType getIssueType() {
+        return issueType;
     }
 }

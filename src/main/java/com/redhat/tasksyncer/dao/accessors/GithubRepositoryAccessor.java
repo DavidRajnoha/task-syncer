@@ -11,10 +11,7 @@ import org.kohsuke.github.*;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,7 +72,11 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         Set<GHEvent> events = new HashSet<>();
         //The webhook is triggered by all issues events - not comments!!
         events.add(GHEvent.ISSUES);
-        ghRepository.createWebHook(webHookUrl, events);
+        // ghRepository.createWebHook(webHookUrl, events);
+        Map<String, String> config = new HashMap();
+        config.put("url", webHookUrl.toExternalForm());
+        config.put("content_type", "json");
+        ghRepository.createHook("web", config,events, true);
     }
 
 }
