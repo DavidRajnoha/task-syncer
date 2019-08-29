@@ -72,11 +72,16 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         Set<GHEvent> events = new HashSet<>();
         //The webhook is triggered by all issues events - not comments!!
         events.add(GHEvent.ISSUES);
+
         // ghRepository.createWebHook(webHookUrl, events);
+
+        // it is necessary to use the .createHook instead of .createWebHook method, the createWebHook creates the webhook
+        // of the other content_type than JSON
+        // .createHook enables to pass config further, and in config is possible to set the content_type to JSON
         Map<String, String> config = new HashMap();
         config.put("url", webHookUrl.toExternalForm());
         config.put("content_type", "json");
-        ghRepository.createHook("web", config,events, true);
+        ghRepository.createHook("web", config, events, true);
     }
 
 }
