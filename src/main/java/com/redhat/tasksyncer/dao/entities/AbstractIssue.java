@@ -1,5 +1,8 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 
 import javax.persistence.*;
@@ -9,6 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Inheritance
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public abstract class AbstractIssue {
 
     public static final String STATE_OPENED = "opened";
@@ -28,9 +32,11 @@ public abstract class AbstractIssue {
     private IssueType issueType;
 
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
+    @JsonBackReference
     private AbstractRepository repository;
 
     @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, optional = false)
+    @JsonManagedReference
     private AbstractCard card;
 
     public AbstractIssue(IssueType issueType) {
@@ -101,5 +107,9 @@ public abstract class AbstractIssue {
 
     public IssueType getIssueType() {
         return issueType;
+    }
+
+    public void setIssueType(IssueType issueType) {
+        this.issueType = issueType;
     }
 }

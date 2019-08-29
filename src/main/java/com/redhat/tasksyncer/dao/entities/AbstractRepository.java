@@ -1,5 +1,8 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -8,6 +11,7 @@ import java.util.List;
  */
 @Entity
 @Inheritance
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public abstract class AbstractRepository {
 
     @Id
@@ -18,6 +22,7 @@ public abstract class AbstractRepository {
     private String repositoryName;
 
     @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository")
+    @JsonManagedReference
     private List<AbstractIssue> issues;
 
 

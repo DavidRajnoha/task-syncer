@@ -21,7 +21,7 @@ public class GitlabIssue extends AbstractIssue {
         public static GitlabIssue convert(Issue input) {
             GitlabIssue issue = new GitlabIssue();
 
-            issue.setRemoteIssueId(input.getId().toString());
+            issue.setRemoteIssueId("GL" + input.getProjectId() + input.getId().toString());
             issue.setTitle(input.getTitle());
             issue.setDescription(input.getDescription());
 
@@ -41,7 +41,7 @@ public class GitlabIssue extends AbstractIssue {
 
             issue.setRemoteIssueId(input.getId().toString());
             issue.setTitle(input.getTitle());
-            issue.setDescription(input.getDescription());
+            issue.setDescription("GL" + input.getProjectId() + input.getDescription());
 
             if(Objects.equals(input.getState(), Constants.IssueState.OPENED.toString()))
                 issue.setState(AbstractIssue.STATE_OPENED);

@@ -1,5 +1,9 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -8,6 +12,7 @@ import java.util.List;
  */
 @Entity
 @Inheritance
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public abstract class AbstractColumn {
 
     @Id
@@ -18,9 +23,11 @@ public abstract class AbstractColumn {
     private String remoteColumnId;
 
     @OneToMany(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, mappedBy = "column")
+    @JsonManagedReference
     private List<AbstractCard> cards;
 
     @ManyToOne(targetEntity = AbstractBoard.class, fetch = FetchType.LAZY, optional = false)
+    @JsonBackReference
     private AbstractBoard board;
 
 

@@ -1,11 +1,11 @@
 package com.redhat.tasksyncer;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.GitlabRepository;
-import com.redhat.tasksyncer.dao.entities.Project;
-import com.redhat.tasksyncer.dao.entities.TrelloCard;
+import com.redhat.tasksyncer.dao.entities.*;
+import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.GithubWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.GitlabWebhookIssueDecoder;
@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -164,6 +166,25 @@ public class Endpoints {
     projectAccessor.connectGithub(githubWebhookURLString,githubUserName + "/" + repoName);
 
     return OK;
+    }
+
+    @RequestMapping(path = "/project/{projectName}/all/{issueType}",
+                    method = RequestMethod.GET
+    )
+    public String getIssuesByType(@PathVariable String projectName,
+                                  @PathVariable IssueType issueType) throws JsonProcessingException {
+        Set<AbstractIssue> issues = issueRepository.findByIssueType(issueType);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(issues);
+    }
+
+    @RequestMapping(path = "/project/{projectName}/all/",
+            method = RequestMethod.GET
+    )
+    public String getAllIssues(@PathVariable String projectName) throws JsonProcessingException {
+        List<AbstractIssue> issues = (List<AbstractIssue>) issueRepository.findAll();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(issues);
     }
 
 }

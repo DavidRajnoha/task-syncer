@@ -3,10 +3,6 @@ package com.redhat.tasksyncer.dao.accessors;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
-import org.gitlab4j.api.Constants;
-import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.models.Issue;
-import org.gitlab4j.api.models.Project;
 import org.kohsuke.github.*;
 
 import java.io.IOException;
@@ -78,7 +74,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         // it is necessary to use the .createHook instead of .createWebHook method, the createWebHook creates the webhook
         // of the other content_type than JSON
         // .createHook enables to pass config further, and in config is possible to set the content_type to JSON
-        Map<String, String> config = new HashMap();
+        Map<String, String> config = new HashMap<>();
         config.put("url", webHookUrl.toExternalForm());
         config.put("content_type", "json");
         ghRepository.createHook("web", config, events, true);
