@@ -33,6 +33,5 @@ public class GithubIssue extends AbstractIssue {
 
             return issue;
         }
-
     }
 }
