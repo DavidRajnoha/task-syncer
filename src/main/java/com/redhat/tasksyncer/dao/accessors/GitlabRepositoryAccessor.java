@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import com.redhat.tasksyncer.dao.entities.GitlabRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
@@ -20,12 +21,13 @@ import java.util.stream.Stream;
  * @author Filip Cap
  */
 public class GitlabRepositoryAccessor extends RepositoryAccessor {
-    private GitlabRepository repository;
 
+    private AbstractRepository repository;
     private AbstractRepositoryRepository repositoryRepository;
     private AbstractIssueRepository issueRepository;
 
     private GitLabApi gitlabApi;
+
 
     public GitlabRepositoryAccessor(GitlabRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, String gitlabURL, String gitlabAuthKey) {
         this.repository = repository;
@@ -35,11 +37,17 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
         gitlabApi = new GitLabApi(gitlabURL, Constants.TokenType.PRIVATE, gitlabAuthKey);
     }
 
-    public GitlabRepository createItself() {
+    public AbstractRepository createItself() {
         // todo according to repository.isCreated create remote instance
         this.save();
         return repository;
     }
+
+    @Override
+    public AbstractRepository getRepository() {
+        return repository;
+    }
+
 
     @Override
     public void save() {
@@ -49,7 +57,7 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     @Override
     public List<AbstractIssue> downloadAllIssues() throws GitLabApiException {
         Project glProject = gitlabApi.getProjectApi()
-                .getProject(repository.getRepositoryNamespace(), repository.getRepositoryName());
+                .getProject(this.repository.getRepositoryNamespace(), repository.getRepositoryName());
 
         Stream<Issue> issuesStream = gitlabApi.getIssuesApi()
                 .getIssues(glProject,100)

@@ -1,25 +1,30 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
- * @author Filip Cap
- */
+ * @author Filip Cap */
 @Entity
 public class Project {
 
     @Id
     @GeneratedValue
+    @NotNull
     private Long id;
 
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     private AbstractBoard board;
 
-    @OneToOne(optional = false)
-    private AbstractRepository repository;
+    @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<AbstractRepository> repositories;
 
 
     public Project() {
@@ -33,12 +38,16 @@ public class Project {
         this.board = board;
     }
 
-    public AbstractRepository getRepository() {
-        return repository;
+    public List<AbstractRepository> getRepositories() {
+        return repositories;
     }
 
-    public void setRepository(AbstractRepository repository) {
-        this.repository = repository;
+    public void setRepositories(List<AbstractRepository> repository) {
+        this.repositories = repository;
+    }
+
+    public void addRepository(AbstractRepository repository) {
+        this.repositories.add(repository);
     }
 
     public String getName() {

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public class GithubRepositoryAccessor extends RepositoryAccessor {
 
-    private GithubRepository repository;
+    private AbstractRepository repository;
 
     private AbstractRepositoryRepository repositoryRepository;
     private AbstractIssueRepository issueRepository;
@@ -32,9 +32,14 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
 
     }
 
-    public GithubRepository createItself() {
+    public AbstractRepository createItself() {
         // todo according to repository.isCreated create remote instance
         this.save();
+        return repository;
+    }
+
+    @Override
+    public AbstractRepository getRepository() {
         return repository;
     }
 

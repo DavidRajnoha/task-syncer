@@ -1,5 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -24,6 +25,10 @@ public abstract class AbstractRepository {
     @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository")
     @JsonManagedReference
     private List<AbstractIssue> issues;
+
+    @ManyToOne
+    @JsonBackReference
+    private Project project;
 
 
     public AbstractRepository() {
@@ -59,5 +64,13 @@ public abstract class AbstractRepository {
 
     public void setIssues(List<AbstractIssue> issues) {
         this.issues = issues;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

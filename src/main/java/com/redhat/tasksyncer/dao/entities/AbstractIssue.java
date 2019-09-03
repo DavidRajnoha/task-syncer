@@ -31,6 +31,8 @@ public abstract class AbstractIssue {
 
     private IssueType issueType;
 
+    private String repositoryName;
+
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
     private AbstractRepository repository;
@@ -111,5 +113,13 @@ public abstract class AbstractIssue {
 
     public void setIssueType(IssueType issueType) {
         this.issueType = issueType;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public void setRepositoryName(String repositoryName) {
+        this.repositoryName = repositoryName;
     }
 }

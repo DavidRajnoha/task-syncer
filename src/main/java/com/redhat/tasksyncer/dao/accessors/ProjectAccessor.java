@@ -3,15 +3,10 @@ package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
-import org.kohsuke.github.GHEvent;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Filip Cap
@@ -21,7 +16,7 @@ public class ProjectAccessor {
     private Project project;
 
     private BoardAccessor board;
-    private RepositoryAccessor gitlabRepository;
+    private RepositoryAccessor gitlabRepositoryAccessor;
 
     private AbstractIssueRepository issueRepository;
     private AbstractCardRepository cardRepository;
@@ -63,11 +58,11 @@ public class ProjectAccessor {
         return board;
     }
 
-    public RepositoryAccessor getGitlabRepository() {
-        if(gitlabRepository == null)
-            gitlabRepository = new GitlabRepositoryAccessor((GitlabRepository) project.getRepository(), repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);  // todo generify
+    public RepositoryAccessor getGitlabRepositoryAccessor() {
+        if(gitlabRepositoryAccessor == null)
+            gitlabRepositoryAccessor = new GitlabRepositoryAccessor((GitlabRepository) project.getRepositories(), repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);  // todo generify
 
-        return gitlabRepository;
+        return gitlabRepositoryAccessor;
     }
 
     private BoardAccessor createBoard(String boardType, String name) {
@@ -77,6 +72,7 @@ public class ProjectAccessor {
         this.board = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
 
         AbstractBoard b = this.board.createItself();
+        this.board.save();
         project.setBoard(b);  // todo: maybe propagate to boardAccessor if created
 
         return this.board;
@@ -88,23 +84,29 @@ public class ProjectAccessor {
 
     public void initialize(String repoType, String repoNamespace, String repoName, String boardType, String boardName) throws Exception {
         // todo : maybe check whether not already initialised?
+        createRepositoryList();
         createBoard(boardType, boardName);
         createRepository(repoType, repoNamespace, repoName);
-        doSync(gitlabRepository);
+        doSync(gitlabRepositoryAccessor);
     }
 
-    private RepositoryAccessor createRepository(String repoType, String repoNamespace, String repoName) {
+    private void createRepositoryList() {
+        this.project.setRepositories(new ArrayList<>());
+    }
+
+    private RepositoryAccessor createRepository(String repoType, String repoNamespace, String repoName /*, RepositoryAccessor repositoryAccessor*/) {
         GitlabRepository repository = new GitlabRepository();
 
         repository.setRepositoryNamespace(repoNamespace);
         repository.setRepositoryName(repoName);
 
-        this.gitlabRepository = new GitlabRepositoryAccessor(repository, repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);
+        this.gitlabRepositoryAccessor = new GitlabRepositoryAccessor(repository, repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);
 
-        AbstractRepository r = this.gitlabRepository.createItself();
-        project.setRepository(r);  // todo: maybe propagate to repositoryAccessor if created
+        AbstractRepository r = this.gitlabRepositoryAccessor.createItself();
+        r.setProject(project);
+        repositoryRepository.save(r);
 
-        return this.gitlabRepository;
+        return this.gitlabRepositoryAccessor;
     }
 
     /**
@@ -116,6 +118,7 @@ public class ProjectAccessor {
         List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
 
         for(AbstractIssue i : issues) {
+            i.setRepository(repositoryAccessor.getRepository());
             this.update(i);
         }
     }
@@ -140,7 +143,7 @@ public class ProjectAccessor {
 
         // its new issue
 
-        newIssue.setRepository(project.getRepository());
+        //newIssue.setRepository(repository);
 
         List<AbstractColumn> columns = getBoard().getColumns();  // for now we assume that there exists such column for mapping
         AbstractCard c = this.getBoard().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
@@ -170,4 +173,7 @@ public class ProjectAccessor {
         System.out.println("Issues Synced");
 
     }
+
+/*    public void connectGitlab(String githubWebhookURLString, String s) {
+    }*/
 }
