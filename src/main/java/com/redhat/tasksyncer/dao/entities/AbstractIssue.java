@@ -37,7 +37,7 @@ public abstract class AbstractIssue {
     @JsonBackReference
     private AbstractRepository repository;
 
-    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     @JsonManagedReference
     private AbstractCard card;
 

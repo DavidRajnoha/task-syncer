@@ -34,9 +34,17 @@ public class GitlabWebhookIssueDecoder {
         this.ie = null;
 
         IssueEvent.ObjectAttributes oa = ie.getObjectAttributes();
+
         AbstractIssue issue = GitlabIssue.ObjectToGitlabIssueConverter.convert(oa);
-        issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(ie.getRepository().getName(), project.getId()));
+        issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(parseRepositoryName(ie.getRepository().getName()), project.getId()));
 
         return issue;
+    }
+
+    //When calling the Gitlab api, the spaces in the repo name are replaced with dashes.
+    //However, when we get the repo name from the web hook issue event, it is in the original form without dashes, so
+    //it is necessary to parse it so it matches the data in our repository
+    private String parseRepositoryName(String name) {
+        return name.toLowerCase().replaceAll(" ", "-");
     }
 }

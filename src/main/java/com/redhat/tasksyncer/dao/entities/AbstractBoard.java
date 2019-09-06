@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Filip Cap
@@ -27,7 +28,6 @@ public abstract class AbstractBoard {
     @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board")
     @JsonManagedReference
     private List<AbstractColumn> columns;
-
 
     public AbstractBoard() {
     }
@@ -66,5 +66,33 @@ public abstract class AbstractBoard {
 
     public void setColumns(List<AbstractColumn> columns) {
         this.columns = columns;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        //prevets endless loop
+        if (sameAsFormerProject(project))
+            return;
+
+        //Updates the project here
+        Project oldProject = this.project;
+        this.project = project;
+
+        //Removes this board from the previous project
+        if (oldProject != null) {
+            oldProject.setBoard(null);
+        }
+
+        //Set this board on the project
+        if (project != null){
+            project.setBoard(this);
+        }
+    }
+
+    private boolean sameAsFormerProject(Project newProject) {
+        return Objects.equals(project, newProject);
     }
 }

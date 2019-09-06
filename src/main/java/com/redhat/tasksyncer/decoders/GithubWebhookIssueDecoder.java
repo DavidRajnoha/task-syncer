@@ -19,8 +19,11 @@ public class GithubWebhookIssueDecoder {
 
     public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws IOException {
         GHEventPayload.Issue issueEventPayload = GitHub.connectAnonymously().parseEventPayload(request.getReader(), GHEventPayload.Issue.class);
+
         AbstractIssue gitHubIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue());
+
         gitHubIssue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(gitHubIssue.getRepositoryName(), project.getId()));
+
         return gitHubIssue;
     }
 

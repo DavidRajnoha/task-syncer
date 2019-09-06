@@ -85,6 +85,11 @@ public class TrelloBoardAccessor extends BoardAccessor {
     }
 
     @Override
+    public void setProject(Project project) {
+        board.setProject(project);
+    }
+
+    @Override
     public void save() {
         this.board = boardRepository.save(board);
     }

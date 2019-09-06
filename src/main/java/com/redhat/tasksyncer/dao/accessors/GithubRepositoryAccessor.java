@@ -65,7 +65,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
 
     @Override
     public void save() {
-
+        this.repository = this.repositoryRepository.save(repository);
     }
 
     public void createWebhook(URL webHookUrl) throws IOException {

@@ -21,7 +21,7 @@ public class GitlabIssue extends AbstractIssue {
         public static GitlabIssue convert(Issue input) {
             GitlabIssue issue = new GitlabIssue();
 
-            issue.setRemoteIssueId("GL" + input.getProjectId() + input.getId().toString());
+            issue.setRemoteIssueId(input.getId().toString());
             issue.setTitle(input.getTitle());
             issue.setDescription(input.getDescription());
 

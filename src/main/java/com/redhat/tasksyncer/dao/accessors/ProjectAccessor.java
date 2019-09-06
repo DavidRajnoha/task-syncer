@@ -15,7 +15,7 @@ public class ProjectAccessor {
 
     private Project project;
 
-    private BoardAccessor board;
+    private BoardAccessor boardAccessor;
     private RepositoryAccessor gitlabRepositoryAccessor;
 
     private AbstractIssueRepository issueRepository;
@@ -51,11 +51,11 @@ public class ProjectAccessor {
     }
 
 
-    public BoardAccessor getBoard() {
-        if(board == null)
-            board = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository); // todo generify
+    public BoardAccessor getBoardAccessor() {
+        if(boardAccessor == null)
+            boardAccessor = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository); // todo generify
 
-        return board;
+        return boardAccessor;
     }
 
     public RepositoryAccessor getGitlabRepositoryAccessor() {
@@ -69,13 +69,13 @@ public class ProjectAccessor {
         TrelloBoard board = new TrelloBoard();
         board.setBoardName(name);
 
-        this.board = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
+        this.boardAccessor = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
 
-        AbstractBoard b = this.board.createItself();
-        this.board.save();
-        project.setBoard(b);  // todo: maybe propagate to boardAccessor if created
-
-        return this.board;
+        AbstractBoard b = this.boardAccessor.createItself();
+        b.setProject(project);
+        boardRepository.save(b);
+        this.save();
+        return this.boardAccessor;
     }
 
     public void save() {
@@ -124,17 +124,17 @@ public class ProjectAccessor {
     }
 
     public void update(AbstractIssue newIssue) {
-        AbstractIssue oldIssue = issueRepository.findByRemoteIssueId(newIssue.getRemoteIssueId())
+        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getIssueType(), newIssue.getRepositoryName())
                 .orElse(newIssue);
 
-        if(oldIssue.getId() != null) {  // there exists such issue
+        if(oldIssue.getId() != null) {  // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
 
-            List<AbstractColumn> columns = getBoard().getColumns();  // for now we assume that there exists such column for mapping
+            List<AbstractColumn> columns = getBoardAccessor().getColumns();  // for now we assume that there exists such column for mapping
 
             oldIssue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(newIssue, columns));
 
-            this.getBoard().update(oldIssue.getCard());
+            this.getBoardAccessor().update(oldIssue.getCard());
 
             issueRepository.save(oldIssue);
 
@@ -143,10 +143,8 @@ public class ProjectAccessor {
 
         // its new issue
 
-        //newIssue.setRepository(repository);
-
-        List<AbstractColumn> columns = getBoard().getColumns();  // for now we assume that there exists such column for mapping
-        AbstractCard c = this.getBoard().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
+        List<AbstractColumn> columns = getBoardAccessor().getColumns();  // for now we assume that there exists such column for mapping
+        AbstractCard c = this.getBoardAccessor().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
         newIssue.setCard(c);
 
         issueRepository.save(newIssue);
@@ -155,7 +153,7 @@ public class ProjectAccessor {
     public void connectGithub(String webHookUrl, String repoName) throws Exception {
 
         //Creates a new githubRepository Object, now only acting as a container to pass repoName, UserName and Pass to the gitHubRepositoryAccessor
-        //TODO: Decide what exactly is the function of the gitHubRepository entity, implement saving it, change Project's field repository to List<repository>, one project can have multiple of them
+        //TODO: Decide what exactly is the function of the gitHubRepository entity, implement saving it
         GithubRepository githubRepository = new GithubRepository();
         githubRepository.setRepositoryName(repoName);
         githubRepository.setGithubPassword(gitHubPassword);
@@ -163,6 +161,7 @@ public class ProjectAccessor {
 
         //Creates new Accessor that is used for the commmunication with the particular githubrepository
         GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
+        githubRepositoryAccessor.save();
 
         //Creating webhook in the desired repository
         githubRepositoryAccessor.createWebhook(new URL(webHookUrl));
@@ -174,6 +173,9 @@ public class ProjectAccessor {
 
     }
 
-/*    public void connectGitlab(String githubWebhookURLString, String s) {
-    }*/
+        public void addGitlabRepository(String repoName, String repoNamespace) throws Exception {
+        createRepository(GitlabRepository.class.getName(), repoNamespace, repoName);
+        doSync(gitlabRepositoryAccessor);
+        System.out.println("Issues Synced");
+    }
 }

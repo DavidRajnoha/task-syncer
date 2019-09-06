@@ -19,7 +19,7 @@ public class GithubIssue extends AbstractIssue {
         public static GithubIssue convert(GHIssue input) {
             GithubIssue issue = new GithubIssue();
 
-            issue.setRemoteIssueId("GH" + input.getRepository().getName() + (input.getId()));
+            issue.setRemoteIssueId(Long.toString(input.getId()));
             issue.setTitle(input.getTitle());
             issue.setDescription(input.getBody());
             issue.setRepositoryName(input.getRepository().getName());

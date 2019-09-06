@@ -150,13 +150,15 @@ public class Endpoints {
         return OK;
     }
 
-/*
+    //TODO: fix creating multiplerepositories with same ne
     //TODO: Add more abstraction and merge with connectGithub
-    @RequestMapping(path = "/project/{projectName}/connect/gitlab/{repoName}",
+    //TODO: Create Gitlab webhook on connection
+    @RequestMapping(path = "/project/{projectName}/connect/gitlab/{repoNamespace}/{repoName}",
             method = RequestMethod.PUT
     )
     public String connectGitlab(@PathVariable String projectName,
-                                @PathVariable String repoName) throws Exception {
+                                @PathVariable String repoName,
+                                @PathVariable String repoNamespace) throws Exception {
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
@@ -164,15 +166,12 @@ public class Endpoints {
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
                 githubUserName, githubPassword);
 
-        //Creates a webhook to this app in the github repository based on the repoName PathVariable
-        //TODO: assure that the webhook points to this app, now impossible due to ngrok
-        //And also conducts synchronization of the github issues with the local issueRepository and trello
-        projectAccessor.connectGitlab(githubWebhookURLString,githubUserName + "/" + repoName);
+
+        //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
+        projectAccessor.addGitlabRepository(repoName, repoNamespace);
 
         return OK;
     }
-*/
-
 
 
 

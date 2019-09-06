@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Filip Cap */
@@ -19,13 +21,12 @@ public class Project {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = AbstractBoard.class, optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.MERGE)
     private AbstractBoard board;
 
-    @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.MERGE)
     @JsonManagedReference
     private List<AbstractRepository> repositories;
-
 
     public Project() {
     }
@@ -35,7 +36,18 @@ public class Project {
     }
 
     public void setBoard(AbstractBoard board) {
+        //prevents infinite loops
+        if (Objects.equals(this.board, board)) return;
+
+        //updates the board here
+        AbstractBoard oldBoard = this.board;
         this.board = board;
+
+        //clears the project from the previous board
+        if (oldBoard != null) oldBoard.setProject(null);
+
+        //updates the new board
+        if (board != null) board.setProject(this);
     }
 
     public List<AbstractRepository> getRepositories() {
@@ -47,7 +59,28 @@ public class Project {
     }
 
     public void addRepository(AbstractRepository repository) {
+        //creates new ArrayList when adding a new item
+        if (this.repositories == null) {
+            this.repositories = new ArrayList<>();
+        }
+
+        //prevents infinite loops
+        if (this.repositories.contains(repository)) return;
+
+        //adds the repository here
         this.repositories.add(repository);
+
+        //sets the project field in repository
+        repository.setProject(this);
+    }
+
+    public void removeRepository(AbstractRepository repository) {
+        //prevents infinite looping
+        if (this.repositories == null || !this.repositories.contains(repository)) return;
+
+        repositories.remove(repository);
+
+        repository.setProject(null);
     }
 
     public String getName() {
