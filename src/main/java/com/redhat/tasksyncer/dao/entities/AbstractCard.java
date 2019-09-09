@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 /**
  * @author Filip Cap
@@ -14,15 +15,14 @@ import javax.persistence.*;
 public abstract class AbstractCard {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     private String title;
     private String description;
     private String remoteCardId;
 
-    @OneToOne(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, optional = false, mappedBy = "card")
-    @JsonBackReference
+    @OneToOne
     private AbstractIssue issue;
 
     @ManyToOne(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, optional = false)
@@ -75,7 +75,17 @@ public abstract class AbstractCard {
     }
 
     public void setIssue(AbstractIssue issue) {
+        //prevents inifinite loops
+        if (Objects.equals(issue, this.issue)) return;
+
+        //removes old reference
+        if (this.issue != null) this.issue.setCard(null);
+
+        //updates the issue here
         this.issue = issue;
+
+        //creates new reference to this in issue
+        if (this.issue != null) this.issue.setCard(this);
     }
 
     public AbstractColumn getColumn() {
@@ -83,6 +93,16 @@ public abstract class AbstractCard {
     }
 
     public void setColumn(AbstractColumn column) {
+        //prevents inifinite loops
+        if (Objects.equals(column, this.column)) return;
+
+        //removes old reference
+        if (this.column != null) this.column.removeCard(this);
+
+        //updates the column here
         this.column = column;
+
+        //creates new reference to this in column
+        if (this.column != null) this.column.addCard(this);
     }
 }

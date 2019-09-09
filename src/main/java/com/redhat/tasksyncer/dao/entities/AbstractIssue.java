@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 /**
  * @author Filip Cap
@@ -37,8 +38,7 @@ public abstract class AbstractIssue {
     @JsonBackReference
     private AbstractRepository repository;
 
-    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY)
     private AbstractCard card;
 
     public AbstractIssue(IssueType issueType) {
@@ -88,7 +88,13 @@ public abstract class AbstractIssue {
     }
 
     public void setRepository(AbstractRepository repository) {
+        if (Objects.equals(repository, this.repository)) return;
+        
+        if (this.repository != null) this.repository.removeIssue(this);
+        
         this.repository = repository;
+        
+        if (this.repository != null) this.repository.addIssue(this);
     }
 
     public AbstractCard getCard() {
@@ -96,7 +102,13 @@ public abstract class AbstractIssue {
     }
 
     public void setCard(AbstractCard card) {
+        if (Objects.equals(card, this.card)) return;
+
+        if (this.card != null) this.card.setIssue(null);
+
         this.card = card;
+
+        if (this.card != null) this.card.setIssue(this);
     }
 
     public String getState() {

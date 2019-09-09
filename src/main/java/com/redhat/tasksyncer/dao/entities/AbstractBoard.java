@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,6 +63,26 @@ public abstract class AbstractBoard {
 
     public List<AbstractColumn> getColumns() {
         return columns;
+    }
+
+    public void removeColumn(AbstractColumn column){
+        if (this.columns == null || !this.columns.contains(column)) return;
+
+        this.columns.remove(column);
+
+        column.setBoard(null);
+    }
+
+    public void addColumn(AbstractColumn column){
+        if (this.columns == null) {
+            this.columns = new ArrayList<>();
+        }
+
+        if (this.columns.contains(column)) return;
+
+        this.columns.add(column);
+
+        column.setBoard(this);
     }
 
     public void setColumns(List<AbstractColumn> columns) {
