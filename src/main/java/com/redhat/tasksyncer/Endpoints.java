@@ -23,11 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * @author Filip Cap
@@ -143,7 +140,9 @@ public class Endpoints {
                 githubUserName, githubPassword);
         projectAccessor.save();
 
-        projectAccessor.initialize(GitlabRepository.class.getName(), repoNamespace, repoName, TrelloCard.class.getName(), boardName);
+        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
+
+        projectAccessor.initialize(repository, TrelloCard.class.getName(), boardName);
 
         projectAccessor.save(); // todo: make it transactional
 
@@ -167,8 +166,9 @@ public class Endpoints {
                 githubUserName, githubPassword);
 
 
+        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
-        projectAccessor.addGitlabRepository(repoName, repoNamespace);
+        projectAccessor.addRepository(repository);
 
         return OK;
     }

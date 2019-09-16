@@ -21,7 +21,7 @@ public class Project {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToOne(targetEntity = AbstractBoard.class, optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.MERGE)
+    @OneToOne(targetEntity = AbstractBoard.class, optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     private AbstractBoard board;
 
     @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.MERGE)

@@ -3,9 +3,10 @@ package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
+import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +17,6 @@ public class ProjectAccessor {
     private Project project;
 
     private BoardAccessor boardAccessor;
-    private RepositoryAccessor gitlabRepositoryAccessor;
 
     private AbstractIssueRepository issueRepository;
     private AbstractCardRepository cardRepository;
@@ -27,8 +27,6 @@ public class ProjectAccessor {
 
     private String trelloApplicationKey;
     private String trelloAccessToken;
-    private String gitlabURL;
-    private String gitlabAuthKey;
     private String gitHubPassword;
     private String gitHubUsername;
 
@@ -44,8 +42,6 @@ public class ProjectAccessor {
         this.projectRepository = projectRepository;
         this.trelloApplicationKey = trelloApplicationKey;
         this.trelloAccessToken = trelloAccessToken;
-        this.gitlabURL = gitlabURL;
-        this.gitlabAuthKey = gitlabAuthKey;
         this.gitHubUsername = gitHubUsername;
         this.gitHubPassword = gitHubPassword;
     }
@@ -58,12 +54,6 @@ public class ProjectAccessor {
         return boardAccessor;
     }
 
-    public RepositoryAccessor getGitlabRepositoryAccessor() {
-        if(gitlabRepositoryAccessor == null)
-            gitlabRepositoryAccessor = new GitlabRepositoryAccessor((GitlabRepository) project.getRepositories(), repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);  // todo generify
-
-        return gitlabRepositoryAccessor;
-    }
 
     private BoardAccessor createBoard(String boardType, String name) {
         TrelloBoard board = new TrelloBoard();
@@ -82,37 +72,45 @@ public class ProjectAccessor {
         project = projectRepository.save(project);
     }
 
-    public void initialize(String repoType, String repoNamespace, String repoName, String boardType, String boardName) throws Exception {
+    /**
+     * Takes a repository and board, creates a new board to display Issues,
+     * and invokes method add repository that leads to setting this repository to this project, and syncing the issues
+     * from the external repository with the internal repository and then also with trello
+     * */
+    public void initialize(AbstractRepository repository, String boardType, String boardName) throws Exception {
         // todo : maybe check whether not already initialised?
-        createRepositoryList();
         createBoard(boardType, boardName);
-        createRepository(repoType, repoNamespace, repoName);
-        doSync(gitlabRepositoryAccessor);
+        addRepository(repository);
     }
 
-    private void createRepositoryList() {
-        this.project.setRepositories(new ArrayList<>());
+    /**
+     * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
+     * The accessor is then used to sync the issues from the particular repository with the internal database
+     * */
+    public void addRepository(AbstractRepository repository) throws Exception {
+        RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
+        doSync(repositoryAccessor);
     }
 
-    private RepositoryAccessor createRepository(String repoType, String repoNamespace, String repoName /*, RepositoryAccessor repositoryAccessor*/) {
-        GitlabRepository repository = new GitlabRepository();
 
-        repository.setRepositoryNamespace(repoNamespace);
-        repository.setRepositoryName(repoName);
+    /**
+     * Creates a repositoryAccessor to serve as a middle layer between repository object and "real" network repository,
+     * Also adds project to the repository and saves the repository TODO: This violates the single responsibility principle
+     * */
+    private RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, IOException {
+        RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
 
-        this.gitlabRepositoryAccessor = new GitlabRepositoryAccessor(repository, repositoryRepository, issueRepository, gitlabURL, gitlabAuthKey);
-
-        AbstractRepository r = this.gitlabRepositoryAccessor.createItself();
+        AbstractRepository r = repositoryAccessor.createItself();
         r.setProject(project);
         repositoryRepository.save(r);
 
-        return this.gitlabRepositoryAccessor;
+        return repositoryAccessor;
     }
 
     /**
      * Method takes takes object that extends the RepositoryAccessor abstract class and uses the downloadAllIssues()
-     * method to get a list of issues from that particular repository, than updates all of these issues in issueRepository and
-     * in Trello
+     * method to get a list of issues from that particular repository, then updates and syncs those issues with the internal
+     * IssueRepository and Trello using the update method
      * */
     public void doSync(RepositoryAccessor repositoryAccessor) throws Exception {
         List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
@@ -124,7 +122,7 @@ public class ProjectAccessor {
     }
 
     public void update(AbstractIssue newIssue) {
-        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getIssueType(), newIssue.getRepositoryName())
+        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getIssueType(), newIssue.getRepository().getRepositoryName())
                 .orElse(newIssue);
 
         if(oldIssue.getId() != null) {  // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
@@ -150,14 +148,18 @@ public class ProjectAccessor {
         issueRepository.save(newIssue);
     }
 
+
+
+    //TODO: refactor into addRepository and initialize repository
+
     public void connectGithub(String webHookUrl, String repoName) throws Exception {
 
         //Creates a new githubRepository Object, now only acting as a container to pass repoName, UserName and Pass to the gitHubRepositoryAccessor
         //TODO: Decide what exactly is the function of the gitHubRepository entity, implement saving it
         GithubRepository githubRepository = new GithubRepository();
         githubRepository.setRepositoryName(repoName);
-        githubRepository.setGithubPassword(gitHubPassword);
-        githubRepository.setGithubUsername(gitHubUsername);
+        githubRepository.setSecondLoginCredential(gitHubPassword);
+        githubRepository.setFirstLoginCredential(gitHubUsername);
 
         //Creates new Accessor that is used for the commmunication with the particular githubrepository
         GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
@@ -173,9 +175,5 @@ public class ProjectAccessor {
 
     }
 
-        public void addGitlabRepository(String repoName, String repoNamespace) throws Exception {
-        createRepository(GitlabRepository.class.getName(), repoNamespace, repoName);
-        doSync(gitlabRepositoryAccessor);
-        System.out.println("Issues Synced");
-    }
+
 }

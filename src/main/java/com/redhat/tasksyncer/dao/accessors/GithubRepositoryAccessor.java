@@ -25,11 +25,6 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         this.repository = repository;
         this.repositoryRepository = repositoryRepository;
         this.issueRepository = issueRepository;
-
-        //GitHub object used to communicate with Github and ghRepository are created along with the Accessor
-        gitHub = GitHub.connectUsingPassword(repository.getGithubUsername(), repository.getGithubPassword());
-        ghRepository = gitHub.getRepository(repository.getRepositoryName());
-
     }
 
     public AbstractRepository createItself() {
@@ -41,6 +36,16 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     @Override
     public AbstractRepository getRepository() {
         return repository;
+    }
+
+    @Override
+    public void connectToRepository() throws IOException {
+        this.gitHub = getConnection(repository.getFirstLoginCredential(), repository.getSecondLoginCredential());
+        ghRepository = gitHub.getRepository(repository.getRepositoryName());
+    }
+
+    private GitHub getConnection(String firstLoginCredential, String secondLoginCredential) throws IOException {
+        return GitHub.connectUsingPassword(repository.getFirstLoginCredential(), repository.getSecondLoginCredential());
     }
 
     @Override

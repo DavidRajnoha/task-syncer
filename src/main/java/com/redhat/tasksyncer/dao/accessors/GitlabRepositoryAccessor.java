@@ -12,6 +12,7 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.Project;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,12 +30,11 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     private GitLabApi gitlabApi;
 
 
-    public GitlabRepositoryAccessor(GitlabRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, String gitlabURL, String gitlabAuthKey) {
+    public GitlabRepositoryAccessor(GitlabRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository) {
         this.repository = repository;
         this.repositoryRepository = repositoryRepository;
         this.issueRepository = issueRepository;
 
-        gitlabApi = new GitLabApi(gitlabURL, Constants.TokenType.PRIVATE, gitlabAuthKey);
     }
 
     public AbstractRepository createItself() {
@@ -52,6 +52,16 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     @Override
     public void save() {
         this.repository = repositoryRepository.save(repository);
+    }
+
+    @Override
+    public void connectToRepository() throws IOException {
+        this.gitlabApi = getConnection(repository.getFirstLoginCredential(), Constants.TokenType.PRIVATE, repository.getSecondLoginCredential());
+    }
+
+    private GitLabApi getConnection(String firstLoginCredential, Constants.TokenType aPrivate, String secondLoginCredential) {
+        return new GitLabApi(firstLoginCredential, aPrivate, secondLoginCredential);
+
     }
 
     @Override

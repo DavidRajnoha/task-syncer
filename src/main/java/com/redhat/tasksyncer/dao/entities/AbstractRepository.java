@@ -3,11 +3,15 @@ package com.redhat.tasksyncer.dao.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.redhat.tasksyncer.dao.enumerations.IssueType;
+import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static com.redhat.tasksyncer.dao.enumerations.IssueType.*;
 
 /**
  * @author Filip Cap
@@ -24,6 +28,9 @@ public abstract class AbstractRepository {
     private String repositoryNamespace;
     private String repositoryName;
 
+    private String firstLoginCredential;
+    private String secondLoginCredential;
+
     @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<AbstractIssue> issues;
@@ -35,6 +42,32 @@ public abstract class AbstractRepository {
 
     public AbstractRepository() {
     }
+
+    /**
+     * Factory method
+     * Creates new repository of the type that is passed as IssueType, then sets the security credential fields and the repositoryName and repositoryNamespace
+     * */
+    public static AbstractRepository newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType type, String firstLoginCredential, String secondLoginCredential,
+                                                                                             String repositoryName, String repositoryNamespace) throws RepositoryTypeNotSupportedException {
+        AbstractRepository repository;
+        switch (type){
+            case GITLAB:
+                repository = new GitlabRepository();
+                break;
+            case GITHUB:
+                repository = new GithubRepository();
+                break;
+            default:
+                throw new RepositoryTypeNotSupportedException("");
+        }
+
+        repository.setSecondLoginCredential(secondLoginCredential);
+        repository.setFirstLoginCredential(firstLoginCredential);
+        repository.setRepositoryName(repositoryName);
+        repository.setRepositoryNamespace(repositoryNamespace);
+
+        return repository;
+    };
 
     public Long getId() {
         return id;
@@ -108,5 +141,21 @@ public abstract class AbstractRepository {
 
         //sets this repository to the new project
         if (this.project != null) this.project.addRepository(this);
+    }
+
+    public String getFirstLoginCredential() {
+        return firstLoginCredential;
+    }
+
+    public void setFirstLoginCredential(String firstLoginCredential) {
+        this.firstLoginCredential = firstLoginCredential;
+    }
+
+    public String getSecondLoginCredential() {
+        return secondLoginCredential;
+    }
+
+    public void setSecondLoginCredential(String secondLoginCredential) {
+        this.secondLoginCredential = secondLoginCredential;
     }
 }

@@ -12,7 +12,7 @@ import java.util.Set;
  * @author Filip Cap
  */
 public interface AbstractIssueRepository extends CrudRepository<AbstractIssue, Long> {
-    Optional<AbstractIssue> findByRemoteIssueId(String remoteIssueId);  // todo: rework
+    AbstractIssue findOneByRemoteIssueId(String remoteIssueId);  // todo: rework
     Optional<AbstractIssue> findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(String issueId, IssueType issueType, String repositoryName);
     Set<AbstractIssue> findByIssueType(IssueType issueType);
 }

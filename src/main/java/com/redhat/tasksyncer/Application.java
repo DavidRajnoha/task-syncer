@@ -24,29 +24,6 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
-    @Bean
-    CommandLineRunner init(ProjectRepository projectRepository, AbstractBoardRepository abstractBoardRepository, AbstractRepositoryRepository abstractRepositoryRepository, AbstractRepositoryRepository a) {
-        return (args) -> {
-            Project project = new Project();
-            AbstractBoard abstractBoard = new TrelloBoard();
-
-            project.setName("Testing");
-            projectRepository.save(project);
-
-
-            AbstractRepository oldAbstractRepository = new GitlabRepository();
-            oldAbstractRepository.setProject(project);
-            oldAbstractRepository.setRepositoryName("Repo");
-            abstractRepositoryRepository.save(oldAbstractRepository);
-
-            AbstractRepository abstractRepository = abstractRepositoryRepository.findByRepositoryNameAndProject_Id(oldAbstractRepository.getRepositoryName(), oldAbstractRepository.getProject().getId());
-
-
-            System.out.println("Bullsikh");
-
-        };
-    }
 }
 
 
