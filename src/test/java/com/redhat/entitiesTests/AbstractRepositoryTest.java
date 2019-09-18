@@ -3,6 +3,7 @@ package com.redhat.entitiesTests;
 import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GithubRepository;
+import com.redhat.tasksyncer.dao.entities.GitlabRepository;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.junit.Test;
@@ -15,9 +16,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 
-@RunWith(SpringRunner.class)
-@ComponentScan("com.redhat.tasksyncer")
-@SpringBootTest(classes = Application.class)
 public class AbstractRepositoryTest {
     private String firstCredential = "login";
     private String secondCredential = "password";
@@ -32,18 +30,14 @@ public class AbstractRepositoryTest {
                         secondCredential, repoName, repoNamespace);
 
         assertThat(repository).isInstanceOf(GithubRepository.class);
-        assertThat(repository.getFirstLoginCredential()).isEqualTo(firstCredential);
-        assertThat(repository.getSecondLoginCredential()).isEqualTo(secondCredential);
-        assertThat(repository.getRepositoryNamespace()).isEqualTo(repoNamespace);
-        assertThat(repository.getRepositoryName()).isEqualTo(repoName);
     }
 
     @Test
     public void whenNewInstanceOfTypeGITLABisCalled_thenGitLabRepositoryIsCreated() throws RepositoryTypeNotSupportedException {
         AbstractRepository repository = AbstractRepository
-                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB, firstCredential,
+                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, firstCredential,
                         secondCredential, repoName, repoNamespace);
-        assertThat(repository).isInstanceOf(GithubRepository.class);
+        assertThat(repository).isInstanceOf(GitlabRepository.class);
     }
 
     @Test

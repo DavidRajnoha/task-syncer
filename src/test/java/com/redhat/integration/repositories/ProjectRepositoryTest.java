@@ -28,7 +28,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @DataJpaTest
 @ComponentScan("com.redhat.tasksyncer")
 @SpringBootTest(classes = Application.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase
 public class ProjectRepositoryTest {
 
     @Autowired

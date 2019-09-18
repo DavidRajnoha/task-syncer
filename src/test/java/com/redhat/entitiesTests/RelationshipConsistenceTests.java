@@ -19,9 +19,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@RunWith(SpringRunner.class)
-@ComponentScan("com.redhat.tasksyncer")
-@SpringBootTest(classes = Application.class)
+
 public class RelationshipConsistenceTests {
 
 

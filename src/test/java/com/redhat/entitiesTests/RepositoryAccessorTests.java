@@ -29,21 +29,19 @@ import static org.mockito.Mockito.when;
 
 
 
-@RunWith(SpringRunner.class)
-@ComponentScan("com.redhat.tasksyncer")
-@SpringBootTest(classes = Application.class)
-public class RepositoryAccessorTest {
+
+public class RepositoryAccessorTests {
 
     @Autowired
-    AbstractRepositoryRepository repositoryRepository;
+    private AbstractRepositoryRepository repositoryRepository;
     @Autowired
-    AbstractIssueRepository issueRepository;
+    private AbstractIssueRepository issueRepository;
 
-    AbstractRepository githubRepository;
-    AbstractRepository gitlabRepository;
-    AbstractRepository unsuportedRepository;
+    private AbstractRepository githubRepository;
+    private AbstractRepository gitlabRepository;
+    private AbstractRepository unsuportedRepository;
 
-    RepositoryAccessor repositoryAccessor;
+    private RepositoryAccessor repositoryAccessor;
 
     private String firstCredential = "login";
     private String secondCredential = "password";

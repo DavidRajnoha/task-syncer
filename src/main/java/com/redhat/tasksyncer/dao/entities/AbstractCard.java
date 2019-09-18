@@ -79,11 +79,13 @@ public abstract class AbstractCard {
         //prevents inifinite loops
         if (Objects.equals(issue, this.issue)) return;
 
-        //removes old reference
-        if (this.issue != null) this.issue.setCard(null);
+
+        AbstractIssue oldIssue = this.issue;
 
         //updates the issue here
         this.issue = issue;
+
+        if (oldIssue != null) oldIssue.setCard(null);
 
         //creates new reference to this in issue
         if (this.issue != null) this.issue.setCard(this);

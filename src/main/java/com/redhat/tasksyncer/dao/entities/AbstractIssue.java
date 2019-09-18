@@ -110,11 +110,12 @@ public abstract class AbstractIssue {
     public void setCard(AbstractCard card) {
         if (Objects.equals(card, this.card)) return;
 
-        if (this.card != null) this.card.setIssue(null);
-
+        AbstractCard oldCard = this.card;
         this.card = card;
 
-        if (this.card != null) this.card.setIssue(this);
+        if (oldCard != null) oldCard.setIssue(null);
+
+        if (card != null) card.setIssue(this);
     }
 
     public String getState() {
