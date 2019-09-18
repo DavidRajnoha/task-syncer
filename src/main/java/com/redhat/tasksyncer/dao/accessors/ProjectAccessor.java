@@ -27,11 +27,8 @@ public class ProjectAccessor {
 
     private String trelloApplicationKey;
     private String trelloAccessToken;
-    private String gitHubPassword;
-    private String gitHubUsername;
 
-    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken, String gitlabURL, String gitlabAuthKey,
-                           String gitHubUsername, String gitHubPassword) {
+    public ProjectAccessor(Project project, AbstractBoardRepository boardRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository, ProjectRepository projectRepository, String trelloApplicationKey, String trelloAccessToken) {
         this.project = project;
 
         this.boardRepository = boardRepository;
@@ -42,8 +39,6 @@ public class ProjectAccessor {
         this.projectRepository = projectRepository;
         this.trelloApplicationKey = trelloApplicationKey;
         this.trelloAccessToken = trelloAccessToken;
-        this.gitHubUsername = gitHubUsername;
-        this.gitHubPassword = gitHubPassword;
     }
 
 
@@ -87,9 +82,10 @@ public class ProjectAccessor {
      * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
      * The accessor is then used to sync the issues from the particular repository with the internal database
      * */
-    public void addRepository(AbstractRepository repository) throws Exception {
+    public RepositoryAccessor addRepository(AbstractRepository repository) throws Exception {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
         doSync(repositoryAccessor);
+        return repositoryAccessor;
     }
 
 
@@ -122,7 +118,7 @@ public class ProjectAccessor {
     }
 
     public void update(AbstractIssue newIssue) {
-        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getIssueType(), newIssue.getRepository().getRepositoryName())
+        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getRepository().getRepositoryName())
                 .orElse(newIssue);
 
         if(oldIssue.getId() != null) {  // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
@@ -148,30 +144,11 @@ public class ProjectAccessor {
         issueRepository.save(newIssue);
     }
 
-
-
-    //TODO: refactor into addRepository and initialize repository
-
-    public void connectGithub(String webHookUrl, String repoName) throws Exception {
-
-        //Creates a new githubRepository Object, now only acting as a container to pass repoName, UserName and Pass to the gitHubRepositoryAccessor
-        //TODO: Decide what exactly is the function of the gitHubRepository entity, implement saving it
-        GithubRepository githubRepository = new GithubRepository();
-        githubRepository.setRepositoryName(repoName);
-        githubRepository.setSecondLoginCredential(gitHubPassword);
-        githubRepository.setFirstLoginCredential(gitHubUsername);
-
-        //Creates new Accessor that is used for the commmunication with the particular githubrepository
-        GithubRepositoryAccessor githubRepositoryAccessor = new GithubRepositoryAccessor(githubRepository, repositoryRepository, issueRepository);
-        githubRepositoryAccessor.save();
-
-        //Creating webhook in the desired repository
-        githubRepositoryAccessor.createWebhook(new URL(webHookUrl));
-        System.out.println("webHook Created");
-
-        //Synchronization of the issues from github to local repository and trello
-        doSync(githubRepositoryAccessor);
-        System.out.println("Issues Synced");
+    public void hookRepository(AbstractRepository repository, String webhookUrl) throws Exception {
+        RepositoryAccessor repositoryAccessor;
+        //Adds the repository to the project, syncs it and returns the particular repository Accessor
+        repositoryAccessor = addRepository(repository);
+        repositoryAccessor.createWebhook(new URL(webhookUrl));
 
     }
 

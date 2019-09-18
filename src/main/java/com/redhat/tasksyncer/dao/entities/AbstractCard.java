@@ -23,6 +23,7 @@ public abstract class AbstractCard {
     private String remoteCardId;
 
     @OneToOne
+    @JsonBackReference
     private AbstractIssue issue;
 
     @ManyToOne(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, optional = false)

@@ -22,7 +22,6 @@ public class GithubIssue extends AbstractIssue {
             issue.setRemoteIssueId(Long.toString(input.getId()));
             issue.setTitle(input.getTitle());
             issue.setDescription(input.getBody());
-            issue.setRepositoryName(input.getRepository().getName());
 
             if(Objects.equals(input.getState(), GHIssueState.OPEN)){
                 issue.setState(AbstractIssue.STATE_OPENED);

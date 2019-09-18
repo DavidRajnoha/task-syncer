@@ -92,8 +92,7 @@ public class Endpoints {
         // todo: determine which decoder to use
         AbstractIssue newIssue = new GitlabWebhookIssueDecoder().decode(request, project, repositoryRepository);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-                githubUserName, githubPassword);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         projectAccessor.update(newIssue);
 
         return OK;
@@ -112,8 +111,7 @@ public class Endpoints {
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         AbstractIssue newIssue = new GithubWebhookIssueDecoder().decode(request, project, repositoryRepository);
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-                githubUserName, githubPassword);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         projectAccessor.update(newIssue);
 
         System.out.println("GitHubEventChanged");
@@ -136,8 +134,7 @@ public class Endpoints {
         Project project = new Project();
         project.setName(projectName);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-                githubUserName, githubPassword);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         projectAccessor.save();
 
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
@@ -162,8 +159,7 @@ public class Endpoints {
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-                githubUserName, githubPassword);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
 
 
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
@@ -184,16 +180,21 @@ public class Endpoints {
             .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
     //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
-    ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken, gitlabURL, gitlabAuthKey,
-        githubUserName, githubPassword);
+    ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+
+    AbstractRepository githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB, githubUserName, githubPassword, repoName, githubUserName);
 
     //Creates a webhook to this app in the github repository based on the repoName PathVariable
     //TODO: assure that the webhook points to this app, now impossible due to ngrok
     //And also conducts synchronization of the github issues with the local issueRepository and trello
-    projectAccessor.connectGithub(githubWebhookURLString,githubUserName + "/" + repoName);
+    projectAccessor.hookRepository(githubRepository, githubWebhookURLString);
 
     return OK;
     }
+
+
+
+    //GET REQUESTS
 
     @RequestMapping(path = "/project/{projectName}/all/{issueType}",
                     method = RequestMethod.GET
@@ -205,7 +206,7 @@ public class Endpoints {
         return mapper.writeValueAsString(issues);
     }
 
-    @RequestMapping(path = "/project/{projectName}/all/",
+    @RequestMapping(path = "/project/{projectName}/all",
             method = RequestMethod.GET
     )
     public String getAllIssues(@PathVariable String projectName) throws JsonProcessingException {
@@ -214,13 +215,25 @@ public class Endpoints {
         return mapper.writeValueAsString(issues);
     }
 
-    @RequestMapping(path = "/project/{projectName}/repositories/",
+    @RequestMapping(path = "/project/{projectName}/repositories",
             method = RequestMethod.GET
     )
     public String getRepositoriesByProject(@PathVariable String projectName) throws JsonProcessingException {
         List<AbstractRepository> repositories = repositoryRepository.findByProject_Name(projectName);
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(repositories);
+    }
+
+    @RequestMapping(path = "/project/{projectName}/{repositoryName}/{remoteIssueId}",
+            method = RequestMethod.GET
+    )
+    public String getIssueByTypeAndRepositoryAndId(@PathVariable String projectName, @PathVariable String repositoryName,
+                                                   @PathVariable String remoteIssueId) throws JsonProcessingException {
+        List<AbstractIssue> issues = issueRepository
+                .findByRepository_Project_nameAndRemoteIssueIdAndRepository_repositoryName(projectName, remoteIssueId, repositoryName);
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(issues);
     }
 
 }

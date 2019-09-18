@@ -12,6 +12,7 @@ import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
 
     @Override
     public List<AbstractColumn> getColumns() {
-        return Collections.unmodifiableList(columnRepository.findAllByBoardId(board.getId()));
+         return Collections.unmodifiableList(columnRepository.findByBoard_Id(board.getId()));
     }
 
     @Override

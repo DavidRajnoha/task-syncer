@@ -10,6 +10,7 @@ import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +58,8 @@ public abstract class RepositoryAccessor {
     public abstract AbstractRepository createItself();
 
     public abstract AbstractRepository getRepository();
+
+    public abstract void createWebhook(URL webhook) throws IOException;
 
 
 }

@@ -21,8 +21,7 @@ public class GithubWebhookIssueDecoder {
         GHEventPayload.Issue issueEventPayload = GitHub.connectAnonymously().parseEventPayload(request.getReader(), GHEventPayload.Issue.class);
 
         AbstractIssue gitHubIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue());
-
-        gitHubIssue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(gitHubIssue.getRepositoryName(), project.getId()));
+        gitHubIssue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(issueEventPayload.getRepository().getName(), project.getId()));
 
         return gitHubIssue;
     }

@@ -24,7 +24,7 @@ public class Project {
     @OneToOne(targetEntity = AbstractBoard.class, optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     private AbstractBoard board;
 
-    @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.MERGE)
+    @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<AbstractRepository> repositories;
 

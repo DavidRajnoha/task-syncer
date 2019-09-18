@@ -38,10 +38,13 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         return repository;
     }
 
+
     @Override
     public void connectToRepository() throws IOException {
         this.gitHub = getConnection(repository.getFirstLoginCredential(), repository.getSecondLoginCredential());
-        ghRepository = gitHub.getRepository(repository.getRepositoryName());
+        //Creating string to find the particular repository
+        String namsespaceAndRepository = repository.getRepositoryNamespace() + "/" + repository.getRepositoryName();
+        ghRepository = gitHub.getRepository(namsespaceAndRepository);
     }
 
     private GitHub getConnection(String firstLoginCredential, String secondLoginCredential) throws IOException {

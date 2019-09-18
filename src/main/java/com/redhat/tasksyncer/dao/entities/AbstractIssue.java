@@ -11,6 +11,12 @@ import java.util.Objects;
 /**
  * @author Filip Cap
  */
+
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"remoteIssueId", "repository_repositoryName"})
+)
+
+
 @Entity
 @Inheritance
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -32,13 +38,13 @@ public abstract class AbstractIssue {
 
     private IssueType issueType;
 
-    private String repositoryName;
-
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
+    @JoinColumn(name = "repository_repositoryName")
     private AbstractRepository repository;
 
     @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private AbstractCard card;
 
     public AbstractIssue(IssueType issueType) {
@@ -127,11 +133,4 @@ public abstract class AbstractIssue {
         this.issueType = issueType;
     }
 
-    public String getRepositoryName() {
-        return repositoryName;
-    }
-
-    public void setRepositoryName(String repositoryName) {
-        this.repositoryName = repositoryName;
-    }
 }

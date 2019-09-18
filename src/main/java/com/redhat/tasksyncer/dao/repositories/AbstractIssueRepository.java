@@ -5,6 +5,7 @@ import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import java.util.Set;
  */
 public interface AbstractIssueRepository extends CrudRepository<AbstractIssue, Long> {
     AbstractIssue findOneByRemoteIssueId(String remoteIssueId);  // todo: rework
-    Optional<AbstractIssue> findByRemoteIssueIdAndIssueTypeAndRepository_repositoryName(String issueId, IssueType issueType, String repositoryName);
+    Optional<AbstractIssue> findByRemoteIssueIdAndRepository_repositoryName(String issueId, String repositoryName);
+    List<AbstractIssue> findByRepository_Project_nameAndRemoteIssueIdAndRepository_repositoryName(String name, String issueId, String repositoryName);
     Set<AbstractIssue> findByIssueType(IssueType issueType);
 }

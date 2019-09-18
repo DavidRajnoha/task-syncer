@@ -13,6 +13,7 @@ import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.Project;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +47,11 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     @Override
     public AbstractRepository getRepository() {
         return repository;
+    }
+
+    @Override
+    public void createWebhook(URL webhook) throws IOException {
+
     }
 
 

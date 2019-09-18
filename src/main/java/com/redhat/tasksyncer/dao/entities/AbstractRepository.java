@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
@@ -26,12 +27,16 @@ public abstract class AbstractRepository {
     private Long id;
 
     private String repositoryNamespace;
+
+    @Column(name = "repository_repositoryName")
     private String repositoryName;
 
+    @JsonIgnore
     private String firstLoginCredential;
+    @JsonIgnore
     private String secondLoginCredential;
 
-    @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository", cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository")
     @JsonManagedReference
     private List<AbstractIssue> issues;
 

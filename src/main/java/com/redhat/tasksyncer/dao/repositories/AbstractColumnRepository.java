@@ -10,5 +10,5 @@ import java.util.List;
  * @author Filip Cap
  */
 public interface AbstractColumnRepository extends CrudRepository<AbstractColumn, Long> {
-    List<AbstractColumn> findAllByBoardId(Long boardId);
+    List<AbstractColumn> findByBoard_Id(Long id);
 }
