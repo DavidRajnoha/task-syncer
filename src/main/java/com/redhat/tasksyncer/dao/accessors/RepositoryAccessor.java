@@ -8,6 +8,7 @@ import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
+import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -59,7 +60,7 @@ public abstract class RepositoryAccessor {
 
     public abstract AbstractRepository getRepository();
 
-    public abstract void createWebhook(URL webhook) throws IOException;
+    public abstract void createWebhook(URL webhook) throws IOException, GitLabApiException;
 
 
 }

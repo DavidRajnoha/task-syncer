@@ -50,6 +50,10 @@ public class Endpoints {
     @Value("${githubWebhookURL}")
     private String githubWebhookURLString;
 
+    //TODO: Set this string to something
+    @Value("${gitlabWebhookURL}")
+    private String gitlabWebhookURLString;
+
     @Value("${githubUsername}")
     private String githubUserName;
 
@@ -165,6 +169,28 @@ public class Endpoints {
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
         projectAccessor.addRepository(repository);
+
+        return OK;
+    }
+
+    //TODO: Test this!!!
+    @RequestMapping(path = "/project/{projectName}/hook/gitlab/{repoNamespace}/{repoName}",
+            method = RequestMethod.PUT
+    )
+    public String hookGitlab(@PathVariable String projectName,
+                                @PathVariable String repoName,
+                                @PathVariable String repoNamespace) throws Exception {
+        Project project = projectRepository.findProjectByName(projectName)
+                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+
+        //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+
+
+        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, gitlabURL, gitlabAuthKey, repoName, repoNamespace);
+        //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
+
+        projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
 
         return OK;
     }

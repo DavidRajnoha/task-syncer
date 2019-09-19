@@ -17,6 +17,11 @@ import static com.redhat.tasksyncer.dao.enumerations.IssueType.*;
 /**
  * @author Filip Cap
  */
+
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"repository_repositoryName", "repositoryNamespace"})
+)
+
 @Entity
 @Inheritance
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
