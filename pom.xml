@@ -18,6 +18,25 @@
         <version>2.0.5.RELEASE</version>
     </parent>
 
+    <repositories>
+        <repository>
+            <id>atlassian.repository</id>
+            <url>https://packages.atlassian.com/maven-public</url>
+        </repository>
+        <repository>
+            <id>spring.plugins</id>
+            <url>https://repo.spring.io/plugins-release/</url>
+        </repository>
+        <repository>
+            <id>central repository</id>
+            <url>https://mvnrepository.com/repos/central</url>
+        </repository>
+        <repository>
+            <id>atlassion external</id>
+            <url>https://packages.atlassian.com/maven-external/</url>
+        </repository>
+    </repositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -31,6 +50,22 @@
     </properties>
 
     <dependencies>
+<!--        TODO: Fix this, this is local dependency, would not work without the jta-1.0.1.jar file, availible at:
+            TODO: http://www.java2s.com/Code/Jar/j/Downloadjta101jar.htm-->
+        <dependency>
+            <groupId>jta</groupId>
+            <artifactId>jta</artifactId>
+            <version>1.0.1</version>
+            <scope>system</scope>
+            <systemPath>/home/david/jta-1.0.1.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -164,7 +199,60 @@
             <version>1.4.199</version>
         </dependency>
 
- </dependencies>
+
+        <!-- https://mvnrepository.com/artifact/com.atlassian.jira/jira-rest-java-client-core -->
+        <dependency>
+            <groupId>com.atlassian.jira</groupId>
+            <artifactId>jira-rest-java-client-core</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <!--THE MAVEN DEPENDENCY PROBLEM LIES WITHIN THIS ANNOTATION-->
+        <dependency>
+            <groupId>com.atlassian.jira</groupId>
+            <artifactId>jira-api</artifactId>
+            <version>5.1.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atlassian.fugue</groupId>
+            <artifactId>fugue</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>3.10.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+            <version>3.10.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.20.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+
+    </dependencies>
 
     <build>
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->

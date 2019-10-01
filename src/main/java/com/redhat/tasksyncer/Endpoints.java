@@ -10,6 +10,7 @@ import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.GithubWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.GitlabWebhookIssueDecoder;
 
+import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;
 import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +51,6 @@ public class Endpoints {
     @Value("${githubWebhookURL}")
     private String githubWebhookURLString;
 
-    //TODO: Set this string to something
     @Value("${gitlabWebhookURL}")
     private String gitlabWebhookURLString;
 
@@ -59,6 +59,12 @@ public class Endpoints {
 
     @Value("${githubPassword}")
     private String githubPassword;
+
+    @Value("${jiraUserName}")
+    private String jiraUserName;
+
+    @Value("${jiraPassword}")
+    private String jiraPassword;
 
     @Autowired
     private AbstractBoardRepository boardRepository;
@@ -123,6 +129,29 @@ public class Endpoints {
     }
 
 
+    //TODO: Move jiraHook into the hook and determine which decoder to use
+    @RequestMapping(path = "/jira/project/{projectName}/hook",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.POST
+    )
+    public String jiraHook(@PathVariable String projectName,
+                             HttpServletRequest request
+    ) throws Exception {
+        Project project = projectRepository.findProjectByName(projectName)
+                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+
+        AbstractIssue newIssue = new JiraWebhookIssueDecoder().decode(request, project, repositoryRepository);
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+        projectAccessor.update(newIssue);
+
+        System.out.println("Jira Issue Created");
+        return OK;
+    }
+
+
+
+
+
     @RequestMapping(path = "/project/new/{projectName}/from/gitlab/{repoNamespace}/{repoName}/to/trello/{boardName}",
                     method = RequestMethod.PUT
     )
@@ -173,7 +202,10 @@ public class Endpoints {
         return OK;
     }
 
-    //TODO: Test this!!!
+
+
+
+
     @RequestMapping(path = "/project/{projectName}/hook/gitlab/{repoNamespace}/{repoName}",
             method = RequestMethod.PUT
     )
@@ -216,6 +248,30 @@ public class Endpoints {
     projectAccessor.hookRepository(githubRepository, githubWebhookURLString);
 
     return OK;
+    }
+
+
+    //TODO: THIS WAS CTRL-Ced -> ABSTRACTIZE
+    @RequestMapping(path = "/project/{projectName}/connect/jira/{repoNamespace}/{repoName}",
+            method = RequestMethod.PUT
+    )
+    public String connectJira(@PathVariable String projectName,
+                                @PathVariable String repoNamespace,
+                                @PathVariable String repoName) throws Exception {
+        Project project = projectRepository.findProjectByName(projectName)
+                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+
+        //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
+        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+
+        AbstractRepository jiraRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.JIRA, jiraPassword, jiraUserName, repoName, repoNamespace);
+
+        //Creates a webhook to this app in the github repository based on the repoName PathVariable
+        //TODO: assure that the webhook points to this app, now impossible due to ngrok
+        //And also conducts synchronization of the github issues with the local issueRepository and trello
+        projectAccessor.addRepository(jiraRepository);
+
+        return OK;
     }
 
 

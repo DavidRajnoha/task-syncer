@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Filip Cap
  */
-public class GitlabWebhookIssueDecoder {
+public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
     private WebHookManager webHookManager = new WebHookManager(); // todo: check secret token
     private IssueEvent ie;
 

@@ -67,12 +67,15 @@ public abstract class AbstractRepository {
             case GITHUB:
                 repository = new GithubRepository();
                 break;
+            case JIRA:
+                repository = new JiraRepository();
+                break;
             default:
                 throw new RepositoryTypeNotSupportedException("");
         }
 
-        repository.setSecondLoginCredential(secondLoginCredential);
         repository.setFirstLoginCredential(firstLoginCredential);
+        repository.setSecondLoginCredential(secondLoginCredential);
         repository.setRepositoryName(repositoryName);
         repository.setRepositoryNamespace(repositoryNamespace);
 

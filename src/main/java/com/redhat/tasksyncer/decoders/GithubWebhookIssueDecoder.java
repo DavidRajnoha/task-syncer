@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * @author Filip Cap
  */
-public class GithubWebhookIssueDecoder {
+public class GithubWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
 
     public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws IOException {

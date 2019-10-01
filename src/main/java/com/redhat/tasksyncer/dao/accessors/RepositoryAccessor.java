@@ -1,9 +1,6 @@
 package com.redhat.tasksyncer.dao.accessors;
 
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.AbstractRepository;
-import com.redhat.tasksyncer.dao.entities.GithubRepository;
-import com.redhat.tasksyncer.dao.entities.GitlabRepository;
+import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
@@ -32,6 +29,8 @@ public abstract class RepositoryAccessor {
         }
         else if (GithubRepository.class.equals(repoType)) {
             repositoryAccessor = new GithubRepositoryAccessor((GithubRepository) repository, repositoryRepository, issueRepository);
+        } else if (JiraRepository.class.equals(repoType)) {
+            repositoryAccessor = new JiraRepositoryAccessor((JiraRepository) repository, repositoryRepository, issueRepository);
         } else {
             throw new RepositoryTypeNotSupportedException("");
         }
