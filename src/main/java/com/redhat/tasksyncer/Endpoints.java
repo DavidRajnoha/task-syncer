@@ -7,10 +7,12 @@ import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
+import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.GithubWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.GitlabWebhookIssueDecoder;
 
 import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;
+import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,65 +90,38 @@ public class Endpoints {
     }
 
 
-    @RequestMapping(path = "/project/{projectName}/hook",
-                    consumes = MediaType.APPLICATION_JSON_VALUE,
-                    method = RequestMethod.POST
-    )
-    public String hook(@PathVariable String projectName,
-                       HttpServletRequest request
-    ) throws GitLabApiException {
-
-        Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
-
-        // todo: determine which decoder to use
-        AbstractIssue newIssue = new GitlabWebhookIssueDecoder().decode(request, project, repositoryRepository);
-
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-        projectAccessor.update(newIssue);
-
-        return OK;
-    }
-
-
-    //TODO: Move gitHubHook into the hook and determine which decoder to use
-    @RequestMapping(path = "/github/project/{projectName}/hook",
-                    consumes = MediaType.APPLICATION_JSON_VALUE,
-                    method = RequestMethod.POST
-    )
-    public String gitHubHook(@PathVariable String projectName,
-                             HttpServletRequest request
-    ) throws IOException {
-        Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
-
-        AbstractIssue newIssue = new GithubWebhookIssueDecoder().decode(request, project, repositoryRepository);
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-        projectAccessor.update(newIssue);
-
-        System.out.println("GitHubEventChanged");
-        return OK;
-    }
-
-
-    //TODO: Move jiraHook into the hook and determine which decoder to use
-    @RequestMapping(path = "/jira/project/{projectName}/hook",
+    /**
+     *  Endpoint for processing webhooks
+     * @param serviceName - name of the service you are trying to connect
+     *                    Available values: "gitlab", "github, "jira"
+     * @param projectName - name of the project in this app you want to have your webhooks send
+     * */
+    @RequestMapping(path = "/service/{serviceName}/project/{projectName}/hook",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.POST
     )
-    public String jiraHook(@PathVariable String projectName,
-                             HttpServletRequest request
+    public String hookEndpoint(@PathVariable String serviceName,
+            @PathVariable String projectName,
+                       HttpServletRequest request
     ) throws Exception {
+        return processHook(projectName, request, serviceName);
+    }
+
+    //processing received webhook
+    private String processHook(String projectName, HttpServletRequest request, String serviceType
+    ) throws Exception {
+
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
-        AbstractIssue newIssue = new JiraWebhookIssueDecoder().decode(request, project, repositoryRepository);
+        AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
+
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         projectAccessor.update(newIssue);
 
-        System.out.println("Jira Issue Created");
         return OK;
     }
+
 
 
 
