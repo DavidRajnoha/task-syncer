@@ -31,35 +31,15 @@ import java.util.Set;
 public class Endpoints {
     public static final String OK = "OK";
 
-    @Value("${gitlabURL}")
-    private String gitlabURL;
-
-    @Value("${gitlabAuthKey}")
-    private String gitlabAuthKey;
-
     @Value("${trello.appKey}")
     private String trelloApplicationKey;
 
     @Value("${trello.token}")
     private String trelloAccessToken;
 
-    @Value("${githubWebhookURL}")
-    private String githubWebhookURLString;
 
     @Value("${gitlabWebhookURL}")
     private String gitlabWebhookURLString;
-
-    @Value("${githubUsername}")
-    private String githubUserName;
-
-    @Value("${githubPassword}")
-    private String githubPassword;
-
-    @Value("${jiraUserName}")
-    private String jiraUserName;
-
-    @Value("${jiraPassword}")
-    private String jiraPassword;
 
     @Autowired
     private AbstractBoardRepository boardRepository;
