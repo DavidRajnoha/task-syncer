@@ -52,10 +52,10 @@ public class RepositoryAccessorTests {
 
     @Before
     public void setUp() throws RepositoryTypeNotSupportedException, IOException {
-        githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB,
+        githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("github",
                 firstCredential, secondCredential, repoName, repoNamespace);
 
-        gitlabRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB,
+        gitlabRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("gitlab",
                 firstCredential, secondCredential, repoName, repoNamespace);
 
         unsuportedRepository = new UnsuportedRepository();

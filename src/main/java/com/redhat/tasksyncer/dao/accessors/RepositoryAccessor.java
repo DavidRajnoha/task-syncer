@@ -59,7 +59,7 @@ public abstract class RepositoryAccessor {
 
     public abstract AbstractRepository getRepository();
 
-    public abstract void createWebhook(URL webhook) throws IOException, GitLabApiException;
+    public abstract void createWebhook(String webhook) throws IOException, GitLabApiException;
 
 
 }

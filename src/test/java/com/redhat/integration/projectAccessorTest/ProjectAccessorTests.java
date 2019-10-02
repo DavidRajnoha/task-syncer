@@ -96,7 +96,7 @@ public class ProjectAccessorTests {
         project.setBoard(board);
 
 
-        githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB, "userName", "passwd", ghRepositoryName, "");
+        githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("github", "userName", "passwd", ghRepositoryName, "");
         repositoryRepository.save(githubRepository);
 
     }

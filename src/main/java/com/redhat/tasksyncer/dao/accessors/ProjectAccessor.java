@@ -148,7 +148,7 @@ public class ProjectAccessor {
         RepositoryAccessor repositoryAccessor;
         //Adds the repository to the project, syncs it and returns the particular repository Accessor
         repositoryAccessor = addRepository(repository);
-        repositoryAccessor.createWebhook(new URL(webhookUrl));
+        repositoryAccessor.createWebhook(webhookUrl);
 
     }
 

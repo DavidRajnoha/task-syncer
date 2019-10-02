@@ -52,10 +52,11 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public void createWebhook(@NotNull URL webhook) throws  GitLabApiException {
+    public void createWebhook(@NotNull String webhook) throws  GitLabApiException {
         ProjectHook projectHook = new ProjectHook();
         projectHook.setIssuesEvents(true);
-        gitlabApi.getProjectApi().addHook(repository.getRepositoryNamespace() + "%2F" + repository.getRepositoryName(), webhook.toString(), projectHook, false, gitlabApi.getSecretToken());
+        webhook = webhook.replace("{projectName}", repository.getProject().getName());
+        gitlabApi.getProjectApi().addHook(repository.getRepositoryNamespace() + "%2F" + repository.getRepositoryName(), webhook, projectHook, false, gitlabApi.getSecretToken());
     }
 
 

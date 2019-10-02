@@ -19,6 +19,7 @@ import static com.redhat.tasksyncer.dao.enumerations.IssueType.*;
  */
 
 @Table(
+        //TODO: Same repoistory on multiple projects
         uniqueConstraints = @UniqueConstraint(columnNames = {"repository_repositoryName", "repositoryNamespace"})
 )
 
@@ -57,17 +58,17 @@ public abstract class AbstractRepository {
      * Factory method
      * Creates new repository of the type that is passed as IssueType, then sets the security credential fields and the repositoryName and repositoryNamespace
      * */
-    public static AbstractRepository newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType type, String firstLoginCredential, String secondLoginCredential,
+    public static AbstractRepository newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(String servcieType, String firstLoginCredential, String secondLoginCredential,
                                                                                              String repositoryName, String repositoryNamespace) throws RepositoryTypeNotSupportedException {
         AbstractRepository repository;
-        switch (type){
-            case GITLAB:
+        switch (servcieType){
+            case "gitlab":
                 repository = new GitlabRepository();
                 break;
-            case GITHUB:
+            case "github":
                 repository = new GithubRepository();
                 break;
-            case JIRA:
+            case "jira":
                 repository = new JiraRepository();
                 break;
             default:

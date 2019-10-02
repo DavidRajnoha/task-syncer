@@ -76,11 +76,13 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         this.repository = this.repositoryRepository.save(repository);
     }
 
-    public void createWebhook(URL webHookUrl) throws IOException {
+    public void createWebhook(String webHookUrlString) throws IOException {
         //using library to set Webhook to the webhookURL from argument (should be URL pointing to this app's endpoint
         Set<GHEvent> events = new HashSet<>();
         //The webhook is triggered by all issues events - not comments!!
         events.add(GHEvent.ISSUES);
+
+        URL webHookUrl = new URL(webHookUrlString);
 
         // ghRepository.createWebHook(webHookUrl, events);
 

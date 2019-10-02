@@ -98,7 +98,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public void createWebhook(URL webhook) throws IOException, GitLabApiException {
+    public void createWebhook(String webhook) throws IOException, GitLabApiException {
         //this functionality is not supported yet
     }
 

@@ -8,12 +8,16 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.gitlab4j.api.webhook.WebHookListener;
 import org.gitlab4j.api.webhook.WebHookManager;
+import org.springframework.context.annotation.PropertySource;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Filip Cap
  */
+
+
+@PropertySource("classpath:other.properties")
 public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
     private WebHookManager webHookManager = new WebHookManager(); // todo: check secret token
     private IssueEvent ie;

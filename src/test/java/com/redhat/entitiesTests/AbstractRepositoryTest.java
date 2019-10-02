@@ -26,7 +26,7 @@ public class AbstractRepositoryTest {
     @Test
     public void whenNewInstanceOfTypeGITHUBisCalled_thenGitHubRepositoryIsCreated() throws RepositoryTypeNotSupportedException {
         AbstractRepository repository = AbstractRepository
-                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB, firstCredential,
+                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("github", firstCredential,
                         secondCredential, repoName, repoNamespace);
 
         assertThat(repository).isInstanceOf(GithubRepository.class);
@@ -35,7 +35,7 @@ public class AbstractRepositoryTest {
     @Test
     public void whenNewInstanceOfTypeGITLABisCalled_thenGitLabRepositoryIsCreated() throws RepositoryTypeNotSupportedException {
         AbstractRepository repository = AbstractRepository
-                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITLAB, firstCredential,
+                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("gitlab", firstCredential,
                         secondCredential, repoName, repoNamespace);
         assertThat(repository).isInstanceOf(GitlabRepository.class);
     }
@@ -43,7 +43,7 @@ public class AbstractRepositoryTest {
     @Test
     public void whenNewInstanceOfUnknownTypeIsCalled_thenRepositoryTypeNotSupportedExceptionIsThrwon() {
         assertThatThrownBy(() ->
-                AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.TRELLO, firstCredential,
+                AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("trello", firstCredential,
                         secondCredential, repoName, repoNamespace)).isInstanceOf(RepositoryTypeNotSupportedException.class);
 
     }
@@ -52,7 +52,7 @@ public class AbstractRepositoryTest {
     @Test
     public void whenNewInstanceOfIsCalled_thenAllFieldsArecorrectlySet() throws RepositoryTypeNotSupportedException {
         AbstractRepository repository = AbstractRepository
-                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(IssueType.GITHUB, firstCredential,
+                .newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("github", firstCredential,
                         secondCredential, repoName, repoNamespace);
 
         assertThat(repository.getFirstLoginCredential()).isEqualTo(firstCredential);
