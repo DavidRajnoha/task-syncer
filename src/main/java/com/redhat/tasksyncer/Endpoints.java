@@ -8,21 +8,17 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
-import com.redhat.tasksyncer.decoders.GithubWebhookIssueDecoder;
-import com.redhat.tasksyncer.decoders.GitlabWebhookIssueDecoder;
 
-import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;
-import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
-import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -121,55 +117,41 @@ public class Endpoints {
 
 
 
-    @RequestMapping(path = "/service/{serviceName}/project/{projectName}/connect/{repoNamespace}/{repoName}",
+
+
+    @RequestMapping(path = "/service/{serviceName}/project/{projectName}/{hookOrConnect}/{repoNamespace}/{repoName}",
             method = RequestMethod.PUT
-    )    public String connectService(@PathVariable String serviceName,
-                                @PathVariable String projectName,
-                                @PathVariable String repoNamespace,
-                                @PathVariable String repoName,
-                                @RequestParam("firstLoginCredential") String firstLoginCredential,
-                                @RequestParam("secondLoginCredential") String secondLoginCredential) throws Exception {
+    )    public ResponseEntity<String> connectService(@PathVariable String serviceName,
+                                                      @PathVariable String projectName,
+                                                      @PathVariable String hookOrConnect,
+                                                      @PathVariable String repoNamespace,
+                                                      @PathVariable String repoName,
+                                                      @RequestParam("firstLoginCredential") String firstLoginCredential,
+                                                      @RequestParam("secondLoginCredential") String secondLoginCredential) throws Exception {
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-
-
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+
+
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
         projectAccessor.addRepository(repository);
 
-        return OK;
-    }
+        // Deciding if create hook or not based on the query parameters
+        switch (hookOrConnect){
+            case "hook":
+                //TODO: let the repositoryAccessors get the hook somewhere else
+                projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
+                break;
+            case "connect":
+                break;
+            default:
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid action \n Valid parameters are \"connect\" and \"hook\"");
+        }
 
-
-    @RequestMapping(path = "/service/{serviceName}/project/{projectName}/hook/{repoNamespace}/{repoName}",
-            method = RequestMethod.PUT
-    )
-    public String hookService(@PathVariable String serviceName,
-                              @PathVariable String projectName,
-                              @PathVariable String repoName,
-                              @PathVariable String repoNamespace,
-                              @RequestParam("firstLoginCredential") String firstLoginCredential,
-                              @RequestParam("secondLoginCredential") String secondLoginCredential) throws Exception {
-        Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
-
-        //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-
-
-        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
-        //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
-        projectAccessor.addRepository(repository);
-
-
-        //TODO: let the repositoryAccessors get the hook somewhere else
-        projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
-
-
-        return OK;
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("");
     }
 
 
@@ -193,11 +175,11 @@ public class Endpoints {
 
         ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         projectAccessor.save();
-
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
 
-        projectAccessor.initialize(repository, TrelloCard.class.getName(), boardName);
 
+        projectAccessor.initialize(repository, TrelloCard.class.getName(), boardName);
+        projectAccessor.addRepository(repository);
         projectAccessor.save(); // todo: make it transactional
 
         return OK;

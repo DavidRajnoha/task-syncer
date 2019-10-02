@@ -75,7 +75,6 @@ public class ProjectAccessor {
     public void initialize(AbstractRepository repository, String boardType, String boardName) throws Exception {
         // todo : maybe check whether not already initialised?
         createBoard(boardType, boardName);
-        addRepository(repository);
     }
 
     /**
