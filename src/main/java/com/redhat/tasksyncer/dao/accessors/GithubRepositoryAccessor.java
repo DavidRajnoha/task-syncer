@@ -52,7 +52,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public List<AbstractIssue> downloadAllIssues() throws Exception {
+    public List<AbstractIssue> downloadAllIssues() throws IOException {
         Stream<GHIssue> issuesStream = ghRepository.getIssues(GHIssueState.ALL)
                 .stream();
 

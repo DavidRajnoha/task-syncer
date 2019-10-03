@@ -11,10 +11,13 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
+import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * @author Filip Cap
@@ -38,9 +41,10 @@ public class TrelloBoardAccessor extends BoardAccessor {
     }
 
     @Override
-    public AbstractBoard createItself() {
+    public AbstractBoard createItself() throws HttpClientErrorException {
         if(this.board.isCreated())
             return this.board;
+
 
         Board trelloBoard = trelloApi.createBoard(
                 board.getBoardName(),
@@ -108,5 +112,55 @@ public class TrelloBoardAccessor extends BoardAccessor {
         this.board = (TrelloBoard) boardRepository.findById(this.board.getId()).get();  // todo generify
 
         return newColumnAccessor;
+    }
+
+    @Override
+    public String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
+        URL url = new URL("https://api.trello.com/1/boards/" + board.getRemoteBoardId() /* + "?key=" + trelloApplicationKey + "&token=" + trelloAccessToken */);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("DELETE");
+        connection.setDoOutput(true);
+
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("key", trelloApplicationKey);
+        parameters.put("token", trelloAccessToken);
+
+
+
+        try(DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
+            outputStream.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+            outputStream.flush();
+        }
+
+        StringBuilder content;
+
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))){
+            String line;
+            content = new StringBuilder();
+                while ((line = input.readLine()) != null) {
+                    // Append each line of the response and separate them
+                    content.append(line);
+                    content.append(System.lineSeparator());
+                }
+        }
+
+        return connection.getResponseMessage();
+    }
+
+    private static class ParameterStringBuilder {
+        public static String getParamsString(Map<String, String> param) throws UnsupportedEncodingException {
+            StringBuilder result = new StringBuilder();
+            for (Map.Entry<String, String> entry : param.entrySet()) {
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+                result.append("&");
+            }
+
+            String resultString = result.toString();
+
+            return resultString.length() > 0 ? resultString.substring(0, resultString.length() - 1) : resultString;
+        }
     }
 }

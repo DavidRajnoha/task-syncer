@@ -29,7 +29,6 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different
     private static final String URL = "https://NAMESPACE.atlassian.net";
     private AbstractRepository repository;
-    private AbstractRepositoryRepository repositoryRepository;
     private JiraRestClient jiraRestClient;
 
 
@@ -54,7 +53,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
 
 
     @Override
-    public List<AbstractIssue> downloadAllIssues() throws Exception {
+    public List<AbstractIssue> downloadAllIssues() {
 
        // String newJQL = JQL.replace("project_name", repository.getRepositoryName());
         String newJQL = JQL;
@@ -101,6 +100,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     public void createWebhook(String webhook) throws IOException, GitLabApiException {
         //this functionality is not supported yet
     }
+
 
 
 }

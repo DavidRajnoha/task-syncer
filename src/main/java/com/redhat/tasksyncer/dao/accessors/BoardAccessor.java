@@ -5,6 +5,7 @@ import com.redhat.tasksyncer.dao.entities.AbstractCard;
 import com.redhat.tasksyncer.dao.entities.AbstractColumn;
 import com.redhat.tasksyncer.dao.entities.Project;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,4 +20,6 @@ public abstract class BoardAccessor {
     public abstract void save();
 
     public abstract ColumnAccessor createColumn(String name);
+
+    public abstract String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException;
 }

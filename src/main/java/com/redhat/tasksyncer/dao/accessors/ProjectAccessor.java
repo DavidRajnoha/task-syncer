@@ -4,6 +4,9 @@ package com.redhat.tasksyncer.dao.accessors;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
+import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
+import org.gitlab4j.api.GitLabApiException;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -50,7 +53,7 @@ public class ProjectAccessor {
     }
 
 
-    private BoardAccessor createBoard(String boardType, String name) {
+    private BoardAccessor createBoard(String boardType, String name) throws HttpClientErrorException {
         TrelloBoard board = new TrelloBoard();
         board.setBoardName(name);
 
@@ -59,8 +62,11 @@ public class ProjectAccessor {
         AbstractBoard b = this.boardAccessor.createItself();
         b.setProject(project);
         boardRepository.save(b);
-        this.save();
         return this.boardAccessor;
+    }
+
+    public void deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
+        boardAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
     }
 
     public void save() {
@@ -68,11 +74,9 @@ public class ProjectAccessor {
     }
 
     /**
-     * Takes a repository and board, creates a new board to display Issues,
-     * and invokes method add repository that leads to setting this repository to this project, and syncing the issues
-     * from the external repository with the internal repository and then also with trello
+     * Creates board to display the issues
      * */
-    public void initialize(AbstractRepository repository, String boardType, String boardName) throws Exception {
+    public void initialize(String boardType, String boardName) {
         // todo : maybe check whether not already initialised?
         createBoard(boardType, boardName);
     }
@@ -81,9 +85,14 @@ public class ProjectAccessor {
      * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
      * The accessor is then used to sync the issues from the particular repository with the internal database
      * */
-    public RepositoryAccessor addRepository(AbstractRepository repository) throws Exception {
+    public RepositoryAccessor addRepository(AbstractRepository repository) throws SynchronizationFailedException, IOException, RepositoryTypeNotSupportedException {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
-        doSync(repositoryAccessor);
+        try {
+            doSync(repositoryAccessor);
+        } catch (GitLabApiException | IOException glException){
+            repositoryAccessor.deleteRepository(repository);
+            throw new SynchronizationFailedException("Synchronization with " + repository.getClass().toString() + " failed");
+        }
         return repositoryAccessor;
     }
 
@@ -107,7 +116,7 @@ public class ProjectAccessor {
      * method to get a list of issues from that particular repository, then updates and syncs those issues with the internal
      * IssueRepository and Trello using the update method
      * */
-    public void doSync(RepositoryAccessor repositoryAccessor) throws Exception {
+    private void doSync(RepositoryAccessor repositoryAccessor) throws IOException, GitLabApiException {
         List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
 
         for(AbstractIssue i : issues) {
@@ -148,8 +157,10 @@ public class ProjectAccessor {
         //Adds the repository to the project, syncs it and returns the particular repository Accessor
         repositoryAccessor = addRepository(repository);
         repositoryAccessor.createWebhook(webhookUrl);
-
     }
 
 
+    public void deleteProject(Project project) {
+        projectRepository.delete(project);
+    }
 }

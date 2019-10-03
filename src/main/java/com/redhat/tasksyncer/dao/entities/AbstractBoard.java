@@ -26,7 +26,7 @@ public abstract class AbstractBoard {
     @OneToOne
     private Project project;
 
-    @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board")
+    @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board", cascade = CascadeType.REMOVE)
     @JsonManagedReference
     private List<AbstractColumn> columns;
 

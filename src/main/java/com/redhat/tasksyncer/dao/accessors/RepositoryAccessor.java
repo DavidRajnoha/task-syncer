@@ -16,6 +16,8 @@ import java.util.Optional;
  * @author Filip Cap
  */
 public abstract class RepositoryAccessor {
+    protected AbstractRepositoryRepository repositoryRepository;
+
 
     /**
      * Creates new subclass of repositoryAccessor, based on the class of the repository that is passed in the argument
@@ -47,7 +49,7 @@ public abstract class RepositoryAccessor {
 
     public abstract void connectToRepository() throws IOException;
 
-    public abstract List<AbstractIssue> downloadAllIssues() throws Exception;
+    public abstract List<AbstractIssue> downloadAllIssues() throws IOException, GitLabApiException;
 
     public abstract AbstractIssue saveIssue(AbstractIssue issue);
 
@@ -61,5 +63,7 @@ public abstract class RepositoryAccessor {
 
     public abstract void createWebhook(String webhook) throws IOException, GitLabApiException;
 
-
+    public void deleteRepository(AbstractRepository repository) {
+        repositoryRepository.delete(repository);
+    }
 }

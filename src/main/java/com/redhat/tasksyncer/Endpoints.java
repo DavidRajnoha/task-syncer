@@ -4,11 +4,14 @@ package com.redhat.tasksyncer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
+import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.json.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -117,13 +121,19 @@ public class Endpoints {
 
 
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
-        projectAccessor.addRepository(repository);
+        RepositoryAccessor repositoryAccessor = projectAccessor.addRepository(repository);
 
         // Deciding if create hook or not based on the query parameters
         switch (hookOrConnect){
             case "hook":
                 //TODO: let the repositoryAccessors get the hook somewhere else
+                try {
                 projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
+                } catch (Exception e) {
+                    repositoryAccessor.deleteRepository(repository);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create the webhook," +
+                            " check if the webhook is not already created");
+                }
                 break;
             case "connect":
                 break;
@@ -138,13 +148,13 @@ public class Endpoints {
     @RequestMapping(path = "/project/new/{projectName}/from/{serviceType}/{repoNamespace}/{repoName}/to/trello/{boardName}",
                     method = RequestMethod.PUT
     )
-    public String createProject(@PathVariable String projectName,
-                                @PathVariable String serviceType,
-                                @PathVariable String repoNamespace,
-                                @PathVariable String repoName,
-                                @PathVariable String boardName,
-                                @RequestParam("firstLoginCredential") String firstLoginCredential,
-                                @RequestParam("secondLoginCredential") String secondLoginCredential
+    public ResponseEntity<String> createProject(@PathVariable String projectName,
+                                                @PathVariable String serviceType,
+                                                @PathVariable String repoNamespace,
+                                                @PathVariable String repoName,
+                                                @PathVariable String boardName,
+                                                @RequestParam("firstLoginCredential") String firstLoginCredential,
+                                                @RequestParam("secondLoginCredential") String secondLoginCredential
     ) throws Exception {
         projectRepository.findProjectByName(projectName).ifPresent(p -> {
             throw new IllegalArgumentException("Project with name already exists");
@@ -158,11 +168,25 @@ public class Endpoints {
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
 
 
-        projectAccessor.initialize(repository, TrelloCard.class.getName(), boardName);
-        projectAccessor.addRepository(repository);
+
+        try {
+            projectAccessor.initialize(TrelloCard.class.getName(), boardName);
+        } catch (HttpClientErrorException e){
+            projectAccessor.deleteProject(project);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authentication with Trello failed");
+        }
+
+        try {
+            projectAccessor.addRepository(repository);
+        } catch (Exception e) {
+            projectAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+            projectAccessor.deleteProject(project);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Database failure, repository already exists");
+        }
+
         projectAccessor.save(); // todo: make it transactional
 
-        return OK;
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
 
 
