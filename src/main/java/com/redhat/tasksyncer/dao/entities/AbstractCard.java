@@ -2,9 +2,12 @@ package com.redhat.tasksyncer.dao.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.gitlab4j.api.models.Milestone;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Filip Cap
@@ -21,6 +24,14 @@ public abstract class AbstractCard {
     private String title;
     private String description;
     private String remoteCardId;
+    private Date dueDate;
+    private Date createdAt;
+    private Date closedAt;
+    private String closedBy;
+    private String assignee;
+//    private Set<String> labels;
+ //   private Milestone milestone;
+//    private Set<Comment> comments;
 
     @OneToOne
     @JsonBackReference
@@ -108,4 +119,70 @@ public abstract class AbstractCard {
         //creates new reference to this in column
         if (this.column != null) this.column.addCard(this);
     }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getClosedAt() {
+        return closedAt;
+    }
+
+    public void setClosedAt(Date closedAt) {
+        this.closedAt = closedAt;
+    }
+
+    public String getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(String closedBy) {
+        this.closedBy = closedBy;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+/*
+    public Set<String> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Set<String> labels) {
+        this.labels = labels;
+    }
+*/
+
+//    public Milestone getMilestone() {
+//        return milestone;
+//    }
+//
+//    public void setMilestone(Milestone milestone) {
+//        this.milestone = milestone;
+//    }
+
+//    public Set<Comment> getComments() {
+//        return comments;
+//    }
+//
+//    public void setComments(Set<Comment> comments) {
+//        this.comments = comments;
+//    }
 }

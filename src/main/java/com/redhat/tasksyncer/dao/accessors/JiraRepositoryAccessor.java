@@ -42,7 +42,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     @Override
     public void connectToRepository() throws IOException {
         URI jiraUri = getJiraUri();
-        jiraRestClient = new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(jiraUri, repository.getSecondLoginCredential(), repository.getFirstLoginCredential());
+        jiraRestClient = new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(jiraUri, repository.getFirstLoginCredential(), repository.getSecondLoginCredential());
     }
 
 

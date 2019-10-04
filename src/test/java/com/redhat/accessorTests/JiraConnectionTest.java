@@ -37,6 +37,6 @@ public class JiraConnectionTest {
                 .spliterator(), false);
         List<Issue> realList = issuesStream.collect(Collectors.toList());
 
-        System.out.println(issuesStream.findFirst().isPresent());
+        System.out.println(realList);
     }
 }

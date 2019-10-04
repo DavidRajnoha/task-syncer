@@ -121,7 +121,7 @@ public class Endpoints {
 
 
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
-        RepositoryAccessor repositoryAccessor = projectAccessor.addRepository(repository);
+            RepositoryAccessor repositoryAccessor = projectAccessor.addRepository(repository);
 
         // Deciding if create hook or not based on the query parameters
         switch (hookOrConnect){
@@ -180,6 +180,7 @@ public class Endpoints {
             projectAccessor.addRepository(repository);
         } catch (Exception e) {
             projectAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+            e.printStackTrace();
             projectAccessor.deleteProject(project);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Database failure, repository already exists");
         }

@@ -6,7 +6,10 @@ import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.webhook.IssueEvent;
 
 import javax.persistence.Entity;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Filip Cap
@@ -24,6 +27,18 @@ public class GitlabIssue extends AbstractIssue {
             issue.setRemoteIssueId(input.getId().toString());
             issue.setTitle(input.getTitle());
             issue.setDescription(input.getDescription());
+
+            issue.setDueDate(input.getDueDate());
+            //set Assignee
+            Optional.ofNullable(input.getAssignee()).ifPresent(assignee -> issue.setAssignee(assignee.getName()));
+            issue.setLabel(new HashSet<>(input.getLabels()));
+
+            issue.setCreatedAt(input.getCreatedAt());
+            issue.setClosedAt(input.getClosedAt());
+            //set ClosedBy
+            Optional.ofNullable(input.getClosedBy()).ifPresent(user -> issue.setClosedBy(user.getName()));
+
+
 
             if(input.getState() == Constants.IssueState.OPENED)
                 issue.setState(AbstractIssue.STATE_OPENED);

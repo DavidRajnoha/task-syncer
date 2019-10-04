@@ -23,6 +23,14 @@ public class TrelloCard extends AbstractCard {
             card.setTitle(issue.getTitle());
             card.setDescription(issue.getIssueType() + "\n" + issue.getDescription());
 
+            card.setAssignee(issue.getAssignee());
+            card.setCreatedAt(issue.getCreatedAt());
+            card.setClosedAt(issue.getClosedAt());
+            card.setClosedBy(issue.getClosedBy());
+      //      card.setComments(issue.getComments());
+            //      card.setLabels(issue.getLabels());
+            card.setDueDate(issue.getDueDate());
+
             // todo: use mapping to determine proper column
             if(issue.getState().equals(AbstractIssue.STATE_OPENED) || issue.getState().equals(AbstractIssue.STATE_REOPENED)) {
                 card.setColumn(columns.stream().filter(c -> c.getName().equals("TODO")).collect(Collectors.toList()).get(0));
@@ -40,6 +48,7 @@ public class TrelloCard extends AbstractCard {
             abstractCard.setRemoteCardId(input.getId());
             abstractCard.setTitle(input.getName());
             abstractCard.setDescription(input.getDesc());
+            abstractCard.setDueDate(input.getDue());
 
             return abstractCard;
         }
@@ -52,6 +61,11 @@ public class TrelloCard extends AbstractCard {
             card.setId(input.getRemoteCardId());
             card.setName(input.getTitle());
             card.setDesc(input.getDescription());
+            card.setDue(input.getDueDate());
+
+//            input.getComments().forEach(comment -> {
+//                card.addComment(comment.getBody());
+//            });
 
             return card;
         }

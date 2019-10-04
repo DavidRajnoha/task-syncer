@@ -6,6 +6,7 @@ import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
+import org.json.JSONException;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
@@ -89,8 +90,9 @@ public class ProjectAccessor {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
         try {
             doSync(repositoryAccessor);
-        } catch (GitLabApiException | IOException glException){
+        } catch (GitLabApiException | IOException  glException){
             repositoryAccessor.deleteRepository(repository);
+            System.out.println(glException.getMessage());
             throw new SynchronizationFailedException("Synchronization with " + repository.getClass().toString() + " failed");
         }
         return repositoryAccessor;

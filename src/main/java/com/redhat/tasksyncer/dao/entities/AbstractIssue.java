@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
+import org.gitlab4j.api.models.Milestone;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Filip Cap
@@ -33,6 +34,18 @@ public abstract class AbstractIssue {
     private String title;
     private String description;
     private String remoteIssueId;
+    private Date dueDate;
+    private Date createdAt;
+    private Date closedAt;
+    private String closedBy;
+    private String assignee;
+    @ElementCollection
+    private Set<String> labels;
+//    private Milestone milestone;
+
+    @OneToMany(targetEntity = Comment.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Comment> comments;
+
 
     private String state;
 
@@ -118,6 +131,23 @@ public abstract class AbstractIssue {
         if (card != null) card.setIssue(this);
     }
 
+    public void addComment(Comment comment){
+        if (this.comments == null) {
+            this.comments = new HashSet<>();
+        }
+        if (this.comments.contains(comment)) return;
+        this.comments.add(comment);
+        comment.setIssue(this);
+    }
+
+    public void removeComment(Comment comment){
+        if (this.comments == null || !this.comments.contains(comment)) return;
+
+        this.comments.remove(comment);
+
+        comment.setIssue(null);
+    }
+
     public String getState() {
         return state;
     }
@@ -134,4 +164,67 @@ public abstract class AbstractIssue {
         this.issueType = issueType;
     }
 
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public Set<String> getLabels() {
+        return labels;
+    }
+
+    public void setLabel(Set<String> labels) {
+        this.labels = labels;
+    }
+
+//    public Milestone getMilestone() {
+//        return milestone;
+//    }
+//
+//    public void setMilestone(Milestone milestone) {
+//        this.milestone = milestone;
+//    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getClosedAt() {
+        return closedAt;
+    }
+
+    public void setClosedAt(Date closedAt) {
+        this.closedAt = closedAt;
+    }
+
+    public String getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(String closedBy) {
+        this.closedBy = closedBy;
+    }
 }
