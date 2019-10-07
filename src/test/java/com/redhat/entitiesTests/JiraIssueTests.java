@@ -1,11 +1,21 @@
 package com.redhat.entitiesTests;
 
+import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.api.domain.Status;
+import com.atlassian.jira.rest.client.api.domain.User;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import com.redhat.tasksyncer.dao.entities.JiraIssue;
+import com.redhat.tasksyncer.dao.enumerations.IssueType;
+import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.net.URI;
+import java.util.*;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
@@ -13,6 +23,19 @@ public class JiraIssueTests {
 
     String jsonInputIssueChanged;
     JSONObject jsonObject;
+    Issue jiraIssueTwo;
+
+    Issue jiraIssueOne;
+    List<String> labels;
+
+    String label_name = "label";
+    String assigneeName = "assignee";
+    String titleOne = "Title_one";
+    String description = "description";
+    Date dueDate = new Date();
+    Date createdAt = new Date();
+    Date closedAt = new Date();
+
 
     @Before
     public void setup() throws JSONException {
@@ -27,5 +50,56 @@ public class JiraIssueTests {
         assertThat(issue.getTitle()).isEqualTo("Issuetestingwednesday");
         assertThat(issue.getDescription()).isEqualTo("null");
         assertThat(issue.getState()).isEqualTo(AbstractIssue.STATE_OPENED);
+    }
+
+    @Test
+    public void whenDecodingIssueFromJRJCIssue_thenAbstractIssueIsCreated(){
+        // Preparation
+        Status status = new Status(URI.create("uri"), 1L, "opened", "issue is open", null);
+        Map<String, URI> avatarURI = new HashMap<String, URI>();
+        avatarURI.put("48x48", URI.create("avatar"));
+
+        User assignee = new User(URI.create("assignee"), assigneeName, "David", "dr@email.com", null, avatarURI, null);
+
+        Set<String> labels = new HashSet<>();
+        labels.add(label_name);
+        labels.add("label_two");
+
+
+        jiraIssueOne = new Issue(titleOne, null, null, 2L, null, null, status, description, null, null, null, null, assignee,
+                new DateTime(createdAt), null, new DateTime(dueDate), null, null, null, null, null, new HashSet<>(), null, null,
+                null, null, null, null, null, null, null, labels);
+
+
+        // Test
+        AbstractIssue convertedIssue = JiraIssue.ObjectToJiraIssueConverter.convert(jiraIssueOne);
+
+        // Assertion
+        assertThat(convertedIssue.getIssueType()).isEqualTo(IssueType.JIRA);
+        assertThat(convertedIssue.getTitle()).isEqualTo(titleOne);
+        assertThat(convertedIssue.getState()).isEqualTo(AbstractIssue.STATE_OPENED);
+        assertThat(convertedIssue.getDescription()).isEqualTo(description);
+        assertThat(convertedIssue.getDueDate()).isEqualTo(dueDate);
+        assertThat(convertedIssue.getCreatedAt()).isEqualTo(createdAt);
+//        assertThat(convertedIssue.getClosedAt()).isEqualTo(closedAt);
+        assertThat(convertedIssue.getAssignee()).isEqualTo(assigneeName);
+//        assertThat(convertedIssue.getClosedBy()).isEqualTo(assigneeName);
+        assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(2));
+
+
+        assert(convertedIssue.getLabels().contains(label_name));
+    }
+
+    @Test
+    public void whenDecodingIssueWithNullValuesButId_thenNoExceptionIsThrown(){
+        Status status = new Status(URI.create("uri"), 1L, "n", "d", null);
+        jiraIssueTwo = new Issue(null, null, null, 2L, null, null, status, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, new HashSet<>(), null, null,
+                null, null, null, null, null, null, null, null);
+
+        AbstractIssue convertedIssue = JiraIssue.ObjectToJiraIssueConverter.convert(jiraIssueTwo);
+
+        assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(2L));
+
     }
 }

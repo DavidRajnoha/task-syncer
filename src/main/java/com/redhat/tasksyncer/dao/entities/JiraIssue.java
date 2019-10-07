@@ -35,6 +35,8 @@ public class JiraIssue extends AbstractIssue {
             Optional.ofNullable(input.getCreationDate()).ifPresent(dateTime -> issue.setCreatedAt(dateTime.toDate()));
             //set Comments
             Set<Comment> comments = new HashSet<>();
+
+
             input.getComments().forEach(comment -> {
                 comments.add(new Comment(comment.getBody(), comment.getCreationDate().toDate(), Objects.requireNonNull(comment.getAuthor()).getName()));
             });
@@ -51,11 +53,11 @@ public class JiraIssue extends AbstractIssue {
 
 
             //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each porject has different issue states)
-            if(input.getStatus().getDescription().equals("Next"))
+            if(input.getStatus().getName().equals("Next"))
                 issue.setState(AbstractIssue.STATE_OPENED);
-            if(input.getStatus().getDescription().equals("Next"))
+            else if(input.getStatus().getName().toLowerCase().equals("opened"))
                 issue.setState(AbstractIssue.STATE_OPENED);
-            if(input.getStatus().getDescription().equals("Next"))
+            else if(input.getStatus().getName().equals("Next"))
                 issue.setState(AbstractIssue.STATE_OPENED);
             else issue.setState(AbstractIssue.STATE_CLOSED);
 

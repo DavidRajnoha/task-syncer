@@ -31,7 +31,7 @@ public class GitlabIssue extends AbstractIssue {
             issue.setDueDate(input.getDueDate());
             //set Assignee
             Optional.ofNullable(input.getAssignee()).ifPresent(assignee -> issue.setAssignee(assignee.getName()));
-            issue.setLabel(new HashSet<>(input.getLabels()));
+            Optional.ofNullable(input.getLabels()).ifPresent(label -> {issue.setLabel(new HashSet<>(label));});
 
             issue.setCreatedAt(input.getCreatedAt());
             issue.setClosedAt(input.getClosedAt());
@@ -46,7 +46,6 @@ public class GitlabIssue extends AbstractIssue {
                 issue.setState(AbstractIssue.STATE_CLOSED);
             if(input.getState() == Constants.IssueState.REOPENED)
                 issue.setState(AbstractIssue.STATE_REOPENED);
-
 
             return issue;
         }
