@@ -10,8 +10,7 @@ import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 
-import org.hibernate.exception.ConstraintViolationException;
-import org.json.HTTP;
+import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,6 +40,9 @@ public class Endpoints {
     @Value("${trello.token}")
     private String trelloAccessToken;
 
+    @Value("${githubWebhookURL}")
+    private String githubWebhookURLString;
+
 
     @Value("${gitlabWebhookURL}")
     private String gitlabWebhookURLString;
@@ -67,6 +69,12 @@ public class Endpoints {
     }
 
 
+    @RequestMapping(path = "/service/{serviceName}/project/{projectName}/hook",
+            method = {RequestMethod.GET}
+    ) public ResponseEntity<String> yesTrelloThisEndpointWorks(){
+        return ResponseEntity.status(HttpStatus.OK).body("");
+    }
+
     /**
      *  Endpoint for processing webhooks
      * @param serviceName - name of the service you are trying to connect
@@ -75,7 +83,7 @@ public class Endpoints {
      * */
     @RequestMapping(path = "/service/{serviceName}/project/{projectName}/hook",
             consumes = MediaType.APPLICATION_JSON_VALUE,
-            method = RequestMethod.POST
+            method = {RequestMethod.POST}
     )
     public String hookEndpoint(@PathVariable String serviceName,
             @PathVariable String projectName,
@@ -91,18 +99,23 @@ public class Endpoints {
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
-        AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
+        try {
+            AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-        projectAccessor.update(newIssue);
-
+            ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+            projectAccessor.syncIssue(newIssue);
+        } catch (TrelloCalllbackNotAboutCardException ignored) {
+        }
         return OK;
     }
 
 
 
-
-
+    /**
+     * @param firstLoginCredential Trello - app key;
+     * @param secondLoginCredential Trello - token;
+     *
+     * */
     @RequestMapping(path = "/service/{serviceName}/project/{projectName}/{hookOrConnect}/{repoNamespace}/{repoName}",
             method = RequestMethod.PUT
     )    public ResponseEntity<String> connectService(@PathVariable String serviceName,
@@ -128,8 +141,10 @@ public class Endpoints {
             case "hook":
                 //TODO: let the repositoryAccessors get the hook somewhere else
                 try {
-                projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
+                //projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
+                projectAccessor.hookRepository(repository, githubWebhookURLString.replace("{projectName}", projectName));
                 } catch (Exception e) {
+                    e.printStackTrace();
                     repositoryAccessor.deleteRepository(repository);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create the webhook," +
                             " check if the webhook is not already created");

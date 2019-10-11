@@ -3,14 +3,16 @@ package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
+import com.redhat.tasksyncer.exceptions.IssueSyncFailedException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
-import org.json.JSONException;
+import org.hibernate.HibernateException;
+import org.postgresql.util.PSQLException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.util.NestedServletException;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -90,9 +92,9 @@ public class ProjectAccessor {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
         try {
             doSync(repositoryAccessor);
-        } catch (GitLabApiException | IOException  glException){
+        } catch (IssueSyncFailedException | GitLabApiException glException){
+            glException.printStackTrace();
             repositoryAccessor.deleteRepository(repository);
-            System.out.println(glException.getMessage());
             throw new SynchronizationFailedException("Synchronization with " + repository.getClass().toString() + " failed");
         }
         return repositoryAccessor;
@@ -118,40 +120,59 @@ public class ProjectAccessor {
      * method to get a list of issues from that particular repository, then updates and syncs those issues with the internal
      * IssueRepository and Trello using the update method
      * */
-    private void doSync(RepositoryAccessor repositoryAccessor) throws IOException, GitLabApiException {
+    private void doSync(RepositoryAccessor repositoryAccessor) throws IOException, GitLabApiException, IssueSyncFailedException {
         List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
 
         for(AbstractIssue i : issues) {
-            i.setRepository(repositoryAccessor.getRepository());
-            this.update(i);
+            try {
+                i.setRepository(repositoryAccessor.getRepository());
+                this.syncIssue(i);
+            } catch (Exception e){
+                i.setRepository(null);
+                throw new IssueSyncFailedException(e);
+            }
         }
     }
 
-    public void update(AbstractIssue newIssue) {
-        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newIssue.getRemoteIssueId(), newIssue.getRepository().getRepositoryName())
+    public AbstractIssue update(AbstractIssue newIssue) {
+        AbstractIssue oldIssue = issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newIssue.getRemoteIssueId(),
+                newIssue.getRepository().getRepositoryName())
                 .orElse(newIssue);
 
-        if(oldIssue.getId() != null) {  // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
+        if(oldIssue.getId() != null) {
+            // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
-
-            List<AbstractColumn> columns = getBoardAccessor().getColumns();  // for now we assume that there exists such column for mapping
-
-            oldIssue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(newIssue, columns));
-
-            this.getBoardAccessor().update(oldIssue.getCard());
-
-            issueRepository.save(oldIssue);
-
-            return;
+            return oldIssue;
         }
 
         // its new issue
+        return newIssue;
+    }
 
+    public AbstractIssue updateCard(AbstractIssue issue) {
         List<AbstractColumn> columns = getBoardAccessor().getColumns();  // for now we assume that there exists such column for mapping
-        AbstractCard c = this.getBoardAccessor().update(TrelloCard.IssueToCardConverter.convert(newIssue, columns));  // todo use generic converter
-        newIssue.setCard(c);
 
-        issueRepository.save(newIssue);
+        if (issue.getCard() == null) {
+            // It is a new issue and the card does not exist yet
+            AbstractCard c = TrelloCard.IssueToCardConverter.convert(issue, columns);  // todo use generic converter
+            issue.setCard(c);
+
+            return issue;
+        }
+        issue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(issue, columns));
+
+        return issue;
+    }
+
+    public void syncIssue(AbstractIssue issue) {
+        issue = update(issue);
+        issue = issueRepository.save(issue); // so the issue has id and is saved in repository before saving card
+
+        issue = updateCard(issue); // setting new properties to the card
+        issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
+                                                                        // then card with id is returned
+
+        issueRepository.save(issue);
     }
 
     public void hookRepository(AbstractRepository repository, String webhookUrl) throws Exception {
