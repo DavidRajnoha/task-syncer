@@ -117,6 +117,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
     @Override
     public String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
         URL url = new URL("https://api.trello.com/1/boards/" + board.getRemoteBoardId() /* + "?key=" + trelloApplicationKey + "&token=" + trelloAccessToken */);
+        // TODO: Move the implementation details into the library
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("DELETE");
         connection.setDoOutput(true);
@@ -148,7 +149,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
         return connection.getResponseMessage();
     }
 
-    private static class ParameterStringBuilder {
+    public static class ParameterStringBuilder {
         public static String getParamsString(Map<String, String> param) throws UnsupportedEncodingException {
             StringBuilder result = new StringBuilder();
             for (Map.Entry<String, String> entry : param.entrySet()) {

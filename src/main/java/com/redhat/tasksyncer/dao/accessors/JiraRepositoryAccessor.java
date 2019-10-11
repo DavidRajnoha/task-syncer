@@ -55,7 +55,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     @Override
     public List<AbstractIssue> downloadAllIssues() {
 
-       // String newJQL = JQL.replace("project_name", repository.getRepositoryName());
+       // String newJQL = JQL.replace"project_name", repository.getRepositoryName());
         String newJQL = JQL;
 
         Stream<Issue> issuesStream = StreamSupport.stream(jiraRestClient

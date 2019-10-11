@@ -32,6 +32,8 @@ public abstract class AbstractRepository {
     @GeneratedValue
     private Long id;
 
+    private String remoteRepositoryId;
+
     private String repositoryNamespace;
 
     @Column(name = "repository_repositoryName")
@@ -42,7 +44,7 @@ public abstract class AbstractRepository {
     @JsonIgnore
     private String secondLoginCredential;
 
-    @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository")
+    @OneToMany(targetEntity = AbstractIssue.class, fetch = FetchType.LAZY, mappedBy = "repository", cascade = CascadeType.REMOVE)
     @JsonManagedReference
     private List<AbstractIssue> issues;
 
@@ -70,6 +72,9 @@ public abstract class AbstractRepository {
                 break;
             case "jira":
                 repository = new JiraRepository();
+                break;
+            case "trello":
+                repository = new TrelloRepository();
                 break;
             default:
                 throw new RepositoryTypeNotSupportedException("");
@@ -171,5 +176,13 @@ public abstract class AbstractRepository {
 
     public void setSecondLoginCredential(String secondLoginCredential) {
         this.secondLoginCredential = secondLoginCredential;
+    }
+
+    public String getRemoteRepositoryId() {
+        return remoteRepositoryId;
+    }
+
+    public void setRemoteRepositoryId(String remoteRepositoryId) {
+        this.remoteRepositoryId = remoteRepositoryId;
     }
 }

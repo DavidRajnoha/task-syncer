@@ -43,7 +43,7 @@ public class AbstractRepositoryTest {
     @Test
     public void whenNewInstanceOfUnknownTypeIsCalled_thenRepositoryTypeNotSupportedExceptionIsThrwon() {
         assertThatThrownBy(() ->
-                AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("trello", firstCredential,
+                AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("some_unkown_type", firstCredential,
                         secondCredential, repoName, repoNamespace)).isInstanceOf(RepositoryTypeNotSupportedException.class);
 
     }

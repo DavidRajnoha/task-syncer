@@ -64,6 +64,8 @@ public class JiraIssue extends AbstractIssue {
             return issue;
         }
 
+
+        //
         public static AbstractIssue convert(JSONObject input) throws JSONException {
             AbstractIssue issue = new JiraIssue();
             JSONObject inputIssue = input.getJSONObject("issue");

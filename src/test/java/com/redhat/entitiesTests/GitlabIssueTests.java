@@ -97,13 +97,18 @@ public class GitlabIssueTests {
         objectAttributes.setDescription(description);
         objectAttributes.setState("opened");
         issueEvent.setObjectAttributes(objectAttributes);
+
+
         AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter.convert(issueEvent.getObjectAttributes());
 
         assertThat(convertedIssue.getIssueType()).isEqualTo(IssueType.GITLAB);
         assertThat(convertedIssue.getTitle()).isEqualTo(titleOne);
         assertThat(convertedIssue.getDescription()).isEqualTo(description);
-        assertThat(convertedIssue.getCreatedAt()).isEqualTo(createdAt);
-        assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(1));
+        assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(3));
+
+
+        // IssueEvent.ObjectAttributes does not have method to
+        // assertThat(convertedIssue.getCreatedAt()).isEqualTo(createdAt);
 
 
     }

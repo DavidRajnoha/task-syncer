@@ -4,10 +4,8 @@ import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
 import com.redhat.tasksyncer.dao.accessors.TrelloBoardAccessor;
 import com.redhat.tasksyncer.dao.entities.*;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,7 +108,7 @@ public class ProjectAccessorTests {
         projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
 
         AbstractIssue newGithubIssue = getNewGithubIssue();
-        projectAccessor.update(newGithubIssue);
+        projectAccessor.syncIssue(newGithubIssue);
         AbstractIssue foundIssue = issueRepository.findOneByRemoteIssueId(remoteIssueId);
         assertThat(foundIssue).isNotNull();
         assertThat(foundIssue.getTitle()).isEqualTo(title);
@@ -130,11 +128,11 @@ public class ProjectAccessorTests {
         AbstractIssue newGithubIssue = getNewGithubIssue();
 
         //Setup
-        projectAccessor.update(newGithubIssue);
+        projectAccessor.syncIssue(newGithubIssue);
 
         //Test
         newGithubIssue.setDescription(updatedDescription);
-        projectAccessor.update(newGithubIssue);
+        projectAccessor.syncIssue(newGithubIssue);
 
 
         AbstractIssue foundIssue = issueRepository.findByRemoteIssueIdAndRepository_repositoryName(remoteIssueId, ghRepositoryName).orElseThrow(() -> new Exception("No Issue found at second try"));

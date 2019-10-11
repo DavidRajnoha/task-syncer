@@ -14,6 +14,7 @@ import java.util.List;
 public abstract class BoardAccessor {
     public abstract AbstractBoard createItself();
     public abstract AbstractCard update(AbstractCard card);
+
     public abstract List<AbstractColumn> getColumns();
     public abstract void setProject(Project project);
 

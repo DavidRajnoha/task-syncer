@@ -32,6 +32,7 @@ public abstract class AbstractIssue {
     private Long id;
 
     private String title;
+    @Column(length = 2048)
     private String description;
     private String remoteIssueId;
     private Date dueDate;
@@ -56,7 +57,7 @@ public abstract class AbstractIssue {
     @JoinColumn(name = "repository_repositoryName")
     private AbstractRepository repository;
 
-    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JsonManagedReference
     private AbstractCard card;
 
@@ -65,9 +66,17 @@ public abstract class AbstractIssue {
     }
 
     public void updateProperties(AbstractIssue issue) {
-        title = issue.title;
-        description = issue.description;
-        state = issue.state;
+        title =         issue.title != null         ? issue.title : title;
+        description =   issue.description != null   ? issue.description : description;
+        state =         issue.state != null         ? issue.state : state;
+        createdAt =     issue.createdAt != null     ? issue.createdAt : createdAt;
+        remoteIssueId = issue.remoteIssueId != null ? issue.remoteIssueId : remoteIssueId;
+        closedAt =      issue.closedAt != null      ? issue.closedAt : closedAt;
+        dueDate =       issue.dueDate != null       ? issue.dueDate : dueDate;
+        closedBy =      issue.closedBy != null      ? issue.closedBy : closedBy;
+        assignee =      issue.assignee != null      ? issue.assignee : assignee;
+        labels =        issue.labels != null        ? issue.labels : labels;
+        comments =      issue.comments != null      ? issue.comments : comments;
     }
 
     public Long getId() {

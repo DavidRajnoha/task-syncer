@@ -42,18 +42,25 @@ public class GithubIssue extends AbstractIssue {
             //set Labels
             try {
                 Set<String> labels = new HashSet<>();
-                input.getLabels().forEach(ghLabel -> labels.add(ghLabel.getName()));
-                issue.setLabel(labels);
+                if (!input.getLabels().isEmpty()) {
+                    input.getLabels().forEach(ghLabel -> labels.add(ghLabel.getName()));
+                    issue.setLabel(labels);
+                }
             } catch (IOException e) {e.printStackTrace();}
 
             //set Comments
             try {
                 Set<Comment> comments = new HashSet<>();
-                input.getComments().forEach(githubComment -> {
-                    try {
-                        comments.add(new Comment(githubComment.getBody(), githubComment.getCreatedAt(), githubComment.getUser().getLogin()));
-                    } catch (IOException e) { e.printStackTrace(); } });
-                issue.setComments(comments);
+                if (!input.getComments().isEmpty()) {
+                    input.getComments().forEach(githubComment -> {
+                        try {
+                            comments.add(new Comment(githubComment.getBody(), githubComment.getCreatedAt(), githubComment.getUser().getLogin()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    issue.setComments(comments);
+                }
             } catch (IOException e) { e.printStackTrace(); }
 
             //set CreatedAt

@@ -9,6 +9,7 @@ import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,8 @@ public abstract class RepositoryAccessor {
             repositoryAccessor = new GithubRepositoryAccessor((GithubRepository) repository, repositoryRepository, issueRepository);
         } else if (JiraRepository.class.equals(repoType)) {
             repositoryAccessor = new JiraRepositoryAccessor((JiraRepository) repository, repositoryRepository, issueRepository);
+        } else if (TrelloRepository.class.equals(repoType)){
+            repositoryAccessor = new TrelloRepositoryAccessor((TrelloRepository) repository, repositoryRepository);
         } else {
             throw new RepositoryTypeNotSupportedException("");
         }
@@ -64,6 +67,8 @@ public abstract class RepositoryAccessor {
     public abstract void createWebhook(String webhook) throws IOException, GitLabApiException;
 
     public void deleteRepository(AbstractRepository repository) {
+        // TODO: When error is thrown while creating an issue, the repository is not deleted
+        repository.setProject(null);
         repositoryRepository.delete(repository);
     }
 }

@@ -23,7 +23,8 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
     @Override
     public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws Exception {
-        JSONObject input = requestToInput(request);
+//        JSONObject input = requestToInput(request);
+        JSONObject input = AbstractWebhookIssueDecoder.RequestToJsonDecoder.toJson(request);
 
         AbstractIssue issue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
 
@@ -32,19 +33,20 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
         return issue;
     }
 
-    private JSONObject requestToInput(HttpServletRequest request) throws JSONException, org.json.JSONException {
-        StringBuilder stringBuffer = new StringBuilder();
-        String line;
+//    private JSONObject requestToInput(HttpServletRequest request) throws JSONException, org.json.JSONException {
+//        StringBuilder stringBuffer = new StringBuilder();
+//        String line;
+//
+//        try {
+//            BufferedReader reader = request.getReader();
+//            while ((line = reader.readLine()) != null)
+//                stringBuffer.append(line);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String jsonString = stringBuffer.toString();
+//        return new JSONObject(jsonString);
+//    }
 
-        try {
-            BufferedReader reader = request.getReader();
-            while ((line = reader.readLine()) != null)
-                stringBuffer.append(line);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String jsonString = stringBuffer.toString();
-        return new JSONObject(jsonString);
-    }
 }
