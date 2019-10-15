@@ -61,6 +61,13 @@ public abstract class AbstractIssue {
     @JsonManagedReference
     private AbstractCard card;
 
+    @OneToMany(targetEntity = AbstractIssue.class, mappedBy = "parentIssue", fetch = FetchType.LAZY)
+    private Set<AbstractIssue> subIssues;
+
+    @ManyToOne
+    private AbstractIssue parentIssue;
+
+
     public AbstractIssue(IssueType issueType) {
         this.issueType = issueType;
     }
@@ -113,6 +120,43 @@ public abstract class AbstractIssue {
 
     public AbstractRepository getRepository() {
         return repository;
+    }
+
+    public void setParentIssue(AbstractIssue parentIssue){
+        if (Objects.equals(parentIssue, this.parentIssue)) return;
+
+        if (this.parentIssue != null) this.parentIssue.removeChildIssue(this);
+
+        this.parentIssue = parentIssue;
+
+        if (this.parentIssue != null) this.parentIssue.addChildIssue(this);
+    }
+
+    public AbstractIssue getParentIssue(){
+        return parentIssue;
+    }
+
+    public void addChildIssue(AbstractIssue childIssue){
+        if (this.subIssues == null){
+            this.subIssues = new HashSet<>();
+        }
+
+        if (this.subIssues.contains(childIssue)) return;
+
+        this.subIssues.add(childIssue);
+        childIssue.setParentIssue(this);
+
+    }
+
+    public void removeChildIssue(AbstractIssue childIssue){
+        if (this.subIssues == null || !this.subIssues.contains(childIssue)) return;
+
+        this.subIssues.remove(childIssue);
+        childIssue.setParentIssue(null);
+    }
+
+    public Set<AbstractIssue> getChildIssues(){
+        return subIssues;
     }
 
     public void setRepository(AbstractRepository repository) {

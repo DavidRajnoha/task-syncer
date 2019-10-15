@@ -27,6 +27,8 @@ public class RelationshipConsistenceTests {
     AbstractBoard board;
     AbstractColumn column;
     AbstractIssue issue;
+    AbstractIssue childIssueOne;
+    AbstractIssue childIssueTwo;
     AbstractCard card;
 
     @Before
@@ -45,6 +47,12 @@ public class RelationshipConsistenceTests {
 
         issue = new GitlabIssue();
         issue.setDescription("Issue");
+
+        childIssueOne = new GitlabIssue();
+        childIssueOne.setDescription("child One");
+
+        childIssueTwo = new GitlabIssue();
+        childIssueTwo.setDescription("child Two");
         
         card = new TrelloCard();
         card.setDescription("Description");
@@ -221,7 +229,38 @@ public class RelationshipConsistenceTests {
         assertThat(issue.getCard()).isEqualTo(null);
     }
 
+    @Test
+    public void whenChildIssueIsSetToParentIssue_thenParentIsSetToChild(){
+        issue.addChildIssue(childIssueOne);
+        assertTrue(issue.getChildIssues().contains(childIssueOne));
+        assertThat(childIssueOne.getParentIssue()).isEqualTo(issue);
+    }
 
+
+    @Test
+    public void whenChildIssueIsRemovedFromParentIssue_thenParentIsRemovedFromChild(){
+        issue.addChildIssue(childIssueOne);
+        issue.removeChildIssue(childIssueOne);
+
+        assertThat(childIssueOne.getParentIssue()).isNull();
+    }
+
+    @Test
+    public void whenParentIssueIsSetToChild_thenChildIsSetToParent(){
+        childIssueOne.setParentIssue(issue);
+
+        assertThat(childIssueOne.getParentIssue()).isEqualTo(issue);
+        assertTrue(issue.getChildIssues().contains(childIssueOne));
+    }
+
+    @Test
+    public void whenParentIssueIsRemovedFromChild_thenChildIsRemovedFromParent(){
+        childIssueOne.setParentIssue(issue);
+        childIssueOne.setParentIssue(null);
+
+        assertThat(childIssueOne.getParentIssue()).isEqualTo(null);
+        assertFalse(issue.getChildIssues().contains(childIssueOne));
+    }
 
 
 
