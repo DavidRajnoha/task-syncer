@@ -11,6 +11,7 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.*;
@@ -22,6 +23,7 @@ import java.util.*;
 /**
  * @author Filip Cap
  */
+
 public class TrelloBoardAccessor extends BoardAccessor {
     private TrelloBoard board;
     private AbstractBoardRepository boardRepository;
@@ -91,7 +93,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
 
     @Override
     public void setProject(Project project) {
-        board.setProject(project);
+        board.setProjectImpl(project);
     }
 
     @Override

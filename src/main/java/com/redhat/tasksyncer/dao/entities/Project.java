@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * @author Filip Cap */
 @Entity
-public class Project {
+public class Project{
 
     @Id
     @GeneratedValue
@@ -44,10 +44,10 @@ public class Project {
         this.board = board;
 
         //clears the project from the previous board
-        if (oldBoard != null) oldBoard.setProject(null);
+        if (oldBoard != null) oldBoard.setProjectImpl(null);
 
         //updates the new board
-        if (board != null) board.setProject(this);
+        if (board != null) board.setProjectImpl(this);
     }
 
     public List<AbstractRepository> getRepositories() {
@@ -71,7 +71,7 @@ public class Project {
         this.repositories.add(repository);
 
         //sets the project field in repository
-        repository.setProject(this);
+        repository.setProjectImpl(this);
     }
 
     public void removeRepository(AbstractRepository repository) {
@@ -80,7 +80,7 @@ public class Project {
 
         repositories.remove(repository);
 
-        repository.setProject(null);
+        repository.setProjectImpl(null);
     }
 
     public String getName() {

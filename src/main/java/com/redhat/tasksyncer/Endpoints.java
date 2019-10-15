@@ -43,27 +43,20 @@ public class Endpoints {
     @Value("${githubWebhookURL}")
     private String githubWebhookURLString;
 
-
     @Value("${gitlabWebhookURL}")
     private String gitlabWebhookURLString;
-
-    @Autowired
-    private AbstractBoardRepository boardRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private AbstractRepositoryRepository repositoryRepository;
 
     @Autowired
     private AbstractIssueRepository issueRepository;
 
     @Autowired
-    private AbstractCardRepository cardRepository;
+    private AbstractRepositoryRepository repositoryRepository;
 
     @Autowired
-    private AbstractColumnRepository columnRepository;
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectAccessor projectAccessor;
 
     public Endpoints() {
     }
@@ -102,7 +95,8 @@ public class Endpoints {
         try {
             AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
 
-            ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+
+            projectAccessor.saveAndInitialize(project);
             projectAccessor.syncIssue(newIssue);
         } catch (TrelloCalllbackNotAboutCardException ignored) {
         }
@@ -129,7 +123,7 @@ public class Endpoints {
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+        projectAccessor.saveAndInitialize(project);
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
 
 
@@ -178,8 +172,7 @@ public class Endpoints {
         Project project = new Project();
         project.setName(projectName);
 
-        ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
-        projectAccessor.save();
+        projectAccessor.saveAndInitialize(project);
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
 
 

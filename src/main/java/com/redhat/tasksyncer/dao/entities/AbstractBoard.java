@@ -89,11 +89,11 @@ public abstract class AbstractBoard {
         this.columns = columns;
     }
 
-    public Project getProject() {
+    public Project getProjectImpl() {
         return project;
     }
 
-    public void setProject(Project project) {
+    public void setProjectImpl(Project project) {
         //prevets endless loop
         if (sameAsFormerProject(project))
             return;

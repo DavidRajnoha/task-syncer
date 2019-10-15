@@ -1,16 +1,15 @@
 package com.redhat.accessorTests;
 
-import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
+import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
@@ -28,7 +27,7 @@ public class ProjectAccessorTests {
     private AbstractIssue abstractIssue;
     private AbstractRepository abstractRepository;
 
-    private ProjectAccessor projectAccessor;
+    private ProjectAccessorImpl projectAccessor;
 
 
     private AbstractIssue updatedIssue;
@@ -55,9 +54,7 @@ public class ProjectAccessorTests {
         Mockito.when(issueRepository.findByRemoteIssueIdAndRepository_repositoryName(abstractIssue.getRemoteIssueId(),
                 abstractIssue.getRepository().getRepositoryName())).thenReturn(Optional.of(abstractIssue));
 
-        projectAccessor = new ProjectAccessor(null, null, null,
-                issueRepository, null, null, null, null,
-                null);
+        projectAccessor = new ProjectAccessorImpl(null, null, null);
 
         updatedIssue = new GitlabIssue();
         updatedIssue.setRepository(abstractRepository);

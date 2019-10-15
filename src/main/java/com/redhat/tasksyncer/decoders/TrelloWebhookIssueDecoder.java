@@ -2,7 +2,6 @@ package com.redhat.tasksyncer.decoders;
 
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.JiraIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;

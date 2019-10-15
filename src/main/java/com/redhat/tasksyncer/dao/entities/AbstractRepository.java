@@ -4,15 +4,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.redhat.tasksyncer.dao.enumerations.IssueType.*;
 
 /**
  * @author Filip Cap
@@ -144,11 +141,11 @@ public abstract class AbstractRepository {
         issue.setRepository(null);
     }
 
-    public Project getProject() {
+    public Project getProjectImpl() {
         return project;
     }
 
-    public void setProject(Project project) {
+    public void setProjectImpl(Project project) {
         //prevents infinite loops
         if (Objects.equals(this.project, project)) return;
 

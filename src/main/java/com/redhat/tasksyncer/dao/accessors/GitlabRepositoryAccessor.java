@@ -15,7 +15,6 @@ import org.gitlab4j.api.models.ProjectHook;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,7 +54,7 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     public void createWebhook(@NotNull String webhook) throws  GitLabApiException {
         ProjectHook projectHook = new ProjectHook();
         projectHook.setIssuesEvents(true);
-        webhook = webhook.replace("{projectName}", repository.getProject().getName());
+        webhook = webhook.replace("{projectName}", repository.getProjectImpl().getName());
         gitlabApi.getProjectApi().addHook(repository.getRepositoryNamespace() + "%2F" + repository.getRepositoryName(), webhook, projectHook, false, gitlabApi.getSecretToken());
     }
 

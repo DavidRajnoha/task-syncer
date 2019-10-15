@@ -1,7 +1,7 @@
 package com.redhat.integration.projectAccessorTest;
 
 import com.redhat.tasksyncer.Application;
-import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
+import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
 import com.redhat.tasksyncer.dao.accessors.TrelloBoardAccessor;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
@@ -66,7 +66,7 @@ public class ProjectAccessorTests {
 
     private AbstractRepository githubRepository;
     private Project project;
-    private ProjectAccessor projectAccessor;
+    private ProjectAccessorImpl projectAccessor;
     private AbstractBoard trelloBoard;
 
 
@@ -105,7 +105,7 @@ public class ProjectAccessorTests {
 
     @Test
     public void whenProjectAccessorUpdatesNewGithubIssue_thenNewGithubIssueIsSaved(){
-        projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+        projectAccessor = new ProjectAccessorImpl(project, trelloApplicationKey, trelloAccessToken);
 
         AbstractIssue newGithubIssue = getNewGithubIssue();
         projectAccessor.syncIssue(newGithubIssue);
@@ -122,7 +122,7 @@ public class ProjectAccessorTests {
     //Test works in issolation, problem with board Creation
     @Test
     public void whenProjectAccessorUpdatesExistingGithubIssue_thenIsTheIssueReallyUpdated() throws Exception {
-        projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
+        projectAccessor = new ProjectAccessorImpl(project, trelloApplicationKey, trelloAccessToken);
 
 
         AbstractIssue newGithubIssue = getNewGithubIssue();

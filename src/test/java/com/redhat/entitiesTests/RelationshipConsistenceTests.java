@@ -1,11 +1,9 @@
 package com.redhat.entitiesTests;
 
-import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -57,26 +55,26 @@ public class RelationshipConsistenceTests {
     @Test
     public void whenBoardSetToProject_thenProjectSetToBoard(){
         project.setBoard(board);
-        assertThat(project).isEqualTo(board.getProject());
+        assertThat(project).isEqualTo(board.getProjectImpl());
     }
 
     @Test
     public void whenBoardRemovedFromProject_thenProjectRemovedFromBoard(){
         project.setBoard(board);
         project.setBoard(null);
-        assertThat(board.getProject()).isEqualTo(null);
+        assertThat(board.getProjectImpl()).isEqualTo(null);
     }
 
     @Test
     public void whenProjectSetToBoard_thenBoardSetToProject(){
-        board.setProject(project);
+        board.setProjectImpl(project);
         assertThat(board).isEqualTo(project.getBoard());
     }
 
     @Test
     public void whenProjectRemovedFromBoard_thenBoardRemovedFromProject(){
-        board.setProject(project);
-        board.setProject(null);
+        board.setProjectImpl(project);
+        board.setProjectImpl(null);
         assertThat(project.getBoard()).isEqualTo(null);
     }
 
@@ -85,26 +83,26 @@ public class RelationshipConsistenceTests {
     @Test
     public void whenRepositoryAddedToProject_thenProjectSetToRepository(){
         project.addRepository(repository);
-        assertThat(project).isEqualTo(repository.getProject());
+        assertThat(project).isEqualTo(repository.getProjectImpl());
     }
 
     @Test
     public void whenProjectSetToRepository_thenRepositoryAddedToProject(){
-        repository.setProject(project);
+        repository.setProjectImpl(project);
         assertTrue(project.getRepositories().contains(repository));
     }
 
     @Test
     public void whenRepositoryRemovedFromProject_thenProjectRemovedFromRepository(){
-        repository.setProject(project);
+        repository.setProjectImpl(project);
         project.removeRepository(repository);
-        assertThat(repository.getProject()).isEqualTo(null);
+        assertThat(repository.getProjectImpl()).isEqualTo(null);
     }
 
     @Test
     public void whenProjectRemovedFromRepository_thenRepositoryRemovedFromProject(){
         project.addRepository(repository);
-        repository.setProject(null);
+        repository.setProjectImpl(null);
         assertFalse(project.getRepositories().contains(repository));
     }
     

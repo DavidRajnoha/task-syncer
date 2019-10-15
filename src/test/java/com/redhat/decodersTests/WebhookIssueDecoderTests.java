@@ -1,27 +1,19 @@
 package com.redhat.decodersTests;
 
 import com.redhat.tasksyncer.dao.entities.*;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.TrelloWebhookIssueDecoder;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.swing.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
