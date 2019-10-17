@@ -17,6 +17,7 @@ import org.springframework.util.ResourceUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Set;
 
 
 public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
@@ -32,6 +33,7 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
         return issue;
     }
+
 
 //    private JSONObject requestToInput(HttpServletRequest request) throws JSONException, org.json.JSONException {
 //        StringBuilder stringBuffer = new StringBuilder();

@@ -65,10 +65,35 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
                 .getIssues()
                 .spliterator(), false);
 
-        return issuesStream
-                .map(JiraIssue.ObjectToJiraIssueConverter::convert)
+
+        //for each issue from jira converts this issue to abstract issue, adds subtasks and returns
+        return proccessIssueStream(issuesStream);
+    }
+
+
+    /**
+     * Takes stream of Issues downloaded from Jira and transforms it into the list of AbstractIssues
+     *
+    * */
+    public List<AbstractIssue> proccessIssueStream(Stream<Issue> issuesStream){
+        return  issuesStream
+                .map(input -> {
+                    // Converts each issue using
+                    AbstractIssue abstractIssue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
+
+                    // For each subtasks from input appends this subtask to the Jira Issue and adds repository to the
+                    // child issue
+                    JiraIssue.ObjectToJiraIssueConverter.getSubtasks(input).forEach(childIssue -> {
+                        abstractIssue.addChildIssue(childIssue);
+                        childIssue.setRepository(repository);
+                    });
+                    abstractIssue.setRepository(repository);
+
+                    return abstractIssue;
+                })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public AbstractIssue saveIssue(AbstractIssue issue) {

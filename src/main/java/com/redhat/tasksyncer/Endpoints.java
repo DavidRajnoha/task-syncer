@@ -112,8 +112,8 @@ public class Endpoints {
 
 
     /**
-     * @param firstLoginCredential Trello - app key;
-     * @param secondLoginCredential Trello - token;
+     * @param firstLoginCredential Trello - app key; Jira - email@adress
+     * @param secondLoginCredential Trello - token; Jira - ???
      *
      * */
     @RequestMapping(path = "/service/{serviceName}/project/{projectName}/{hookOrConnect}/{repoNamespace}/{repoName}",

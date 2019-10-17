@@ -8,12 +8,15 @@ import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
 import org.hibernate.HibernateException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.postgresql.util.PSQLException;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.NestedServletException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Filip Cap
@@ -127,7 +130,7 @@ public class ProjectAccessor {
             try {
                 i.setRepository(repositoryAccessor.getRepository());
                 this.syncIssue(i);
-            } catch (Exception e){
+            } catch (ConstraintViolationException e){
                 i.setRepository(null);
                 throw new IssueSyncFailedException(e);
             }
@@ -142,6 +145,19 @@ public class ProjectAccessor {
         if(oldIssue.getId() != null) {
             // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
+            // Gets the child issues, if there are child issues present, the child issue is updated
+            // recursive calling of the update function is used, it stops when we reach issue with no childIssues
+            // the update of the innermost issues is therefor finished first
+            // It has to be prohibited to save circular referencing issues - TODO: assert this will not happen
+
+            if (newIssue.getChildIssues() != null){
+                oldIssue.removeChildIssues();
+            }
+
+            Optional.ofNullable(newIssue.getChildIssues()).ifPresent(childIssueSet -> childIssueSet.forEach(
+                    childIssue -> {
+                oldIssue.addChildIssue(update(childIssue));
+                }));
             return oldIssue;
         }
 
@@ -171,7 +187,6 @@ public class ProjectAccessor {
         issue = updateCard(issue); // setting new properties to the card
         issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
                                                                         // then card with id is returned
-
         issueRepository.save(issue);
     }
 

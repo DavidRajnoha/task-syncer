@@ -262,6 +262,18 @@ public class RelationshipConsistenceTests {
         assertFalse(issue.getChildIssues().contains(childIssueOne));
     }
 
+    @Test
+    public void removeIssues_removesAllIssuesFromParentAndPrentFromAllChilds(){
+        issue.addChildIssue(childIssueOne);
+        issue.addChildIssue(childIssueTwo);
+
+        issue.removeChildIssues();
+
+        assertThat(issue.getChildIssues().size()).isEqualTo(0);
+        assertThat(childIssueOne.getParentIssue()).isNull();
+        assertThat(childIssueTwo.getParentIssue()).isNull();
+    }
+
 
 
 

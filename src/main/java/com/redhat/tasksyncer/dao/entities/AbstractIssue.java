@@ -61,7 +61,7 @@ public abstract class AbstractIssue {
     @JsonManagedReference
     private AbstractCard card;
 
-    @OneToMany(targetEntity = AbstractIssue.class, mappedBy = "parentIssue", fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = AbstractIssue.class, mappedBy = "parentIssue", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<AbstractIssue> subIssues;
 
     @ManyToOne
@@ -154,6 +154,23 @@ public abstract class AbstractIssue {
         this.subIssues.remove(childIssue);
         childIssue.setParentIssue(null);
     }
+
+
+
+    public void removeChildIssues() {
+        for (Iterator<AbstractIssue> i = this.subIssues.iterator(); i.hasNext();){
+            AbstractIssue subIssue = i.next();
+            subIssue.removeJustParentIssue();
+            i.remove();
+        }
+    }
+
+    // removes parent issue from this, but leaves this as the child issue at the parent issue
+    // to prevent concurrent modification exception while deleting
+    private void removeJustParentIssue(){
+        this.parentIssue = null;
+    }
+
 
     public Set<AbstractIssue> getChildIssues(){
         return subIssues;

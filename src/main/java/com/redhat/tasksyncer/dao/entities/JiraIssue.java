@@ -20,7 +20,7 @@ public class JiraIssue extends AbstractIssue {
     }
 
     public static class ObjectToJiraIssueConverter{
-        public static JiraIssue convert(Issue input){
+        public static JiraIssue convert(Issue input) {
             JiraIssue issue = new JiraIssue();
 
             issue.setRemoteIssueId(input.getId().toString());
@@ -43,7 +43,6 @@ public class JiraIssue extends AbstractIssue {
             issue.setComments(comments);
 
 
-
             input.getIssueType();
             input.getSubtasks();
             input.getVotes();
@@ -53,11 +52,11 @@ public class JiraIssue extends AbstractIssue {
 
 
             //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each porject has different issue states)
-            if(input.getStatus().getName().equals("Next"))
+            if (input.getStatus().getName().equals("Next"))
                 issue.setState(AbstractIssue.STATE_OPENED);
-            else if(input.getStatus().getName().toLowerCase().equals("opened"))
+            else if (input.getStatus().getName().toLowerCase().equals("opened"))
                 issue.setState(AbstractIssue.STATE_OPENED);
-            else if(input.getStatus().getName().equals("Next"))
+            else if (input.getStatus().getName().equals("Next"))
                 issue.setState(AbstractIssue.STATE_OPENED);
             else issue.setState(AbstractIssue.STATE_CLOSED);
 
@@ -88,5 +87,21 @@ public class JiraIssue extends AbstractIssue {
 
             return issue;
         }
+
+
+        public static Set<AbstractIssue> getSubtasks(Issue input){
+            Set<AbstractIssue> subIssues = new HashSet<>();
+            Optional.ofNullable(input.getSubtasks()).ifPresent(subtasks -> subtasks.forEach(subtask -> {
+                AbstractIssue subIssue = new JiraIssue();
+
+                subIssue.setRemoteIssueId(subtask.getIssueKey());
+                subIssue.setTitle(subtask.getSummary());
+
+                subIssues.add(subIssue);
+            }));
+
+            return subIssues;
+        }
+
     }
 }
