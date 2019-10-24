@@ -65,7 +65,7 @@ public abstract class RepositoryAccessor {
 
     public void deleteRepository(AbstractRepository repository) {
         // TODO: When error is thrown while creating an issue, the repository is not deleted
-        repository.setProjectImpl(null);
+        repository.setProject(null);
         repositoryRepository.delete(repository);
     }
 }

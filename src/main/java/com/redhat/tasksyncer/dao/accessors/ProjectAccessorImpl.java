@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Filip Cap
@@ -78,7 +81,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         this.boardAccessor = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
 
         AbstractBoard b = this.boardAccessor.createItself();
-        b.setProjectImpl(project);
+        b.setProject(project);
         boardRepository.save(b);
         return this.boardAccessor;
     }
@@ -130,7 +133,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
 
         AbstractRepository r = repositoryAccessor.createItself();
-        r.setProjectImpl(project);
+        r.setProject(project);
         repositoryRepository.save(r);
 
         return repositoryAccessor;
@@ -149,6 +152,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
                 i.setRepository(repositoryAccessor.getRepository());
                 this.syncIssue(i);
             } catch (Exception e){
+                e.printStackTrace();
                 i.setRepository(null);
                 throw new IssueSyncFailedException(e);
             }
@@ -163,11 +167,27 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         if(oldIssue.getId() != null) {
             // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
-            return oldIssue;
+
         }
 
+        // Gets the child issues, if there are child issues present, the child issue is updated
+        // recursive calling of the update function is used, it stops when we reach issue with no childIssues
+        // the update of the innermost issues is therefor finished first
+        // It has to be prohibited to save circular referencing issues - TODO: assert this will not happen
+
+        // If the issues has subIssue(s) then updates the subIssue(s)
+        Optional.ofNullable(newIssue.getChildIssues()).ifPresent(childIssueSet -> {
+            // New copy of set so the concurrentModification exception wouldn't be thrown
+            Set<AbstractIssue> copyChildIssuesSet = new HashSet<>(childIssueSet.values());
+
+            for (AbstractIssue childIssue : copyChildIssuesSet) {
+                oldIssue.removeChildIssue(childIssue);
+                oldIssue.addChildIssue(update(childIssue));
+            }
+        });
+
         // its new issue
-        return newIssue;
+        return oldIssue;
     }
 
     public AbstractIssue updateCard(AbstractIssue issue) {

@@ -10,6 +10,7 @@ import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 
+import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +105,7 @@ public class Endpoints {
 
             projectAccessor.saveAndInitialize(project);
             projectAccessor.syncIssue(newIssue);
-        } catch (TrelloCalllbackNotAboutCardException ignored) {
+        } catch (TrelloCalllbackNotAboutCardException | InvalidWebhookCallbackException ignored) {
         } catch (JsonProcessingException e){
             return "Proccessing of the webhook failed - unsuported type";
         }

@@ -1,5 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -24,6 +25,7 @@ public abstract class AbstractBoard {
     private String remoteBoardId;
 
     @OneToOne
+    @JsonBackReference
     private Project project;
 
     @OneToMany(targetEntity = AbstractColumn.class, fetch = FetchType.LAZY, mappedBy = "board", cascade = CascadeType.REMOVE)
@@ -89,11 +91,11 @@ public abstract class AbstractBoard {
         this.columns = columns;
     }
 
-    public Project getProjectImpl() {
+    public Project getProject() {
         return project;
     }
 
-    public void setProjectImpl(Project project) {
+    public void setProject(Project project) {
         //prevets endless loop
         if (sameAsFormerProject(project))
             return;

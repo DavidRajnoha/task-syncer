@@ -95,7 +95,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
 
     @Override
     public void setProject(Project project) {
-        board.setProjectImpl(project);
+        board.setProject(project);
     }
 
     @Override

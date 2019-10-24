@@ -141,11 +141,11 @@ public abstract class AbstractRepository {
         issue.setRepository(null);
     }
 
-    public Project getProjectImpl() {
+    public Project getProject() {
         return project;
     }
 
-    public void setProjectImpl(Project project) {
+    public void setProject(Project project) {
         //prevents infinite loops
         if (Objects.equals(this.project, project)) return;
 

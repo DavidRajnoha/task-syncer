@@ -22,6 +22,7 @@ public class Project{
     private String name;
 
     @OneToOne(targetEntity = AbstractBoard.class, optional = false, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private AbstractBoard board;
 
     @OneToMany(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL)
@@ -44,10 +45,10 @@ public class Project{
         this.board = board;
 
         //clears the project from the previous board
-        if (oldBoard != null) oldBoard.setProjectImpl(null);
+        if (oldBoard != null) oldBoard.setProject(null);
 
         //updates the new board
-        if (board != null) board.setProjectImpl(this);
+        if (board != null) board.setProject(this);
     }
 
     public List<AbstractRepository> getRepositories() {
@@ -71,7 +72,7 @@ public class Project{
         this.repositories.add(repository);
 
         //sets the project field in repository
-        repository.setProjectImpl(this);
+        repository.setProject(this);
     }
 
     public void removeRepository(AbstractRepository repository) {
@@ -80,7 +81,7 @@ public class Project{
 
         repositories.remove(repository);
 
-        repository.setProjectImpl(null);
+        repository.setProject(null);
     }
 
     public String getName() {
