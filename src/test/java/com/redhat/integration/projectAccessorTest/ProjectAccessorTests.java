@@ -1,6 +1,7 @@
 package com.redhat.integration.projectAccessorTest;
 
-import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
+
+import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
@@ -58,7 +59,7 @@ public class ProjectAccessorTests {
 
     private AbstractRepository githubRepository;
     private Project project;
-    private ProjectAccessor projectAccessor;
+    private ProjectAccessorImpl projectAccessor;
     private AbstractBoard trelloBoard;
 
     @InjectMocks
@@ -90,6 +91,11 @@ public class ProjectAccessorTests {
 
     @Test
     public void whenProjectAccessorUpdatesNewGithubIssue_thenNewGithubIssueIsSaved(){
+<<<<<<< HEAD
+=======
+        projectAccessor = new ProjectAccessorImpl(project, trelloApplicationKey, trelloAccessToken);
+
+>>>>>>> dependencyInjection
         AbstractIssue newGithubIssue = getNewGithubIssue();
 
         Mockito.when(issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newGithubIssue.getRemoteIssueId(),
@@ -98,8 +104,15 @@ public class ProjectAccessorTests {
         ArgumentCaptor<AbstractIssue> argument = ArgumentCaptor.forClass(AbstractIssue.class);
 
 
+<<<<<<< HEAD
         projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
         ProjectAccessor spyProjectAccessor = Mockito.spy(projectAccessor);
+=======
+    //Test works in issolation, problem with board Creation
+    @Test
+    public void whenProjectAccessorUpdatesExistingGithubIssue_thenIsTheIssueReallyUpdated() throws Exception {
+        projectAccessor = new ProjectAccessorImpl(project, trelloApplicationKey, trelloAccessToken);
+>>>>>>> dependencyInjection
 
         Mockito.doReturn(newGithubIssue).when(spyProjectAccessor).setCard(newGithubIssue);
         Mockito.doReturn(newGithubIssue).when(spyProjectAccessor).updateCard(newGithubIssue);

@@ -1,15 +1,12 @@
 package com.redhat.tasksyncer.dao.accessors;
 
 import com.redhat.tasksyncer.dao.entities.*;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,7 +65,7 @@ public abstract class RepositoryAccessor {
 
     public void deleteRepository(AbstractRepository repository) {
         // TODO: When error is thrown while creating an issue, the repository is not deleted
-        repository.setProject(null);
+        repository.setProjectImpl(null);
         repositoryRepository.delete(repository);
     }
 }

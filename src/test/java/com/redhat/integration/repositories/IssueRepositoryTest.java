@@ -4,8 +4,6 @@ import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
-import org.gitlab4j.api.models.Issue;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,16 +14,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.Column;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertThat;

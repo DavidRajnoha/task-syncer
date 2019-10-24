@@ -1,9 +1,6 @@
 package com.redhat.tasksyncer.dao.accessors;
 
-import com.redhat.tasksyncer.dao.entities.AbstractBoard;
-import com.redhat.tasksyncer.dao.entities.AbstractCard;
-import com.redhat.tasksyncer.dao.entities.AbstractColumn;
-import com.redhat.tasksyncer.dao.entities.Project;
+import com.redhat.tasksyncer.dao.entities.*;
 
 import java.io.IOException;
 import java.util.List;

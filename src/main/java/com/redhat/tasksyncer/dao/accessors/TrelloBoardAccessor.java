@@ -17,11 +17,15 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Filip Cap
  */
+
 public class TrelloBoardAccessor extends BoardAccessor {
     private TrelloBoard board;
     private AbstractBoardRepository boardRepository;
@@ -91,7 +95,7 @@ public class TrelloBoardAccessor extends BoardAccessor {
 
     @Override
     public void setProject(Project project) {
-        board.setProject(project);
+        board.setProjectImpl(project);
     }
 
     @Override

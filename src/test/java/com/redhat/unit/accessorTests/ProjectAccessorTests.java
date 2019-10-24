@@ -1,6 +1,7 @@
 package com.redhat.unit.accessorTests;
 
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
+import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import org.junit.Before;
@@ -39,9 +40,7 @@ public class ProjectAccessorTests {
 
 
 
-        projectAccessor = new ProjectAccessor(null, null, null,
-                issueRepository, null, null, null, null,
-                null);
+        projectAccessor = new ProjectAccessorImpl();
 
 
     }

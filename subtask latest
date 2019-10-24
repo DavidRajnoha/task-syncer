@@ -1,0 +1,1 @@
+{"webhookEvent":"issuelink_created","issueLink":{"sourceIssueId":10051,"sequence":0,"destinationIssueId":10052,"systemLink":true,"id":10025,"issueLinkType":{"inwardName":"jira_subtask_inward","isSubTaskLinkType":true,"isSystemLinkType":true,"outwardName":"jira_subtask_outward","name":"jira_subtask_link","style":"jira_subtask","id":10004}},"timestamp":1571905117657}
