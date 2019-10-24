@@ -1,12 +1,8 @@
 package com.redhat.tasksyncer.dao.accessors;
 
-import com.atlassian.jira.plugin.webfragment.model.JiraHelper;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.SearchResult;
-import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
-import com.atlassian.util.concurrent.Promise;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.JiraIssue;
@@ -17,7 +13,6 @@ import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +20,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class JiraRepositoryAccessor extends RepositoryAccessor {
-    private static final String JQL = "";
+    private static final String JQL = "project=KEY";
     //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different
     private static final String URL = "https://NAMESPACE.atlassian.net";
     private AbstractRepository repository;
@@ -56,7 +51,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     public List<AbstractIssue> downloadAllIssues() {
 
        // String newJQL = JQL.replace"project_name", repository.getRepositoryName());
-        String newJQL = JQL;
+        String newJQL = JQL.replace("KEY", repository.getRepositoryName());
 
         Stream<Issue> issuesStream = StreamSupport.stream(jiraRestClient
                 .getSearchClient()
