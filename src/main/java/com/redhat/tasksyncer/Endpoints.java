@@ -10,6 +10,7 @@ import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 
+import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -68,7 +70,10 @@ public class Endpoints {
     public Endpoints() {
     }
 
-
+    /**
+     * When creating a trello endpoint via webhook, trello sends a HEAD request and is avaitong 200 response that would not come
+     * from POST Endpoint
+     * */
     @RequestMapping(path = "/service/{serviceName}/project/{projectName}/hook",
             method = {RequestMethod.GET}
     ) public ResponseEntity<String> yesTrelloThisEndpointWorks(){
@@ -93,6 +98,7 @@ public class Endpoints {
     }
 
     //processing received webhook
+    //TODO: Move from endpoints
     private String processHook(String projectName, HttpServletRequest request, String serviceType
     ) throws Exception {
 
@@ -105,6 +111,8 @@ public class Endpoints {
             ProjectAccessor projectAccessor = new ProjectAccessor(project, boardRepository, repositoryRepository, issueRepository, cardRepository, columnRepository, projectRepository, trelloApplicationKey, trelloAccessToken);
             projectAccessor.syncIssue(newIssue);
         } catch (TrelloCalllbackNotAboutCardException ignored) {
+        } catch (JsonProcessingException e){
+            return "Proccessing of the webhook failed - unsuported type";
         }
         return OK;
     }
@@ -160,10 +168,11 @@ public class Endpoints {
     }
 
 
-    @RequestMapping(path = "/project/new/{projectName}/from/{serviceType}/{repoNamespace}/{repoName}/to/trello/{boardName}",
+    //CREATE PROJECT
+    @RequestMapping(path = "/service/{serviceType}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/{boardName}",
                     method = RequestMethod.PUT
     )
-    public ResponseEntity<String> createProject(@PathVariable String projectName,
+    public ResponseEntity<String> createProjectEndpoint(@PathVariable String projectName,
                                                 @PathVariable String serviceType,
                                                 @PathVariable String repoNamespace,
                                                 @PathVariable String repoName,
@@ -171,6 +180,14 @@ public class Endpoints {
                                                 @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                 @RequestParam("secondLoginCredential") String secondLoginCredential
     ) throws Exception {
+        return createProject(projectName, serviceType, repoNamespace, repoName, boardName, firstLoginCredential, secondLoginCredential, true);
+    }
+
+
+    //TODO: rename, move out of endpoints and reconsider
+    public ResponseEntity<String> createProject(String projectName, String serviceType, String repoNamespace, String repoName,
+                                                String boardName, String firstLoginCredential, String secondLoginCredential,
+                                                Boolean trello) throws RepositoryTypeNotSupportedException, IOException {
         projectRepository.findProjectByName(projectName).ifPresent(p -> {
             throw new IllegalArgumentException("Project with name already exists");
         });
@@ -183,12 +200,13 @@ public class Endpoints {
         AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
 
 
-
-        try {
-            projectAccessor.initialize(TrelloCard.class.getName(), boardName);
-        } catch (HttpClientErrorException e){
-            projectAccessor.deleteProject(project);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authentication with Trello failed");
+        if (trello) {
+            try {
+                projectAccessor.initialize(TrelloCard.class.getName(), boardName);
+            } catch (HttpClientErrorException e){
+                projectAccessor.deleteProject(project);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authentication with Trello failed");
+            }
         }
 
         try {
