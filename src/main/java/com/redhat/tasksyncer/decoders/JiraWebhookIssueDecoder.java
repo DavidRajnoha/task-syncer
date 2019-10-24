@@ -1,23 +1,12 @@
 package com.redhat.tasksyncer.decoders;
-import com.atlassian.jira.issue.Issue;
-import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
-import com.atlassian.jira.rest.client.internal.json.IssueJsonParser;
-import com.atlassian.jira.util.http.JiraHttpUtils;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.JiraIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
-
-import org.codehaus.jettison.json.JSONException;
-import org.json.HTTP;
+import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.json.JSONObject;
-import org.springframework.util.ResourceUtils;
-
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Set;
 
 
 public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
@@ -27,9 +16,26 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 //        JSONObject input = requestToInput(request);
         JSONObject input = AbstractWebhookIssueDecoder.RequestToJsonDecoder.toJson(request);
 
+        // TODO: Decide not based on input.has("issue") but based on the issue.getString("webhookEvent") value
+        if (!input.has("issue")){
+            throw new InvalidWebhookCallbackException("Callback has no atribute for Issue");
+        }
+
         AbstractIssue issue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
 
-        issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(input.getJSONObject("issue").getJSONObject("fields").getJSONObject("project").getString("key"), project.getId()));
+        AbstractRepository repository = repositoryRepository.findByRepositoryNameAndProject_Id(input.getJSONObject("issue").getJSONObject("fields").getJSONObject("project").getString("key"), project.getId());
+        issue.setRepository(repository);
+
+        // if the callback is about subissue, then sends the subIssue to the update method wrapped in container issue with
+        // same remoteIssueId and repository as the parent of the issue. The correct parent is then find while updating the
+        // container issue and the parent-issue link is correctly created
+        if (input.getJSONObject("issue").getJSONObject("fields").getJSONObject("issuetype").getBoolean("subtask")){
+            AbstractIssue parentIssue = new JiraIssue();
+            parentIssue.setRepository(repository);
+            parentIssue.setRemoteIssueId(input.getJSONObject("issue").getJSONObject("fields").getJSONObject("parent").getString("key"));
+            parentIssue.addChildIssue(issue);
+            return parentIssue;
+        }
 
         return issue;
     }
