@@ -1,4 +1,4 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.GitlabIssue;
@@ -11,10 +11,12 @@ import org.gitlab4j.api.models.User;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.junit.Before;
 import org.junit.Test;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class GitlabIssueTests {
 

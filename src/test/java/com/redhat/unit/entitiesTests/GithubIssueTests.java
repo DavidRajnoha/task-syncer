@@ -1,4 +1,4 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.GithubIssue;
@@ -12,7 +12,6 @@ import org.kohsuke.github.GitHub;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;

@@ -1,12 +1,10 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
-import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.Label;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.redhat.integration;
+package com.redhat.networkConnectionTests;
 
 import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.accessors.TrelloRepositoryAccessor;
@@ -9,7 +9,6 @@ import org.gitlab4j.api.GitLabApiException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import java.io.IOException;
 

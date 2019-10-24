@@ -1,4 +1,4 @@
-package com.redhat.accessorTests;
+package com.redhat.unit.accessorTests;
 
 import org.junit.Before;
 

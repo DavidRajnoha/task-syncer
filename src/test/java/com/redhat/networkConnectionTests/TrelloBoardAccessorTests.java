@@ -1,4 +1,4 @@
-package com.redhat.integration.projectAccessorTest;
+package com.redhat.networkConnectionTests;
 
 import com.redhat.tasksyncer.dao.accessors.BoardAccessor;
 import com.redhat.tasksyncer.dao.accessors.TrelloBoardAccessor;

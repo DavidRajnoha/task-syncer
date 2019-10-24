@@ -1,12 +1,10 @@
-package com.redhat.accessorTests;
+package com.redhat.unit.accessorTests;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.redhat.tasksyncer.dao.accessors.JiraRepositoryAccessor;
-import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.JiraRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
@@ -16,11 +14,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class JiraAccessorTest {
@@ -83,7 +79,7 @@ public class JiraAccessorTest {
 
         assertThat(abstractIssues.get(0).getChildIssues()).isNotNull();
 
-        Set<AbstractIssue> abstractSubIssues = abstractIssues.get(0).getChildIssues();
+        Map<String, AbstractIssue> abstractSubIssues = abstractIssues.get(0).getChildIssues();
         assertThat(abstractSubIssues.size()).isEqualTo(2);
 
         assertThat(abstractIssues.get(0).getTitle()).isEqualTo(titleOne);

@@ -1,11 +1,9 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
-import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -232,7 +230,7 @@ public class RelationshipConsistenceTests {
     @Test
     public void whenChildIssueIsSetToParentIssue_thenParentIsSetToChild(){
         issue.addChildIssue(childIssueOne);
-        assertTrue(issue.getChildIssues().contains(childIssueOne));
+        assertTrue(issue.getChildIssues().containsValue(childIssueOne));
         assertThat(childIssueOne.getParentIssue()).isEqualTo(issue);
     }
 
@@ -250,7 +248,7 @@ public class RelationshipConsistenceTests {
         childIssueOne.setParentIssue(issue);
 
         assertThat(childIssueOne.getParentIssue()).isEqualTo(issue);
-        assertTrue(issue.getChildIssues().contains(childIssueOne));
+        assertTrue(issue.getChildIssues().containsValue(childIssueOne));
     }
 
     @Test
@@ -259,20 +257,9 @@ public class RelationshipConsistenceTests {
         childIssueOne.setParentIssue(null);
 
         assertThat(childIssueOne.getParentIssue()).isEqualTo(null);
-        assertFalse(issue.getChildIssues().contains(childIssueOne));
+        assertFalse(issue.getChildIssues().containsValue(childIssueOne));
     }
 
-    @Test
-    public void removeIssues_removesAllIssuesFromParentAndPrentFromAllChilds(){
-        issue.addChildIssue(childIssueOne);
-        issue.addChildIssue(childIssueTwo);
-
-        issue.removeChildIssues();
-
-        assertThat(issue.getChildIssues().size()).isEqualTo(0);
-        assertThat(childIssueOne.getParentIssue()).isNull();
-        assertThat(childIssueTwo.getParentIssue()).isNull();
-    }
 
 
 

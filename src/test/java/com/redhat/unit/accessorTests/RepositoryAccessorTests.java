@@ -3,7 +3,7 @@
 
 
 
-//package com.redhat.accessorTests;
+//package com.redhat.unit.accessorTests;
 //
 //import com.atlassian.jira.rest.client.api.JiraRestClient;
 //import com.atlassian.jira.rest.client.api.SearchRestClient;

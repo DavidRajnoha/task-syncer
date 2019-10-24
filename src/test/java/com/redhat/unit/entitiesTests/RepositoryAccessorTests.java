@@ -1,33 +1,20 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
-import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.accessors.GithubRepositoryAccessor;
 import com.redhat.tasksyncer.dao.accessors.GitlabRepositoryAccessor;
 import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
-import com.redhat.tasksyncer.dao.entities.GithubRepository;
-import com.redhat.tasksyncer.dao.entities.GitlabRepository;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
-import static org.mockito.Mockito.when;
-
-
 
 
 public class RepositoryAccessorTests {

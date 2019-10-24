@@ -1,16 +1,10 @@
-package com.redhat.entitiesTests;
+package com.redhat.unit.entitiesTests;
 
-import com.redhat.tasksyncer.Application;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GithubRepository;
 import com.redhat.tasksyncer.dao.entities.GitlabRepository;
-import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
