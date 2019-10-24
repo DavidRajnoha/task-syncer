@@ -1,7 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.Status;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +22,7 @@ public class JiraIssue extends AbstractIssue {
         public static JiraIssue convert(Issue input) {
             JiraIssue issue = new JiraIssue();
 
-            issue.setRemoteIssueId(input.getId().toString());
+            issue.setRemoteIssueId(input.getKey());
             issue.setTitle(input.getSummary());
             issue.setDescription(input.getDescription());
             //set DueDate
@@ -67,13 +66,18 @@ public class JiraIssue extends AbstractIssue {
         //
         public static AbstractIssue convert(JSONObject input) throws JSONException {
             AbstractIssue issue = new JiraIssue();
+
+
             JSONObject inputIssue = input.getJSONObject("issue");
             JSONObject inputFields = inputIssue.getJSONObject("fields");
 
-            issue.setRemoteIssueId(inputIssue.getString("id"));
+
+
+
+            issue.setRemoteIssueId(inputIssue.getString("key"));
 
             issue.setTitle(inputFields.getString("summary"));
-            issue.setDescription(inputFields.getString("description"));
+            issue.setDescription(inputFields.optString("description"));
 
             String status = inputFields.getJSONObject("status").getString("name");
 
@@ -84,10 +88,10 @@ public class JiraIssue extends AbstractIssue {
                 issue.setState(STATE_OPENED);
             else if(status.equals("Closed"))
                 issue.setState(STATE_CLOSED);
+            else issue.setState(STATE_OPENED);
 
             return issue;
         }
-
 
         public static Set<AbstractIssue> getSubtasks(Issue input){
             Set<AbstractIssue> subIssues = new HashSet<>();
@@ -102,6 +106,7 @@ public class JiraIssue extends AbstractIssue {
 
             return subIssues;
         }
+
 
     }
 }

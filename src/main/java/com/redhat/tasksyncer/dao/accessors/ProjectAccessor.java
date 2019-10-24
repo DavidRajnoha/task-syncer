@@ -7,16 +7,11 @@ import com.redhat.tasksyncer.exceptions.IssueSyncFailedException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
-import org.hibernate.HibernateException;
 import org.hibernate.exception.ConstraintViolationException;
-import org.postgresql.util.PSQLException;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.util.NestedServletException;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Filip Cap
@@ -145,24 +140,27 @@ public class ProjectAccessor {
         if(oldIssue.getId() != null) {
             // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
-            // Gets the child issues, if there are child issues present, the child issue is updated
-            // recursive calling of the update function is used, it stops when we reach issue with no childIssues
-            // the update of the innermost issues is therefor finished first
-            // It has to be prohibited to save circular referencing issues - TODO: assert this will not happen
 
-            if (newIssue.getChildIssues() != null){
-                oldIssue.removeChildIssues();
-            }
-
-            Optional.ofNullable(newIssue.getChildIssues()).ifPresent(childIssueSet -> childIssueSet.forEach(
-                    childIssue -> {
-                oldIssue.addChildIssue(update(childIssue));
-                }));
-            return oldIssue;
         }
 
+        // Gets the child issues, if there are child issues present, the child issue is updated
+        // recursive calling of the update function is used, it stops when we reach issue with no childIssues
+        // the update of the innermost issues is therefor finished first
+        // It has to be prohibited to save circular referencing issues - TODO: assert this will not happen
+
+        // If the issues has subIssue(s) then updates the subIssue(s)
+        Optional.ofNullable(newIssue.getChildIssues()).ifPresent(childIssueSet -> {
+            // New copy of set so the concurrentModification exception wouldn't be thrown
+            Set<AbstractIssue> copyChildIssuesSet = new HashSet<>(childIssueSet.values());
+
+            for (AbstractIssue childIssue : copyChildIssuesSet) {
+                oldIssue.removeChildIssue(childIssue);
+                oldIssue.addChildIssue(update(childIssue));
+            }
+        });
+
         // its new issue
-        return newIssue;
+        return oldIssue;
     }
 
     public AbstractIssue updateCard(AbstractIssue issue) {
@@ -175,6 +173,7 @@ public class ProjectAccessor {
 
             return issue;
         }
+
         issue.getCard().updateProperties(TrelloCard.IssueToCardConverter.convert(issue, columns));
 
         return issue;
@@ -183,11 +182,15 @@ public class ProjectAccessor {
     public void syncIssue(AbstractIssue issue) {
         issue = update(issue);
         issue = issueRepository.save(issue); // so the issue has id and is saved in repository before saving card
+        issue = setCard(issue);
+        issueRepository.save(issue);
+    }
 
+    public AbstractIssue setCard(AbstractIssue issue){
         issue = updateCard(issue); // setting new properties to the card
         issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
-                                                                        // then card with id is returned
-        issueRepository.save(issue);
+        // then card with id is returned
+        return issue;
     }
 
     public void hookRepository(AbstractRepository repository, String webhookUrl) throws Exception {
@@ -199,6 +202,6 @@ public class ProjectAccessor {
 
 
     public void deleteProject(Project project) {
-        projectRepository.delete(project);
+       // projectRepository.delete(project);
     }
 }

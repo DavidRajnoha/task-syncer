@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
-import org.gitlab4j.api.models.Milestone;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -34,6 +34,7 @@ public abstract class AbstractIssue {
     private String title;
     @Column(length = 2048)
     private String description;
+    @NotNull
     private String remoteIssueId;
     private Date dueDate;
     private Date createdAt;
@@ -55,15 +56,21 @@ public abstract class AbstractIssue {
     @ManyToOne(targetEntity = AbstractRepository.class, fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
     @JoinColumn(name = "repository_repositoryName")
+    @NotNull
     private AbstractRepository repository;
 
     @OneToOne(targetEntity = AbstractCard.class, fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JsonManagedReference
     private AbstractCard card;
 
-    @OneToMany(targetEntity = AbstractIssue.class, mappedBy = "parentIssue", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Set<AbstractIssue> subIssues;
 
+    @JsonManagedReference
+    @OneToMany(targetEntity = AbstractIssue.class, mappedBy = "parentIssue", fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Map<String, AbstractIssue> childIssues;
+
+
+    @JsonBackReference
     @ManyToOne
     private AbstractIssue parentIssue;
 
@@ -137,32 +144,22 @@ public abstract class AbstractIssue {
     }
 
     public void addChildIssue(AbstractIssue childIssue){
-        if (this.subIssues == null){
-            this.subIssues = new HashSet<>();
+        if (this.childIssues == null){
+            this.childIssues = new HashMap<>();
         }
 
-        if (this.subIssues.contains(childIssue)) return;
+        if (this.childIssues.containsValue(childIssue)) return;
 
-        this.subIssues.add(childIssue);
+        this.childIssues.put(childIssue.getRemoteIssueId(), childIssue);
         childIssue.setParentIssue(this);
 
     }
 
     public void removeChildIssue(AbstractIssue childIssue){
-        if (this.subIssues == null || !this.subIssues.contains(childIssue)) return;
+        if (this.childIssues == null || !this.childIssues.containsKey(childIssue.getRemoteIssueId())) return;
 
-        this.subIssues.remove(childIssue);
+        this.childIssues.remove(childIssue.getRemoteIssueId());
         childIssue.setParentIssue(null);
-    }
-
-
-
-    public void removeChildIssues() {
-        for (Iterator<AbstractIssue> i = this.subIssues.iterator(); i.hasNext();){
-            AbstractIssue subIssue = i.next();
-            subIssue.removeJustParentIssue();
-            i.remove();
-        }
     }
 
     // removes parent issue from this, but leaves this as the child issue at the parent issue
@@ -172,8 +169,8 @@ public abstract class AbstractIssue {
     }
 
 
-    public Set<AbstractIssue> getChildIssues(){
-        return subIssues;
+    public Map<String, AbstractIssue> getChildIssues(){
+        return childIssues;
     }
 
     public void setRepository(AbstractRepository repository) {
