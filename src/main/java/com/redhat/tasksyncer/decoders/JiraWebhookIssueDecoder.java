@@ -5,6 +5,7 @@ import com.redhat.tasksyncer.dao.entities.JiraIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,13 +18,29 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
         JSONObject input = AbstractWebhookIssueDecoder.RequestToJsonDecoder.toJson(request);
 
         // TODO: Decide not based on input.has("issue") but based on the issue.getString("webhookEvent") value
-        if (!input.has("issue")){
+        if (input.has("issue")){
+            return decodeIssue(input, repositoryRepository, project);
+        } else if (input.getString("webhookEvent").equals("issuelink_deleted")){
+            return destroyLink(input, repositoryRepository, project);
+        } else {
             throw new InvalidWebhookCallbackException("Callback has no atribute for Issue");
         }
+    }
 
+    // TODO: alter so it will be supported, necessary to use jira id's and not keys
+    private AbstractIssue destroyLink(JSONObject input, AbstractRepositoryRepository repositoryRepository, Project project) throws InvalidWebhookCallbackException {
+        throw new InvalidWebhookCallbackException("Converting subtasks to issues is ot yet supported");
+    }
+
+    private AbstractIssue decodeIssue(JSONObject input, AbstractRepositoryRepository repositoryRepository, Project project)
+            throws JSONException {
         AbstractIssue issue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
 
-        AbstractRepository repository = repositoryRepository.findByRepositoryNameAndProject_Id(input.getJSONObject("issue").getJSONObject("fields").getJSONObject("project").getString("key"), project.getId());
+        AbstractRepository repository = repositoryRepository
+                .findByRepositoryNameAndProject_Id(input.getJSONObject("issue")
+                        .getJSONObject("fields")
+                        .getJSONObject("project")
+                        .getString("key"), project.getId());
         issue.setRepository(repository);
 
         // if the callback is about subissue, then sends the subIssue to the update method wrapped in container issue with
@@ -40,21 +57,5 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
         return issue;
     }
 
-
-//    private JSONObject requestToInput(HttpServletRequest request) throws JSONException, org.json.JSONException {
-//        StringBuilder stringBuffer = new StringBuilder();
-//        String line;
-//
-//        try {
-//            BufferedReader reader = request.getReader();
-//            while ((line = reader.readLine()) != null)
-//                stringBuffer.append(line);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        String jsonString = stringBuffer.toString();
-//        return new JSONObject(jsonString);
-//    }
 
 }
