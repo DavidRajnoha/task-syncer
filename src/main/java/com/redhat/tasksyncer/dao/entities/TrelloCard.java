@@ -32,12 +32,15 @@ public class TrelloCard extends AbstractCard {
             card.setDueDate(issue.getDueDate());
 
             // todo: use mapping to determine proper column
-            if(issue.getState().equals(AbstractIssue.STATE_OPENED) || issue.getState().equals(AbstractIssue.STATE_REOPENED)) {
-                card.setColumn(columns.stream().filter(c -> c.getName().equals("TODO")).collect(Collectors.toList()).get(0));
+            if (issue.getState() != null) {
+                if (issue.getState().equals(AbstractIssue.STATE_OPENED) || issue.getState().equals(AbstractIssue.STATE_REOPENED)) {
+                    card.setColumn(columns.stream().filter(c -> c.getName().equals("TODO")).collect(Collectors.toList()).get(0));
+                } else {
+                    card.setColumn(columns.stream().filter(c -> c.getName().equals("DONE")).collect(Collectors.toList()).get(0));
+                }
             } else {
                 card.setColumn(columns.stream().filter(c -> c.getName().equals("DONE")).collect(Collectors.toList()).get(0));
             }
-
             return card;
         }
     }
