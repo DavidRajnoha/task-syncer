@@ -8,9 +8,11 @@ import java.util.List;
 /**
  * @author Filip Cap
  */
-public abstract class BoardAccessor {
-    public abstract AbstractBoard createItself();
+public interface BoardAccessor {
+    public abstract AbstractBoard createBoard();
     public abstract AbstractCard update(AbstractCard card);
+
+    public abstract BoardAccessor initializeAndSave(AbstractBoard board, String trelloApplicationKey, String trelloAccessToken);
 
     public abstract List<AbstractColumn> getColumns();
     public abstract void setProject(Project project);

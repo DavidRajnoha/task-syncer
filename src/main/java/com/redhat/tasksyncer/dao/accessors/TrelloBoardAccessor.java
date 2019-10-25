@@ -11,6 +11,9 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.*;
@@ -26,26 +29,33 @@ import java.util.Map;
  * @author Filip Cap
  */
 
-public class TrelloBoardAccessor extends BoardAccessor {
-    private TrelloBoard board;
+@Service
+@EntityScan(basePackages = {"com.redhat.tasksyncer.dao.entities"})
+public class TrelloBoardAccessor implements BoardAccessor {
+
+    private AbstractBoard board;
+
     private AbstractBoardRepository boardRepository;
     private AbstractCardRepository cardRepository;
     private AbstractColumnRepository columnRepository;
 
     private Trello trelloApi;
 
-    public TrelloBoardAccessor(TrelloBoard board, String trelloApplicationKey, String trelloAccessToken, AbstractBoardRepository boardRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository) {
-        this.board = board;
+    @Autowired
+    public TrelloBoardAccessor(AbstractBoardRepository boardRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository) {
         this.boardRepository = boardRepository;
         this.cardRepository = cardRepository;
         this.columnRepository = columnRepository;
+    }
 
+    public BoardAccessor initializeAndSave(AbstractBoard board, String trelloApplicationKey, String trelloAccessToken){
+        this.board = boardRepository.save(board);
         trelloApi = new TrelloImpl(trelloApplicationKey, trelloAccessToken, new RestTemplateHttpClient());
-
+        return this;
     }
 
     @Override
-    public AbstractBoard createItself() throws HttpClientErrorException {
+    public AbstractBoard createBoard() throws HttpClientErrorException {
         if(this.board.isCreated())
             return this.board;
 

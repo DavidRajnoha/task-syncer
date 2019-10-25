@@ -2,7 +2,9 @@ package com.redhat.tasksyncer.dao.accessors;
 
 
 import com.redhat.tasksyncer.dao.entities.*;
-import com.redhat.tasksyncer.dao.repositories.*;
+import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
+import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import com.redhat.tasksyncer.exceptions.IssueSyncFailedException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
@@ -30,20 +32,10 @@ import java.util.Set;
 public class ProjectAccessorImpl implements ProjectAccessor{
 
 
-    private BoardAccessor boardAccessor;
-
-    @Autowired
     private AbstractIssueRepository issueRepository;
-    @Autowired
-    private AbstractCardRepository cardRepository;
-    @Autowired
-    private AbstractColumnRepository columnRepository;
-    @Autowired
     private ProjectRepository projectRepository;
-    @Autowired
     private AbstractRepositoryRepository repositoryRepository;
-    @Autowired
-    private AbstractBoardRepository boardRepository;
+    private BoardAccessor boardAccessor;
 
 
     @Value("${trello.appKey}")
@@ -54,22 +46,16 @@ public class ProjectAccessorImpl implements ProjectAccessor{
 
     private Project project;
 
-    public ProjectAccessorImpl(){
+    @Autowired
+    public ProjectAccessorImpl(AbstractIssueRepository issueRepository, ProjectRepository projectRepository,
+                               AbstractRepositoryRepository repositoryRepository, BoardAccessor boardAccessor){
+        this.issueRepository = issueRepository;
+        this.projectRepository = projectRepository;
+        this.repositoryRepository = repositoryRepository;
+        this.boardAccessor = boardAccessor;
     }
 
-    // Deprecated - used just in test so they wont throw errors until changed
-    public ProjectAccessorImpl(Project project, String trelloApplicationKey, String trelloAccessToken) {
-        this.project = project;
-
-        this.trelloApplicationKey = trelloApplicationKey;
-        this.trelloAccessToken = trelloAccessToken;
-    }
-
-
-    public BoardAccessor getBoardAccessor() {
-        if(boardAccessor == null)
-            boardAccessor = new TrelloBoardAccessor((TrelloBoard) project.getBoard(), trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository); // todo generify
-
+    private BoardAccessor getBoardAccessor() {
         return boardAccessor;
     }
 
@@ -78,11 +64,11 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         TrelloBoard board = new TrelloBoard();
         board.setBoardName(name);
 
-        this.boardAccessor = new TrelloBoardAccessor(board, trelloApplicationKey, trelloAccessToken, boardRepository, cardRepository, columnRepository);
+        this.boardAccessor = boardAccessor.initializeAndSave(board, trelloApplicationKey, trelloAccessToken);
 
-        AbstractBoard b = this.boardAccessor.createItself();
+        AbstractBoard b = this.boardAccessor.createBoard();
         b.setProject(project);
-        boardRepository.save(b);
+        boardAccessor.save();
         return this.boardAccessor;
     }
 
@@ -164,6 +150,9 @@ public class ProjectAccessorImpl implements ProjectAccessor{
                 newIssue.getRepository().getRepositoryName())
                 .orElse(newIssue);
 
+        Optional<AbstractIssue> superIssue = issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newIssue.getRemoteIssueId(),
+                newIssue.getRepository().getRepositoryName());
+
         if(oldIssue.getId() != null) {
             // there exists such issue (the old issue has an id, therefor was saved, therefor exists in repository)
             oldIssue.updateProperties(newIssue);
@@ -213,7 +202,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
             issueRepository.save(issue);
         }
 
-    private AbstractIssue setCard(AbstractIssue issue){
+    public AbstractIssue setCard(AbstractIssue issue){
             issue = updateCard(issue); // setting new properties to the card
             issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
             // then card with id is returned
@@ -230,4 +219,5 @@ public class ProjectAccessorImpl implements ProjectAccessor{
     public void deleteProject(Project project) {
         projectRepository.delete(project);
     }
+
 }

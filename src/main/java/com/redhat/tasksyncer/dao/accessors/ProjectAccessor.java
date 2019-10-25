@@ -1,8 +1,11 @@
 package com.redhat.tasksyncer.dao.accessors;
 
-import com.redhat.tasksyncer.dao.entities.*;
+import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
+import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
+
 import java.io.IOException;
 
 
@@ -31,5 +34,5 @@ public interface ProjectAccessor {
 
     void deleteProject(Project project);
 
-
+    AbstractIssue setCard(AbstractIssue newGithubIssue);
 }
