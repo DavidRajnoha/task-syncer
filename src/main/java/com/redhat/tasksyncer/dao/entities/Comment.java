@@ -3,10 +3,12 @@ package com.redhat.tasksyncer.dao.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * @author David Rajnoha
+ * */
 @Entity
 public class Comment {
     @Id

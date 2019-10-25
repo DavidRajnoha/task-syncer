@@ -9,6 +9,10 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 
+
+/**
+ * @author David Rajnoha
+ * */
 public class TrelloWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
     @Override

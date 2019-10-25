@@ -9,7 +9,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 
-
+/**
+ * @author David Rajnoha
+ * */
 public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
     @Override

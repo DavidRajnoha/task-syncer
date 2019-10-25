@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 
 
+/**
+ * @author David Rajnoha
+ * */
 @Entity
 public class JiraIssue extends AbstractIssue {
     public JiraIssue() {

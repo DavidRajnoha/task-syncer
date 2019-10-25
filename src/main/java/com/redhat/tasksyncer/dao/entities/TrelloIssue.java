@@ -1,7 +1,6 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.julienvey.trello.domain.Card;
-import com.redhat.tasksyncer.Label;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.json.JSONException;
@@ -15,6 +14,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+/**
+ * @author David Rajnoha
+ * */
 
 @Entity
 public class TrelloIssue extends AbstractIssue {

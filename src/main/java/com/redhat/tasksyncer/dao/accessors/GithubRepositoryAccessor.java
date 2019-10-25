@@ -10,7 +10,9 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+/**
+* @author David Rajnoha
+* */
 public class GithubRepositoryAccessor extends RepositoryAccessor {
 
     private AbstractRepository repository;

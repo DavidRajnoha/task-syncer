@@ -1,10 +1,8 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
-import org.gitlab4j.api.models.Assignee;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
-import org.kohsuke.github.GHUser;
 
 import javax.persistence.Entity;
 import java.io.IOException;
@@ -13,7 +11,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-
+/**
+ * @author David Rajnoha
+ * */
 @Entity
 public class GithubIssue extends AbstractIssue {
     public GithubIssue() {

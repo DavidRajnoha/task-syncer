@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @author Filip Cap
+ * @author Filip Cap, David Rajnoha
  */
 public abstract class RepositoryAccessor {
     protected AbstractRepositoryRepository repositoryRepository;

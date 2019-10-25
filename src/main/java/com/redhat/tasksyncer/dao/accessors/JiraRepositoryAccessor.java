@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+
+/**
+ * @author David Rajnoha
+ * */
 public class JiraRepositoryAccessor extends RepositoryAccessor {
     private static final String JQL = "project=KEY";
     //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different

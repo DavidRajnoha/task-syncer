@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
- * @author Filip Cap
+ * @author Filip Cap, David Rajnoha
  */
 
 @Table(

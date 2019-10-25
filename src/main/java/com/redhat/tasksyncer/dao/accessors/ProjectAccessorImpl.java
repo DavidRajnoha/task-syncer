@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * @author Filip Cap
+ * @author Filip Cap, David Rajnoha
  */
 
 @Service

@@ -1,7 +1,6 @@
 package com.redhat.tasksyncer.dao.accessors;
 
 import com.julienvey.trello.Trello;
-import com.julienvey.trello.domain.Board;
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.http.RestTemplateHttpClient;
@@ -9,7 +8,6 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.entities.TrelloRepository;
-import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.GitLabApiException;
 
@@ -17,14 +15,19 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Parameter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+
+/**
+ * @author David Rajnoha
+ * */
 public class TrelloRepositoryAccessor extends RepositoryAccessor{
     private Trello trelloApi;
     private AbstractRepository repository;

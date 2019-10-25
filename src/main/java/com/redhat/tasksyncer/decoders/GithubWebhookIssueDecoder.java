@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * @author Filip Cap
- */
+ * @author David Rajnoha
+ * */
 public class GithubWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
 

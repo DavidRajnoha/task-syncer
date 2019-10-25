@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+/**
+ * @author David Rajnoha
+ * */
 public abstract class AbstractWebhookIssueDecoder {
 
     public static AbstractWebhookIssueDecoder getInstance(String serviceType) throws RepositoryTypeNotSupportedException {
