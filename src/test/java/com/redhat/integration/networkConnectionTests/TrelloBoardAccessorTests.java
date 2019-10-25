@@ -1,4 +1,4 @@
-package com.redhat.networkConnectionTests;
+package com.redhat.integration.networkConnectionTests;
 
 import com.redhat.tasksyncer.dao.accessors.BoardAccessor;
 import com.redhat.tasksyncer.dao.accessors.TrelloBoardAccessor;
@@ -23,11 +23,11 @@ public class TrelloBoardAccessorTests {
     private String trelloKey = "not_functional_key";
     private String trelloToken = "not_functional_token";
 
-    BoardAccessor boardAccessor = new TrelloBoardAccessor(trelloBoard, trelloKey, trelloToken, boardRepository, abstractCardRepository, columnRepository);
+    BoardAccessor boardAccessor = new TrelloBoardAccessor(boardRepository, abstractCardRepository, columnRepository);
 
     @Test
     public void whenLogingInWithFalseCredential_thenErrorIsThrown(){
-        boardAccessor.createItself();
+        boardAccessor.createBoard();
     }
 
 }

@@ -1,15 +1,21 @@
 package com.redhat.unit.accessorTests;
 
+import com.redhat.tasksyncer.dao.accessors.BoardAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
-import com.redhat.tasksyncer.dao.entities.*;
+import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
+import com.redhat.tasksyncer.dao.entities.GitlabIssue;
+import com.redhat.tasksyncer.dao.entities.GitlabRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
+import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Optional;
 
@@ -21,9 +27,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class ProjectAccessorTests {
 
 
-    @InjectMocks
     private AbstractIssueRepository issueRepository = Mockito.mock(AbstractIssueRepository.class);
+    @MockBean
     private AbstractRepository abstractRepository;
+    @MockBean
+    private ProjectRepository projectRepository;
+    @MockBean
+    private BoardAccessor boardAccessor;
+    @MockBean
+    private AbstractRepositoryRepository repositoryRepository;
+
     private ProjectAccessor projectAccessor;
 
     private String oldDescription = "Cool Issue";
@@ -38,10 +51,7 @@ public class ProjectAccessorTests {
         abstractRepository = new GitlabRepository();
         abstractRepository.setRepositoryName("repoName");
 
-
-
-        projectAccessor = new ProjectAccessorImpl();
-
+        projectAccessor = new ProjectAccessorImpl(issueRepository, projectRepository, repositoryRepository, boardAccessor);
 
     }
 

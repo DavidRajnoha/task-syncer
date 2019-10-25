@@ -1,10 +1,9 @@
-package com.redhat.unit.accessorTests;
+package com.redhat.integration;
 
 import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TrelloBoardAccessorTests {
 
