@@ -3,6 +3,7 @@ package com.redhat.tasksyncer.dao.accessors;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.gitlab4j.api.GitLabApiException;
 
@@ -21,7 +22,7 @@ public abstract class RepositoryAccessor {
      * Creates new subclass of repositoryAccessor, based on the class of the repository that is passed in the argument
      * */
     public static RepositoryAccessor getInstance(AbstractRepository repository, AbstractRepositoryRepository repositoryRepository,
-                                                          AbstractIssueRepository issueRepository) throws IOException, RepositoryTypeNotSupportedException {
+                                                          AbstractIssueRepository issueRepository) throws  RepositoryTypeNotSupportedException {
         Class<? extends AbstractRepository> repoType = repository.getClass();
         RepositoryAccessor repositoryAccessor;
         if (GitlabRepository.class.equals(repoType)) {
@@ -41,9 +42,16 @@ public abstract class RepositoryAccessor {
     }
 
     public static RepositoryAccessor getConnectedInstance(AbstractRepository repository, AbstractRepositoryRepository repositoryRepository,
-                                                 AbstractIssueRepository issueRepository) throws IOException, RepositoryTypeNotSupportedException {
+                                                 AbstractIssueRepository issueRepository) throws
+            RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
+
         RepositoryAccessor repositoryAccessor = getInstance(repository, repositoryRepository, issueRepository);
-        repositoryAccessor.connectToRepository();
+        try {
+            repositoryAccessor.connectToRepository();
+        } catch (IOException exception){
+            throw new CannotConnectToRepositoryException(exception.getMessage());
+        }
+
         return repositoryAccessor;
     }
 

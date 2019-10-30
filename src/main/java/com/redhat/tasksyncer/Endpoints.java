@@ -10,9 +10,8 @@ import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.*;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 
-import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
-import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
-import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
+import com.redhat.tasksyncer.exceptions.*;
+import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
@@ -84,17 +83,18 @@ public class Endpoints {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             method = {RequestMethod.POST}
     )
-    public String hookEndpoint(@PathVariable String serviceName,
+    public ResponseEntity<String> hookEndpoint(@PathVariable String serviceName,
             @PathVariable String projectName,
                        HttpServletRequest request
-    ) throws Exception {
-        return processHook(projectName, request, serviceName);
+    )  {
+       return processHook(projectName, request, serviceName);
+
     }
 
     //processing received webhook
     //TODO: Move from endpoints
-    private String processHook(String projectName, HttpServletRequest request, String serviceType
-    ) throws Exception {
+    private ResponseEntity<String> processHook(String projectName, HttpServletRequest request, String serviceType
+    ) {
 
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
@@ -105,11 +105,11 @@ public class Endpoints {
 
             projectAccessor.saveAndInitialize(project);
             projectAccessor.syncIssue(newIssue);
-        } catch (TrelloCalllbackNotAboutCardException | InvalidWebhookCallbackException ignored) {
-        } catch (JsonProcessingException e){
-            return "Proccessing of the webhook failed - unsuported type";
+        } catch (TrelloCalllbackNotAboutCardException  ignored) {
+        } catch (InvalidWebhookCallbackException | RepositoryTypeNotSupportedException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        return OK;
+        return ResponseEntity.status(HttpStatus.OK).body("Webhook processed");
     }
 
 
@@ -127,17 +127,37 @@ public class Endpoints {
                                                       @PathVariable String repoNamespace,
                                                       @PathVariable String repoName,
                                                       @RequestParam("firstLoginCredential") String firstLoginCredential,
-                                                      @RequestParam("secondLoginCredential") String secondLoginCredential) throws Exception {
+                                                      @RequestParam("secondLoginCredential") String secondLoginCredential) {
+
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
         projectAccessor.saveAndInitialize(project);
-        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+        AbstractRepository repository;
+
+        try {
+            repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
+                    serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+        } catch (RepositoryTypeNotSupportedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Service of type: " + serviceName + " is not supported");
+        }
 
 
         //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
-            RepositoryAccessor repositoryAccessor = projectAccessor.addRepository(repository);
+        RepositoryAccessor repositoryAccessor;
+        try {
+            repositoryAccessor = projectAccessor.addRepository(repository);
+        } catch (CannotConnectToRepositoryException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Could not connect to the " + serviceName +
+                    "web service");
+        } catch (RepositoryTypeNotSupportedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Repository of service of type: " + serviceName +
+                     " is not implemented");
+        }
 
         // Deciding if create hook or not based on the query parameters
         switch (hookOrConnect){
@@ -146,12 +166,25 @@ public class Endpoints {
                 try {
                 //projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
                 projectAccessor.hookRepository(repository, githubWebhookURLString.replace("{projectName}", projectName));
-                } catch (Exception e) {
+                } catch (IOException |
+                        GitLabApiException e) {
                     e.printStackTrace();
                     repositoryAccessor.deleteRepository(repository);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create the webhook," +
                             " check if the webhook is not already created");
+                } catch (RepositoryTypeNotSupportedException e){
+                    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Creation of webhook for the service: " +
+                            serviceName + "is not supported");
+                } catch (SynchronizationFailedException e){
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Connecting to the repository" +
+                            "failed");
+                } catch (CannotConnectToRepositoryException e) {
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Could not connect to the " + serviceName +
+                            "web service");
                 }
+
                 break;
             case "connect":
                 break;
@@ -174,7 +207,7 @@ public class Endpoints {
                                                 @PathVariable String boardName,
                                                 @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                 @RequestParam("secondLoginCredential") String secondLoginCredential
-    ) throws Exception {
+    )  {
         return createProject(projectName, serviceType, repoNamespace, repoName, boardName, firstLoginCredential, secondLoginCredential, true);
     }
 
@@ -182,17 +215,23 @@ public class Endpoints {
     //TODO: rename, move out of endpoints and reconsider
     public ResponseEntity<String> createProject(String projectName, String serviceType, String repoNamespace, String repoName,
                                                 String boardName, String firstLoginCredential, String secondLoginCredential,
-                                                Boolean trello) throws RepositoryTypeNotSupportedException, IOException {
-        projectRepository.findProjectByName(projectName).ifPresent(p -> {
-            throw new IllegalArgumentException("Project with name already exists");
-        });
+                                                Boolean trello) {
+        if (projectRepository.findProjectByName(projectName).isPresent()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Project with name " + projectName + "Already Exists");
+        }
 
         Project project = new Project();
         project.setName(projectName);
 
-        projectAccessor.saveAndInitialize(project);
-        AbstractRepository repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
-
+        AbstractRepository repository;
+        try {
+            projectAccessor.saveAndInitialize(project);
+            repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
+                    serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+        } catch (RepositoryTypeNotSupportedException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Service of type: " + serviceType + " is not yet " +
+                    "supported");
+        }
 
         if (trello) {
             try {
@@ -205,17 +244,27 @@ public class Endpoints {
 
         try {
             projectAccessor.addRepository(repository);
-        } catch (Exception e) {
-            projectAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+        } catch (CannotConnectToRepositoryException e) {
+            revertCreation(project);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Can't connect to the external service");
+        } catch (RepositoryTypeNotSupportedException e) {
             e.printStackTrace();
-            projectAccessor.deleteProject(project);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Database failure, repository already exists");
         }
 
         projectAccessor.save(); // todo: make it transactional
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
+
+    public void revertCreation(Project project){
+        try {
+            projectAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+        } catch (CannotConnectToRepositoryException e) {
+            e.printStackTrace();
+        }
+        projectAccessor.deleteProject(project);
+    }
+
 
 
 

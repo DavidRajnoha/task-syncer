@@ -23,7 +23,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     private GitHub gitHub;
     private GHRepository ghRepository;
 
-    public GithubRepositoryAccessor(GithubRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository) throws IOException {
+    public GithubRepositoryAccessor(GithubRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository) {
         this.repository = repository;
         this.repositoryRepository = repositoryRepository;
         this.issueRepository = issueRepository;

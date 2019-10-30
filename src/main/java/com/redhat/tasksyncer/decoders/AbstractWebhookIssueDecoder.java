@@ -1,8 +1,11 @@
 package com.redhat.tasksyncer.decoders;
 
-import com.redhat.tasksyncer.dao.entities.*;
+import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
+import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,10 +41,11 @@ public abstract class AbstractWebhookIssueDecoder {
         return issueDecoder;
     }
 
-    public abstract AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws Exception;
+    public abstract AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository)
+            throws InvalidWebhookCallbackException, TrelloCalllbackNotAboutCardException;
 
     public static class RequestToJsonDecoder {
-        public static JSONObject toJson(HttpServletRequest request) throws JSONException {
+        public static JSONObject toJson(HttpServletRequest request) throws InvalidWebhookCallbackException {
             StringBuilder stringBuffer = new StringBuilder();
             String line;
 
@@ -54,7 +58,12 @@ public abstract class AbstractWebhookIssueDecoder {
             }
 
             String jsonString = stringBuffer.toString();
-            return new JSONObject(jsonString);
+            try {
+                return new JSONObject(jsonString);
+            } catch (JSONException e){
+                e.printStackTrace();
+                throw new InvalidWebhookCallbackException("Converting the body to JSON object");
+            }
         }
     }
 }

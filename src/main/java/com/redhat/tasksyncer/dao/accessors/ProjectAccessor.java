@@ -3,8 +3,10 @@ package com.redhat.tasksyncer.dao.accessors;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.Project;
+import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
+import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 
@@ -14,13 +16,13 @@ import java.io.IOException;
  */
 public interface ProjectAccessor {
 
-    void deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException;
+    void deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws CannotConnectToRepositoryException;
 
     Project saveAndInitialize(Project project);
 
     void initialize(String boardType, String boardName);
 
-    RepositoryAccessor addRepository(AbstractRepository repository) throws SynchronizationFailedException, IOException, RepositoryTypeNotSupportedException;
+    RepositoryAccessor addRepository(AbstractRepository repository) throws  RepositoryTypeNotSupportedException, CannotConnectToRepositoryException;
 
     AbstractIssue update(AbstractIssue newIssue);
 
@@ -28,7 +30,8 @@ public interface ProjectAccessor {
 
     void syncIssue(AbstractIssue issue);
 
-    void hookRepository(AbstractRepository repository, String webhookUrl) throws Exception;
+    void hookRepository(AbstractRepository repository, String webhookUrl) throws RepositoryTypeNotSupportedException,
+            IOException, SynchronizationFailedException, GitLabApiException, CannotConnectToRepositoryException;
 
     void save();
 

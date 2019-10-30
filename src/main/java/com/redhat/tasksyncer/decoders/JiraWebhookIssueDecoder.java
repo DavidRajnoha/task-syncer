@@ -15,17 +15,24 @@ import javax.servlet.http.HttpServletRequest;
 public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
     @Override
-    public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws Exception {
+    public AbstractIssue decode(HttpServletRequest request, Project project,
+                                AbstractRepositoryRepository repositoryRepository)
+            throws  InvalidWebhookCallbackException {
 //        JSONObject input = requestToInput(request);
         JSONObject input = AbstractWebhookIssueDecoder.RequestToJsonDecoder.toJson(request);
 
         // TODO: Decide not based on input.has("issue") but based on the issue.getString("webhookEvent") value
-        if (input.has("issue")){
-            return decodeIssue(input, repositoryRepository, project);
-        } else if (input.getString("webhookEvent").equals("issuelink_deleted")){
-            return destroyLink(input, repositoryRepository, project);
-        } else {
-            throw new InvalidWebhookCallbackException("Callback has no atribute for Issue");
+        try {
+            if (input.has("issue")) {
+                return decodeIssue(input, repositoryRepository, project);
+            } else if (input.getString("webhookEvent").equals("issuelink_deleted")) {
+                return destroyLink(input, repositoryRepository, project);
+            } else {
+                throw new InvalidWebhookCallbackException("Callback has no atribute for Issue");
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+            throw new InvalidWebhookCallbackException("Error parsing webhhok body");
         }
     }
 

@@ -14,7 +14,6 @@ import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.ProjectHook;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,7 +64,7 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public void connectToRepository() throws IOException {
+    public void connectToRepository() {
         this.gitlabApi = getConnection(repository.getFirstLoginCredential(), Constants.TokenType.PRIVATE, repository.getSecondLoginCredential());
     }
 

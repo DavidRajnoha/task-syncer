@@ -4,6 +4,7 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.gitlab4j.api.webhook.WebHookListener;
@@ -31,8 +32,15 @@ public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
         });
     }
 
-    public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws GitLabApiException {
-        webHookManager.handleEvent(request);
+    public AbstractIssue decode
+            (HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository)
+            throws  InvalidWebhookCallbackException {
+        try {
+            webHookManager.handleEvent(request);
+        } catch (GitLabApiException e){
+            e.printStackTrace();
+            throw new InvalidWebhookCallbackException("Could not handle the webhook content");
+        }
 
         IssueEvent ie = this.ie;
         this.ie = null;

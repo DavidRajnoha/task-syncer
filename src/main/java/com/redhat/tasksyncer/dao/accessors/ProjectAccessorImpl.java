@@ -5,7 +5,7 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
-import com.redhat.tasksyncer.exceptions.IssueSyncFailedException;
+import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
@@ -72,8 +72,13 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         return this.boardAccessor;
     }
 
-    public void deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
-        boardAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+    public void deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws  CannotConnectToRepositoryException {
+        try {
+            boardAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);
+        } catch (IOException e){
+            e.printStackTrace();
+            throw new CannotConnectToRepositoryException(e.getMessage());
+        }
     }
 
     @Override
@@ -98,14 +103,15 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
      * The accessor is then used to sync the issues from the particular repository with the internal database
      * */
-    public RepositoryAccessor addRepository(AbstractRepository repository) throws SynchronizationFailedException, IOException, RepositoryTypeNotSupportedException {
+    public RepositoryAccessor addRepository(AbstractRepository repository) throws RepositoryTypeNotSupportedException,
+            CannotConnectToRepositoryException {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
         try {
             doSync(repositoryAccessor);
-        } catch (IssueSyncFailedException | GitLabApiException glException){
-            glException.printStackTrace();
+        } catch (CannotConnectToRepositoryException exception){
+            exception.printStackTrace();
             repositoryAccessor.deleteRepository(repository);
-            throw new SynchronizationFailedException("Synchronization with " + repository.getClass().toString() + " failed");
+            throw exception;
         }
         return repositoryAccessor;
     }
@@ -115,7 +121,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * Creates a repositoryAccessor to serve as a middle layer between repository object and "real" network repository,
      * Also adds project to the repository and saves the repository TODO: This violates the single responsibility principle
      * */
-    private RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, IOException {
+    private RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
         RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
 
         AbstractRepository r = repositoryAccessor.createItself();
@@ -130,18 +136,17 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * method to get a list of issues from that particular repository, then updates and syncs those issues with the internal
      * IssueRepository and Trello using the update method
      * */
-    private void doSync(RepositoryAccessor repositoryAccessor) throws IOException, GitLabApiException, IssueSyncFailedException {
-        List<AbstractIssue> issues = repositoryAccessor.downloadAllIssues();
+    private void doSync(RepositoryAccessor repositoryAccessor) throws CannotConnectToRepositoryException {
+        List<AbstractIssue> issues = null;
+        try {
+            issues = repositoryAccessor.downloadAllIssues();
+        } catch (IOException | GitLabApiException e) {
+            throw new CannotConnectToRepositoryException(e.getMessage());
+        }
 
         for(AbstractIssue i : issues) {
-            try {
                 i.setRepository(repositoryAccessor.getRepository());
                 this.syncIssue(i);
-            } catch (Exception e){
-                e.printStackTrace();
-                i.setRepository(null);
-                throw new IssueSyncFailedException(e);
-            }
         }
     }
 
@@ -209,7 +214,9 @@ public class ProjectAccessorImpl implements ProjectAccessor{
             return issue;
         }
 
-    public void hookRepository(AbstractRepository repository, String webhookUrl) throws Exception {
+    public void hookRepository(AbstractRepository repository, String webhookUrl) throws
+            RepositoryTypeNotSupportedException, IOException, SynchronizationFailedException, GitLabApiException,
+            CannotConnectToRepositoryException {
         RepositoryAccessor repositoryAccessor;
         //Adds the repository to the project, syncs it and returns the particular repository Accessor
         repositoryAccessor = addRepository(repository);

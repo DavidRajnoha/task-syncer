@@ -5,6 +5,7 @@ import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.TrelloWebhookIssueDecoder;
+import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.codehaus.jettison.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -46,7 +47,7 @@ public class WebhookIssueDecoderTests {
 
 
     @Test
-    public void whenHttpRequestIsPassed_thenJSONObjectIsCreated() throws JSONException, org.json.JSONException, IOException {
+    public void whenHttpRequestIsPassed_thenJSONObjectIsCreated() throws JSONException, org.json.JSONException, IOException, InvalidWebhookCallbackException {
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 
         servletRequest.addHeader("key", "value");
