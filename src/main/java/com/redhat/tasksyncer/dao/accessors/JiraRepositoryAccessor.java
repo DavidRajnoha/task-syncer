@@ -24,6 +24,7 @@ import java.util.stream.StreamSupport;
  * @author David Rajnoha
  * */
 public class JiraRepositoryAccessor extends RepositoryAccessor {
+    // JQL for searching issues corresponding to particular project, the KEY will be replaced by the project key
     private static final String JQL = "project=KEY";
     //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different
     private static final String URL = "https://NAMESPACE.atlassian.net";

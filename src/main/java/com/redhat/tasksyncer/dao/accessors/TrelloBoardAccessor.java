@@ -129,7 +129,7 @@ public class TrelloBoardAccessor implements BoardAccessor {
     }
 
     @Override
-    public String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
+        public String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {
         URL url = new URL("https://api.trello.com/1/boards/" + board.getRemoteBoardId() /* + "?key=" + trelloApplicationKey + "&token=" + trelloAccessToken */);
         // TODO: Move the implementation details into the library
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

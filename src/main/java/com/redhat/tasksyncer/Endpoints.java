@@ -95,14 +95,16 @@ public class Endpoints {
     //TODO: Move from endpoints
     private ResponseEntity<String> processHook(String projectName, HttpServletRequest request, String serviceType
     ) {
-
+        // if project the hook is pointed at does not exists, throws error
+        // TODO: Swap error for HTTP response
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         try {
+            // converts webhook request to the abstractIssue
             AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
 
-
+            // syncs the updated issue with the local database
             projectAccessor.saveAndInitialize(project);
             projectAccessor.syncIssue(newIssue);
         } catch (TrelloCalllbackNotAboutCardException  ignored) {
@@ -115,9 +117,27 @@ public class Endpoints {
 
 
     /**
-     * @param firstLoginCredential Trello - app key; Jira - email@adress
-     * @param secondLoginCredential Trello - token; Jira - ???
+     * Connects or connects and hooks the repository from external service with existing project in tasksyncer
      *
+     * @param firstLoginCredential Trello - app key; Jira - email@adress; Github - email@adress; GitLab - instance URL
+     * @param secondLoginCredential Trello - token; Jira - API token; Github - password; Gitlab - AuthKey
+     * @param serviceName supported values: trello, jira, github, gitlab\
+     * @param projectName name of the project you are trying to connect external service to
+     * @param hookOrConnect supported values: hook - you wish to connect to the service and create webhook there pointing
+     *                                               at this app
+     *                                        connect - you wish to connect to the service but not create a webhook
+     * @param repoNamespace Trello - random value, namespace not required
+     *                      Jira - namespace of your account, NAMESPACE.atlassian.net
+     *                      Github - name of your account, github.com/NAME/repositoryName
+     *                      Gitlab - gitlab namespace
+     * @param repoName Trello - full id of the board you wish to connect, can be found at trello.com/your/board/url.json
+     *                 Jira - project key - the three or two letter shortcut of the project name written in capital letters
+     *                 Github - repository name, github.com/namespace/REPOSITORY_NAME
+     *                 Gitlab - project name
+     *
+     *
+     * @return Http ResponseEntity; 400 when serviceName is not valid; 503 when there was an error in communication with
+     * external service
      * */
     @RequestMapping(path = "/service/{serviceName}/project/{projectName}/{hookOrConnect}/{repoNamespace}/{repoName}",
             method = RequestMethod.PUT
@@ -128,15 +148,16 @@ public class Endpoints {
                                                       @PathVariable String repoName,
                                                       @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                       @RequestParam("secondLoginCredential") String secondLoginCredential) {
-
+        // Project with projectName must be already created
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
-        //Creates a projectAccessor and passes all components that has been autowired and values that has been defined here
+        //Initialize a projectAccessor - adds a project to the accessor and saves the project
         projectAccessor.saveAndInitialize(project);
-        AbstractRepository repository;
 
+        AbstractRepository repository;
         try {
+            // Creates a repository of the serviceName type
             repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
                     serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
         } catch (RepositoryTypeNotSupportedException e) {
@@ -145,9 +166,9 @@ public class Endpoints {
         }
 
 
-        //And also conducts synchronization of the gitlab issues with the local issueRepository and trello
         RepositoryAccessor repositoryAccessor;
         try {
+            // Adds the repository to the project and syncs the remoteIssues with local database
             repositoryAccessor = projectAccessor.addRepository(repository);
         } catch (CannotConnectToRepositoryException e) {
             e.printStackTrace();
@@ -164,7 +185,7 @@ public class Endpoints {
             case "hook":
                 //TODO: let the repositoryAccessors get the hook somewhere else
                 try {
-                //projectAccessor.hookRepository(repository, gitlabWebhookURLString.replace("{projectName}", projectName));
+                // creates webhook pointing to local adress
                 projectAccessor.hookRepository(repository, githubWebhookURLString.replace("{projectName}", projectName));
                 } catch (IOException |
                         GitLabApiException e) {
@@ -197,18 +218,39 @@ public class Endpoints {
 
 
     //CREATE PROJECT
-    @RequestMapping(path = "/service/{serviceType}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/{boardName}",
+    /**
+     * Creates a new project in tasksyncer and connects it with the service repositoru/project (syncs all the issues, webhook
+     * is not created automatically)
+     *
+     * @param firstLoginCredential Trello - app key; Jira - email@adress; Github - email@adress; GitLab - instance URL
+     * @param secondLoginCredential Trello - token; Jira - API token; Github - password; Gitlab - AuthKey
+     * @param serviceName supported values: trello, jira, github, gitlab\
+     * @param projectName name of the project you are trying to connect external service to
+     * @param repoNamespace Trello - random value, namespace not required
+     *                      Jira - namespace of your account, NAMESPACE.atlassian.net
+     *                      Github - name of your account, github.com/NAME/repositoryName
+     *                      Gitlab - gitlab namespace
+     * @param repoName Trello - full id of the board you wish to connect, can be found at trello.com/your/board/url.json
+     *                 Jira - project key - the three or two letter shortcut of the project name written in capital letters
+     *                 Github - repository name, github.com/namespace/REPOSITORY_NAME
+     *                 Gitlab - project name
+     * @param boardName Name of the board that will be created at trello
+     *
+     * @return Http ResponseEntity; 400 when serviceName is not valid; 503 when there was an error in communication with
+     * external service
+     * */
+    @RequestMapping(path = "/service/{serviceName}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/{boardName}",
                     method = RequestMethod.PUT
     )
     public ResponseEntity<String> createProjectEndpoint(@PathVariable String projectName,
-                                                @PathVariable String serviceType,
+                                                @PathVariable String serviceName,
                                                 @PathVariable String repoNamespace,
                                                 @PathVariable String repoName,
                                                 @PathVariable String boardName,
                                                 @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                 @RequestParam("secondLoginCredential") String secondLoginCredential
     )  {
-        return createProject(projectName, serviceType, repoNamespace, repoName, boardName, firstLoginCredential, secondLoginCredential, true);
+        return createProject(projectName, serviceName, repoNamespace, repoName, boardName, firstLoginCredential, secondLoginCredential, true);
     }
 
 
@@ -220,12 +262,15 @@ public class Endpoints {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Project with name " + projectName + "Already Exists");
         }
 
+        // creates a new project
         Project project = new Project();
         project.setName(projectName);
 
         AbstractRepository repository;
         try {
+            // adds the project to the accessor and saves the project into local databace
             projectAccessor.saveAndInitialize(project);
+            // creates new repository of type
             repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
                     serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
         } catch (RepositoryTypeNotSupportedException e){
@@ -233,6 +278,7 @@ public class Endpoints {
                     "supported");
         }
 
+        // based on the trello parameter decides if create trello board or not
         if (trello) {
             try {
                 projectAccessor.initialize(TrelloCard.class.getName(), boardName);
@@ -242,6 +288,7 @@ public class Endpoints {
             }
         }
 
+        // adds repository to the project and syncs the remote issues with the local database
         try {
             projectAccessor.addRepository(repository);
         } catch (CannotConnectToRepositoryException e) {
@@ -251,11 +298,17 @@ public class Endpoints {
             e.printStackTrace();
         }
 
+        // saves the project
         projectAccessor.save(); // todo: make it transactional
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
 
+    /**
+     * deletes board from trello and project from tasksyncer, should clean changes in case of an error during creation of
+     * the project
+     * TODO: assert functionality and test thoroughly
+     * */
     public void revertCreation(Project project){
         try {
             projectAccessor.deleteBoard(trelloApplicationKey, trelloAccessToken);

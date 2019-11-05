@@ -41,6 +41,10 @@ public abstract class RepositoryAccessor {
         return repositoryAccessor;
     }
 
+    /**
+     * Creates new repository accessor that is connected to the external service (for example the trelloApi etc. fields
+     * are initiated and ready to communicate with the ext. service)
+     * */
     public static RepositoryAccessor getConnectedInstance(AbstractRepository repository, AbstractRepositoryRepository repositoryRepository,
                                                  AbstractIssueRepository issueRepository) throws
             RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
@@ -76,4 +80,6 @@ public abstract class RepositoryAccessor {
         repository.setProject(null);
         repositoryRepository.delete(repository);
     }
+
+
 }

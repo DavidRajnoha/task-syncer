@@ -82,6 +82,7 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
                 .getIssues(glProject,100)
                 .stream();  // have to use pagination, we want all pages not just the first one
 
+        // converts each issue
         return issuesStream
                 .map(GitlabIssue.ObjectToGitlabIssueConverter::convert)
                 .collect(Collectors.toList());

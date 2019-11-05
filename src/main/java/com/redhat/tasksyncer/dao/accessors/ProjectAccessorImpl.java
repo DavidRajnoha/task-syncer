@@ -64,9 +64,12 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         TrelloBoard board = new TrelloBoard();
         board.setBoardName(name);
 
+        // Saves the board locally and creates the trelloApi Object inside the board accessor to communicate with trello
         this.boardAccessor = boardAccessor.initializeAndSave(board, trelloApplicationKey, trelloAccessToken);
 
+        // Creates the board on trello, creates two columns - done and todo
         AbstractBoard b = this.boardAccessor.createBoard();
+        // Adds this board to this project
         b.setProject(project);
         boardAccessor.save();
         return this.boardAccessor;
@@ -103,8 +106,8 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
      * The accessor is then used to sync the issues from the particular repository with the internal database
      * */
-    public RepositoryAccessor addRepository(AbstractRepository repository) throws RepositoryTypeNotSupportedException,
-            CannotConnectToRepositoryException {
+    public RepositoryAccessor addRepository(AbstractRepository repository)
+            throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
         try {
             doSync(repositoryAccessor);
@@ -123,7 +126,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * */
     private RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
         RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
-
+        // Creates the repository accessor and saves the repository
         AbstractRepository r = repositoryAccessor.createItself();
         r.setProject(project);
         repositoryRepository.save(r);
@@ -137,14 +140,16 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * IssueRepository and Trello using the update method
      * */
     private void doSync(RepositoryAccessor repositoryAccessor) throws CannotConnectToRepositoryException {
-        List<AbstractIssue> issues = null;
+        List<AbstractIssue> issues;
         try {
+            // downloads issue from external repository
             issues = repositoryAccessor.downloadAllIssues();
         } catch (IOException | GitLabApiException e) {
             throw new CannotConnectToRepositoryException(e.getMessage());
         }
 
         for(AbstractIssue i : issues) {
+                //
                 i.setRepository(repositoryAccessor.getRepository());
                 this.syncIssue(i);
         }
@@ -201,18 +206,19 @@ public class ProjectAccessorImpl implements ProjectAccessor{
     }
 
     public void syncIssue(AbstractIssue issue) {
-            issue = update(issue);
-            issue = issueRepository.save(issue); // so the issue has id and is saved in repository before saving card
-            issue = setCard(issue);
-            issueRepository.save(issue);
-        }
+        issue = update(issue);
+        issue = issueRepository.save(issue); // so the issue has id and is saved in repository before saving card
+        // sets card on the issue and also syncs this card with Trello
+        issue = setCard(issue);
+        issueRepository.save(issue);
+    }
 
     public AbstractIssue setCard(AbstractIssue issue){
-            issue = updateCard(issue); // setting new properties to the card
-            issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
-            // then card with id is returned
-            return issue;
-        }
+        issue = updateCard(issue); // setting new properties to the card
+        issue.setCard(this.getBoardAccessor().update(issue.getCard())); // saving and syncing the card, if new card then
+        // then card with id is returned
+        return issue;
+    }
 
     public void hookRepository(AbstractRepository repository, String webhookUrl) throws
             RepositoryTypeNotSupportedException, IOException, SynchronizationFailedException, GitLabApiException,
@@ -224,6 +230,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
     }
 
     public void deleteProject(Project project) {
+        if (this.project == project) this.project = null;
         projectRepository.delete(project);
     }
 

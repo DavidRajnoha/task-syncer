@@ -49,6 +49,9 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         ghRepository = gitHub.getRepository(namsespaceAndRepository);
     }
 
+    /**
+     * Authenticates with the github and returns the connected object
+     * */
     private GitHub getConnection(String firstLoginCredential, String secondLoginCredential) throws IOException {
         return GitHub.connectUsingPassword(repository.getFirstLoginCredential(), repository.getSecondLoginCredential());
     }
@@ -58,6 +61,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         Stream<GHIssue> issuesStream = ghRepository.getIssues(GHIssueState.ALL)
                 .stream();
 
+        // converts every issue using the GithubIssue convertor
         return issuesStream
                 .map(GithubIssue.ObjectToGithubIssueConverter::convert)
                 .collect(Collectors.toList());
