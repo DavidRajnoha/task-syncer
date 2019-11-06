@@ -7,14 +7,14 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.JiraIssue;
 import com.redhat.tasksyncer.dao.entities.JiraRepository;
-import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.GitLabApiException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -23,17 +23,17 @@ import java.util.stream.StreamSupport;
 /**
  * @author David Rajnoha
  * */
+
+@Component
 public class JiraRepositoryAccessor extends RepositoryAccessor {
     // JQL for searching issues corresponding to particular project, the KEY will be replaced by the project key
     private static final String JQL = "project=KEY";
     //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different
     private static final String URL = "https://NAMESPACE.atlassian.net";
-    private AbstractRepository repository;
     private JiraRestClient jiraRestClient;
 
-
-    public JiraRepositoryAccessor(JiraRepository jiraRepository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository){
-        this.repository = jiraRepository;
+    @Autowired
+    public JiraRepositoryAccessor(AbstractRepositoryRepository repositoryRepository){
         this.repositoryRepository = repositoryRepository;
     }
 
@@ -96,36 +96,14 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
 
 
     @Override
-    public AbstractIssue saveIssue(AbstractIssue issue) {
-        return null;
-    }
-
-    @Override
-    public Optional<AbstractIssue> getIssue(AbstractIssue issue) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void save() {
-        this.repository = repositoryRepository.save(repository);
-    }
-
-    @Override
-    public AbstractRepository createItself() {
-        this.save();
-        return repository;
-    }
-
-    @Override
-    public AbstractRepository getRepository() {
-        return repository;
-    }
-
-    @Override
     public void createWebhook(String webhook) throws IOException, GitLabApiException {
         //this functionality is not supported yet
     }
 
+    @Override
+    public AbstractRepository createRepositoryOfType() {
+        return new JiraRepository();
+    }
 
 
 }

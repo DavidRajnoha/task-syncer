@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -52,38 +51,6 @@ public abstract class AbstractRepository {
 
     public AbstractRepository() {
     }
-
-    /**
-     * Factory method
-     * Creates new repository of the type that is passed as IssueType, then sets the security credential fields and the repositoryName and repositoryNamespace
-     * */
-    public static AbstractRepository newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(String servcieType, String firstLoginCredential, String secondLoginCredential,
-                                                                                             String repositoryName, String repositoryNamespace) throws RepositoryTypeNotSupportedException {
-        AbstractRepository repository;
-        switch (servcieType){
-            case "gitlab":
-                repository = new GitlabRepository();
-                break;
-            case "github":
-                repository = new GithubRepository();
-                break;
-            case "jira":
-                repository = new JiraRepository();
-                break;
-            case "trello":
-                repository = new TrelloRepository();
-                break;
-            default:
-                throw new RepositoryTypeNotSupportedException("");
-        }
-
-        repository.setFirstLoginCredential(firstLoginCredential);
-        repository.setSecondLoginCredential(secondLoginCredential);
-        repository.setRepositoryName(repositoryName);
-        repository.setRepositoryNamespace(repositoryNamespace);
-
-        return repository;
-    };
 
     public Long getId() {
         return id;
@@ -182,4 +149,38 @@ public abstract class AbstractRepository {
     public void setRemoteRepositoryId(String remoteRepositoryId) {
         this.remoteRepositoryId = remoteRepositoryId;
     }
+
+
+
+    /**
+     //     * Factory method
+     //     * Creates new repository of the type that is passed as IssueType, then sets the security credential fields and the repositoryName and repositoryNamespace
+     //     * */
+//    public static AbstractRepository newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(String servcieType, String firstLoginCredential, String secondLoginCredential,
+//                                                                                             String repositoryName, String repositoryNamespace) throws RepositoryTypeNotSupportedException {
+//        AbstractRepository repository;
+//        switch (servcieType){
+//            case "gitlab":
+//                repository = new GitlabRepository();
+//                break;
+//            case "github":
+//                repository = new GithubRepository();
+//                break;
+//            case "jira":
+//                repository = new JiraRepository();
+//                break;
+//            case "trello":
+//                repository = new TrelloRepository();
+//                break;
+//            default:
+//                throw new RepositoryTypeNotSupportedException("");
+//        }
+//
+//        repository.setFirstLoginCredential(firstLoginCredential);
+//        repository.setSecondLoginCredential(secondLoginCredential);
+//        repository.setRepositoryName(repositoryName);
+//        repository.setRepositoryNamespace(repositoryNamespace);
+//
+//        return repository;
+//    };
 }

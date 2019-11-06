@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Filip Cap, David Rajnoha
@@ -46,13 +43,17 @@ public class ProjectAccessorImpl implements ProjectAccessor{
 
     private Project project;
 
+    private Map<String, RepositoryAccessor> repositoryAccessors;
+
     @Autowired
     public ProjectAccessorImpl(AbstractIssueRepository issueRepository, ProjectRepository projectRepository,
-                               AbstractRepositoryRepository repositoryRepository, BoardAccessor boardAccessor){
+                               AbstractRepositoryRepository repositoryRepository, BoardAccessor boardAccessor,
+                               Map<String, RepositoryAccessor> repositoryAccessors){
         this.issueRepository = issueRepository;
         this.projectRepository = projectRepository;
         this.repositoryRepository = repositoryRepository;
         this.boardAccessor = boardAccessor;
+        this.repositoryAccessors = repositoryAccessors;
     }
 
     private BoardAccessor getBoardAccessor() {
@@ -124,8 +125,19 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * Creates a repositoryAccessor to serve as a middle layer between repository object and "real" network repository,
      * Also adds project to the repository and saves the repository TODO: This violates the single responsibility principle
      * */
-    private RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
-        RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
+    public RepositoryAccessor createRepositoryAccessor(AbstractRepository repository) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
+        String serviceType = repository.getClass().getSimpleName().concat("Accessor");
+        String firstLetter = serviceType.substring(0,1).toLowerCase();
+        String stLower = firstLetter + serviceType.substring(1);
+        RepositoryAccessor repositoryAccessor = repositoryAccessors.get(stLower);
+
+        if (repositoryAccessor == null){
+            throw new RepositoryTypeNotSupportedException("Repo type: " + serviceType + " not supported");
+        }
+
+        repositoryAccessor.getConnectedInstance(repository);
+
+        // RepositoryAccessor repositoryAccessor = RepositoryAccessor.getConnectedInstance(repository, repositoryRepository, issueRepository);
         // Creates the repository accessor and saves the repository
         AbstractRepository r = repositoryAccessor.createItself();
         r.setProject(project);

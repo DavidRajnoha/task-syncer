@@ -25,6 +25,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,7 +61,11 @@ public class Endpoints {
     @Autowired
     private ProjectAccessor projectAccessor;
 
-    public Endpoints() {
+    private Map<String, RepositoryAccessor> repositoryAccessors;
+
+
+    public Endpoints(Map<String, RepositoryAccessor> repositoryAccessors) {
+        this.repositoryAccessors = repositoryAccessors;
     }
 
     /**
@@ -155,18 +160,18 @@ public class Endpoints {
         //Initialize a projectAccessor - adds a project to the accessor and saves the project
         projectAccessor.saveAndInitialize(project);
 
-        AbstractRepository repository;
+        RepositoryAccessor repositoryAccessor;
         try {
-            // Creates a repository of the serviceName type
-            repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
-                    serviceName, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+            repositoryAccessor = findRepositoryAccessor(serviceName);
         } catch (RepositoryTypeNotSupportedException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Service of type: " + serviceName + " is not supported");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
+        AbstractRepository repository;
 
-        RepositoryAccessor repositoryAccessor;
+        // Creates a repository of the serviceName type
+        repository = repositoryAccessor.createRepository(firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+
         try {
             // Adds the repository to the project and syncs the remoteIssues with local database
             repositoryAccessor = projectAccessor.addRepository(repository);
@@ -179,6 +184,8 @@ public class Endpoints {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Repository of service of type: " + serviceName +
                      " is not implemented");
         }
+
+
 
         // Deciding if create hook or not based on the query parameters
         switch (hookOrConnect){
@@ -266,17 +273,22 @@ public class Endpoints {
         Project project = new Project();
         project.setName(projectName);
 
+        RepositoryAccessor repositoryAccessor;
         AbstractRepository repository;
+
+        projectAccessor.saveAndInitialize(project);
+
+
         try {
-            // adds the project to the accessor and saves the project into local databace
-            projectAccessor.saveAndInitialize(project);
-            // creates new repository of type
-            repository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace(
-                    serviceType, firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+            repositoryAccessor = findRepositoryAccessor(serviceType);
+
         } catch (RepositoryTypeNotSupportedException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Service of type: " + serviceType + " is not yet " +
                     "supported");
         }
+        repository = repositoryAccessor.createRepository(firstLoginCredential, secondLoginCredential, repoName, repoNamespace);
+
+
 
         // based on the trello parameter decides if create trello board or not
         if (trello) {
@@ -302,6 +314,18 @@ public class Endpoints {
         projectAccessor.save(); // todo: make it transactional
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
+    }
+
+
+
+    private RepositoryAccessor findRepositoryAccessor(String serviceName) throws RepositoryTypeNotSupportedException {
+        String serviceType = serviceName.toLowerCase().concat("RepositoryAccessor");
+        RepositoryAccessor repositoryAccessor = repositoryAccessors.get(serviceType);
+        if (repositoryAccessor == null){
+            throw new RepositoryTypeNotSupportedException("Repo type: " + serviceType + " not supported");
+        }
+
+        return repositoryAccessor;
     }
 
     /**

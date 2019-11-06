@@ -52,7 +52,7 @@ public class JiraAccessorTest {
     @Before
     public void setUp(){
         repository = new JiraRepository();
-        repositoryAccessor = new JiraRepositoryAccessor(repository, repositoryRepository, issueRepository);
+        repositoryAccessor = new JiraRepositoryAccessor(repositoryRepository);
         subtaskOne = new Subtask(issueKeyOne, null, subDescOne, null, null);
         subtaskTwo = new Subtask(issueKeyTwo, null, subDescTwo, null, null);
 

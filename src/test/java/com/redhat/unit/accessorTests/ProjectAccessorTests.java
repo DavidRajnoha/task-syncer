@@ -3,6 +3,7 @@ package com.redhat.unit.accessorTests;
 import com.redhat.tasksyncer.dao.accessors.BoardAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
+import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GitlabIssue;
@@ -17,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static junit.framework.TestCase.assertTrue;
@@ -36,6 +38,10 @@ public class ProjectAccessorTests {
     private BoardAccessor boardAccessor;
     @MockBean
     private AbstractRepositoryRepository repositoryRepository;
+    @MockBean
+    private RepositoryAccessor mockRepositoryAccessor;
+    @MockBean
+    private Map<String, RepositoryAccessor> mockMap;
 
     private ProjectAccessor projectAccessor;
 
@@ -51,7 +57,8 @@ public class ProjectAccessorTests {
         abstractRepository = new GitlabRepository();
         abstractRepository.setRepositoryName("repoName");
 
-        projectAccessor = new ProjectAccessorImpl(issueRepository, projectRepository, repositoryRepository, boardAccessor);
+        projectAccessor = new ProjectAccessorImpl(issueRepository, projectRepository, repositoryRepository, boardAccessor,
+                mockMap);
 
     }
 

@@ -4,10 +4,12 @@ package com.redhat.unit.accessorTests;
 import com.redhat.tasksyncer.dao.accessors.BoardAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessor;
 import com.redhat.tasksyncer.dao.accessors.ProjectAccessorImpl;
+import com.redhat.tasksyncer.dao.accessors.RepositoryAccessor;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
+import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +43,12 @@ public class ProjectAccessorTestsSyncIssue {
     @Mock
     private AbstractIssueRepository issueRepository = Mockito.mock(AbstractIssueRepository.class);
 
+    @Mock
+    private Map mockMap = Mockito.mock(Map.class);
+
+    @Mock
+    private RepositoryAccessor mockRepositoryAccessor = Mockito.mock(RepositoryAccessor.class);
+
     private AbstractRepository githubRepository;
     private Project project;
     private AbstractBoard trelloBoard;
@@ -58,7 +67,8 @@ public class ProjectAccessorTestsSyncIssue {
     @Before
     public void setup() throws RepositoryTypeNotSupportedException {
         project = new Project();
-        projectAccessor = new ProjectAccessorImpl(issueRepository, projectRepository, repositoryRepository, boardAccessor);
+        projectAccessor = new ProjectAccessorImpl(issueRepository, projectRepository, repositoryRepository, boardAccessor,
+                mockMap);
         List<AbstractColumn> columns = new ArrayList<>();
         AbstractColumn abstractColumn = new TrelloColumn();
         AbstractColumn abstractColumnTwo = new TrelloColumn();
@@ -70,8 +80,10 @@ public class ProjectAccessorTestsSyncIssue {
 
         Mockito.when(projectRepository.save(project)).thenReturn(project);
 
-        githubRepository = AbstractRepository.newInstanceOfTypeWithCredentialsAndRepoNameAndNamespace("github", "userName", "passwd", ghRepositoryName, "");
-        // repositoryRepository.save(githubRepository);
+        githubRepository = new GithubRepository();
+        githubRepository.setFirstLoginCredential("userName");
+        githubRepository.setSecondLoginCredential("passwd");
+        githubRepository.setRepositoryName(ghRepositoryName);
 
         projectAccessor.saveAndInitialize(project);
 
@@ -139,6 +151,17 @@ public class ProjectAccessorTestsSyncIssue {
         assertThat(foundIssue.getDescription()).isEqualTo(updatedDescription);
     }
 
+    @Test
+    public void createRepositoryAccessor() throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
+        Mockito.when(mockMap.get("githubRepositoryAccessor")).thenReturn(mockRepositoryAccessor);
+        Mockito.when(mockRepositoryAccessor.createItself()).thenReturn(githubRepository);
+
+        RepositoryAccessor foundAccessor = projectAccessor.createRepositoryAccessor(githubRepository);
+
+        assertThat(foundAccessor).isEqualTo(mockRepositoryAccessor);
+
+    }
+
 
     private AbstractIssue getNewGithubIssue() {
         AbstractIssue newGithubIssue = new GithubIssue();
@@ -150,6 +173,8 @@ public class ProjectAccessorTestsSyncIssue {
 
         return newGithubIssue;
     }
+
+
 
 }
 

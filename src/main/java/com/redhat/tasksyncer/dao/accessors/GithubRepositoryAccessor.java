@@ -4,6 +4,8 @@ import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.kohsuke.github.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -13,31 +15,17 @@ import java.util.stream.Stream;
 /**
 * @author David Rajnoha
 * */
+@Component
 public class GithubRepositoryAccessor extends RepositoryAccessor {
 
-    private AbstractRepository repository;
 
-    private AbstractRepositoryRepository repositoryRepository;
-    private AbstractIssueRepository issueRepository;
 
     private GitHub gitHub;
     private GHRepository ghRepository;
 
-    public GithubRepositoryAccessor(GithubRepository repository, AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository) {
-        this.repository = repository;
+    @Autowired
+    public GithubRepositoryAccessor(AbstractRepositoryRepository repositoryRepository, AbstractIssueRepository issueRepository) {
         this.repositoryRepository = repositoryRepository;
-        this.issueRepository = issueRepository;
-    }
-
-    public AbstractRepository createItself() {
-        // todo according to repository.isCreated create remote instance
-        this.save();
-        return repository;
-    }
-
-    @Override
-    public AbstractRepository getRepository() {
-        return repository;
     }
 
 
@@ -67,21 +55,6 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public AbstractIssue saveIssue(AbstractIssue issue) {
-        return null;
-    }
-
-    @Override
-    public Optional<AbstractIssue> getIssue(AbstractIssue issue) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void save() {
-        this.repository = this.repositoryRepository.save(repository);
-    }
-
     public void createWebhook(String webHookUrlString) throws IOException {
         //using library to set Webhook to the webhookURL from argument (should be URL pointing to this app's endpoint
         Set<GHEvent> events = new HashSet<>();
@@ -99,6 +72,11 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         config.put("url", webHookUrl.toExternalForm());
         config.put("content_type", "json");
         ghRepository.createHook("web", config, events, true);
+    }
+
+    @Override
+    public AbstractRepository createRepositoryOfType() {
+        return new GithubRepository();
     }
 
 }

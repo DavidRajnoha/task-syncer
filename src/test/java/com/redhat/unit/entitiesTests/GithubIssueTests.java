@@ -11,7 +11,6 @@ import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;

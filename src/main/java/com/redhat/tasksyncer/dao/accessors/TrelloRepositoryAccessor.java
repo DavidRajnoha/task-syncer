@@ -10,6 +10,8 @@ import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.entities.TrelloRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.GitLabApiException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -20,7 +22,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,12 +29,13 @@ import java.util.stream.Stream;
 /**
  * @author David Rajnoha
  * */
+
+@Component
 public class TrelloRepositoryAccessor extends RepositoryAccessor{
     private Trello trelloApi;
-    private AbstractRepository repository;
 
-    public TrelloRepositoryAccessor(TrelloRepository trelloRepository, AbstractRepositoryRepository repositoryRepository){
-        this.repository = trelloRepository;
+    @Autowired
+    public TrelloRepositoryAccessor(AbstractRepositoryRepository repositoryRepository){
         this.repositoryRepository = repositoryRepository;
     }
 
@@ -48,32 +50,6 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
         Stream<Card> trelloCards = trelloApi.getBoardCards((repository.getRepositoryName())).stream();
 
         return trelloCards.map(TrelloIssue.ObjectToTrelloIssueConvertor::convert).collect(Collectors.toList());
-    }
-
-    @Override
-    public AbstractIssue saveIssue(AbstractIssue issue) {
-        return null;
-    }
-
-    @Override
-    public Optional<AbstractIssue> getIssue(AbstractIssue issue) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void save() {
-        this.repository = repositoryRepository.save(repository);
-    }
-
-    @Override
-    public AbstractRepository createItself() {
-        this.save();
-        return repository;
-    }
-
-    @Override
-    public AbstractRepository getRepository() {
-        return repository;
     }
 
     @Override
@@ -113,5 +89,10 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
         System.out.println(content.toString());
 
         System.out.println(connection.getResponseMessage());
+    }
+
+    @Override
+    public AbstractRepository createRepositoryOfType() {
+        return new TrelloRepository();
     }
 }
