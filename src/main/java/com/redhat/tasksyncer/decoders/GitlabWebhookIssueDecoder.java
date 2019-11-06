@@ -9,7 +9,9 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.webhook.IssueEvent;
 import org.gitlab4j.api.webhook.WebHookListener;
 import org.gitlab4j.api.webhook.WebHookManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,21 +21,27 @@ import javax.servlet.http.HttpServletRequest;
 
 
 @PropertySource("classpath:other.properties")
+@Component
 public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
     private WebHookManager webHookManager = new WebHookManager(); // todo: check secret token
     private IssueEvent ie;
 
-    public GitlabWebhookIssueDecoder() {
+
+    @Autowired
+    public GitlabWebhookIssueDecoder(AbstractRepositoryRepository repositoryRepository) {
         webHookManager.addListener(new WebHookListener() {
             @Override
             public void onIssueEvent(IssueEvent event) {
                 ie = event;
             }
         });
+        this.repositoryRepository = repositoryRepository;
     }
 
+
+
     public AbstractIssue decode
-            (HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository)
+            (HttpServletRequest request, Project project)
             throws  InvalidWebhookCallbackException {
         try {
             webHookManager.handleEvent(request);

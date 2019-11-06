@@ -75,7 +75,7 @@ public class WebhookIssueDecoderTests {
         servletRequest.setContent(jiraIssueCallback.getBytes());
 
         // Test
-        JiraWebhookIssueDecoder decoder = new JiraWebhookIssueDecoder();
+        JiraWebhookIssueDecoder decoder = new JiraWebhookIssueDecoder(mockRepositoryRepository);
 
         AbstractIssue correctAnswers = new JiraIssue();
         correctAnswers.setRemoteIssueId("JIR-3");
@@ -96,11 +96,11 @@ public class WebhookIssueDecoderTests {
 
 
         //test
-        JiraWebhookIssueDecoder decoder = new JiraWebhookIssueDecoder();
+        JiraWebhookIssueDecoder decoder = new JiraWebhookIssueDecoder(mockRepositoryRepository);
 
         // decoder.decode on subtask should return parentIssueWithEmpty fields and a the subtask as a childIssue wrapped
         // in the parent issue
-        AbstractIssue returnedIssue =  decoder.decode(servletRequest, project, mockRepositoryRepository);
+        AbstractIssue returnedIssue =  decoder.decode(servletRequest, project);
 
         // child issues fields are correctly set
         assertThat(returnedIssue.getChildIssues().get("TAS-8").getTitle()).isEqualTo("Subtasknumeroduo");
@@ -123,7 +123,7 @@ public class WebhookIssueDecoderTests {
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.setContent(trelloIssueCallback.getBytes());
 
-        AbstractWebhookIssueDecoder issueDecoder = new TrelloWebhookIssueDecoder();
+        AbstractWebhookIssueDecoder issueDecoder = new TrelloWebhookIssueDecoder(mockRepositoryRepository);
 
         AbstractIssue correctAnswers = new TrelloIssue();
         correctAnswers.setRemoteIssueId("23");
@@ -140,7 +140,7 @@ public class WebhookIssueDecoderTests {
                                                                AbstractIssue correctConvertedIssue) throws Exception {
 
         // Test
-        AbstractIssue returnedIssue =  issueDecoder.decode(servletRequest, project, mockRepositoryRepository);
+        AbstractIssue returnedIssue =  issueDecoder.decode(servletRequest, project);
 
 
         assertThat(returnedIssue.getRemoteIssueId()).isEqualTo(correctConvertedIssue.getRemoteIssueId());

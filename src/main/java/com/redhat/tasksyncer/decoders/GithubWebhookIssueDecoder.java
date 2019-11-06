@@ -7,6 +7,8 @@ import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.kohsuke.github.GHEventPayload;
 import org.kohsuke.github.GitHub;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -14,10 +16,18 @@ import java.io.IOException;
 /**
  * @author David Rajnoha
  * */
+
+@Component
 public class GithubWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
+    @Autowired
+    public GithubWebhookIssueDecoder(AbstractRepositoryRepository repositoryRepository){
+        this.repositoryRepository = repositoryRepository;
+    }
 
-    public AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository) throws
+
+
+    public AbstractIssue decode(HttpServletRequest request, Project project) throws
             InvalidWebhookCallbackException {
         GHEventPayload.Issue issueEventPayload;
         try {

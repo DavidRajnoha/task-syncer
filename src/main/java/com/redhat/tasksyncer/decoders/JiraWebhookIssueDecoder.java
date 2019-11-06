@@ -7,16 +7,25 @@ import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author David Rajnoha
  * */
+@Component
 public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
+    @Autowired
+    public JiraWebhookIssueDecoder(AbstractRepositoryRepository repositoryRepository){
+        this.repositoryRepository = repositoryRepository;
+    }
+
+
     @Override
-    public AbstractIssue decode(HttpServletRequest request, Project project,
-                                AbstractRepositoryRepository repositoryRepository)
+    public AbstractIssue decode(HttpServletRequest request, Project project)
             throws  InvalidWebhookCallbackException {
 //        JSONObject input = requestToInput(request);
         JSONObject input = AbstractWebhookIssueDecoder.RequestToJsonDecoder.toJson(request);

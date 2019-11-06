@@ -58,14 +58,17 @@ public class Endpoints {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
+
     private ProjectAccessor projectAccessor;
-
     private Map<String, RepositoryAccessor> repositoryAccessors;
+    private Map<String, AbstractWebhookIssueDecoder> webhookIssueDecoderMap;
 
 
-    public Endpoints(Map<String, RepositoryAccessor> repositoryAccessors) {
+    public Endpoints(Map<String, RepositoryAccessor> repositoryAccessors, ProjectAccessor projectAccessor,
+                     Map<String, AbstractWebhookIssueDecoder> webhookIssueDecoderMap) {
         this.repositoryAccessors = repositoryAccessors;
+        this.projectAccessor = projectAccessor;
+        this.webhookIssueDecoderMap = webhookIssueDecoderMap;
     }
 
     /**
@@ -105,20 +108,39 @@ public class Endpoints {
         Project project = projectRepository.findProjectByName(projectName)
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
+        AbstractWebhookIssueDecoder webhookIssueDecoder;
+
+        try {
+            webhookIssueDecoder = findWebhookIssueDecoder(serviceType);
+        } catch (RepositoryTypeNotSupportedException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
         try {
             // converts webhook request to the abstractIssue
-            AbstractIssue newIssue = AbstractWebhookIssueDecoder.getInstance(serviceType).decode(request, project, repositoryRepository);
+
+            AbstractIssue newIssue = webhookIssueDecoder.decode(request, project);
 
             // syncs the updated issue with the local database
             projectAccessor.saveAndInitialize(project);
             projectAccessor.syncIssue(newIssue);
         } catch (TrelloCalllbackNotAboutCardException  ignored) {
-        } catch (InvalidWebhookCallbackException | RepositoryTypeNotSupportedException e) {
+        } catch (InvalidWebhookCallbackException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.OK).body("Webhook processed");
     }
 
+
+    private AbstractWebhookIssueDecoder findWebhookIssueDecoder(String serviceName) throws RepositoryTypeNotSupportedException {
+        String serviceType = serviceName.toLowerCase().concat("WebhookIssueDecoder");
+        AbstractWebhookIssueDecoder webhookIssueDecoder = webhookIssueDecoderMap.get(serviceType);
+        if (webhookIssueDecoder == null){
+            throw new RepositoryTypeNotSupportedException("Service type: " + serviceType + " not supported for processing" +
+                    "webhooks ");
+        }
+        return webhookIssueDecoder;
+    }
 
 
     /**

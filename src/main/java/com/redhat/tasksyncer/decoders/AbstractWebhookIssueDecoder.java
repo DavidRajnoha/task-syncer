@@ -4,7 +4,6 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
-import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,30 +17,9 @@ import java.io.IOException;
  * */
 public abstract class AbstractWebhookIssueDecoder {
 
-    public static AbstractWebhookIssueDecoder getInstance(String serviceType) throws RepositoryTypeNotSupportedException {
-        AbstractWebhookIssueDecoder issueDecoder;
+    protected AbstractRepositoryRepository repositoryRepository;
 
-        switch (serviceType){
-            case "gitlab":
-                issueDecoder = new GitlabWebhookIssueDecoder();
-                break;
-            case "github":
-                issueDecoder = new GithubWebhookIssueDecoder();
-                break;
-            case "jira":
-                issueDecoder = new JiraWebhookIssueDecoder();
-                break;
-            case "trello":
-                issueDecoder = new TrelloWebhookIssueDecoder();
-                break;
-            default:
-                throw new RepositoryTypeNotSupportedException("");
-        }
-
-        return issueDecoder;
-    }
-
-    public abstract AbstractIssue decode(HttpServletRequest request, Project project, AbstractRepositoryRepository repositoryRepository)
+    public abstract AbstractIssue decode(HttpServletRequest request, Project project)
             throws InvalidWebhookCallbackException, TrelloCalllbackNotAboutCardException;
 
     public static class RequestToJsonDecoder {
