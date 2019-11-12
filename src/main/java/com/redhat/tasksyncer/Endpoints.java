@@ -113,7 +113,7 @@ public class Endpoints {
                                                       @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                       @RequestParam("secondLoginCredential") String secondLoginCredential) {
         try {
-            return service.connectService(serviceName, projectName, repoNamespace, repoName, firstLoginCredential,
+            return service.connectService(projectName, serviceName, repoNamespace, repoName, firstLoginCredential,
                     secondLoginCredential, hookOrConnect);
         } catch (CannotConnectToRepositoryException e) {
             e.printStackTrace();

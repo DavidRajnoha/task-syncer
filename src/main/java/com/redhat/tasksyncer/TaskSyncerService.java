@@ -155,12 +155,12 @@ public class TaskSyncerService {
     }
 
 
-    public ResponseEntity<String> connectService(String projectName, String serviceName, String repoNamespace,
+    public ResponseEntity<String> connectService(String projectName , String serviceName, String repoNamespace,
                                                  String repoName, String firstLoginCredential,
                                                  String secondLoginCredential, String hookOrConnect) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException, SynchronizationFailedException {
         // Project with projectName must be already created
         Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Project with name " + projectName + " does not exist"));
 
         //Initialize a projectAccessor - adds a project to the accessor and saves the project
         projectAccessor.saveProject(project);
