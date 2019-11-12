@@ -85,7 +85,7 @@ public class ProjectAccessorTestsSyncIssue {
         githubRepository.setSecondLoginCredential("passwd");
         githubRepository.setRepositoryName(ghRepositoryName);
 
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
 
 
     }
@@ -100,14 +100,14 @@ public class ProjectAccessorTestsSyncIssue {
     public void whenProjectAccessorUpdatesNewGithubIssue_thenNewGithubIssueIsSaved() {
         // Tested classes
         AbstractIssue newGithubIssue = getNewGithubIssue();
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
 
         // Mocking
         Mockito.when(issueRepository.findByRemoteIssueIdAndRepository_repositoryName(newGithubIssue.getRemoteIssueId(),
                 newGithubIssue.getRepository().getRepositoryName())).thenReturn(Optional.of(newGithubIssue));
         Mockito.when(issueRepository.save(any(GithubIssue.class))).thenReturn((GithubIssue) newGithubIssue);
 
-        ArgumentCaptor<AbstractIssue> argument = ArgumentCaptor.forClass(AbstractIssue.class);
+            ArgumentCaptor<AbstractIssue> argument = ArgumentCaptor.forClass(AbstractIssue.class);
 
         // Test
         projectAccessor.syncIssue(newGithubIssue);
@@ -130,7 +130,7 @@ public class ProjectAccessorTestsSyncIssue {
         existingGithubIssue.setId(1L);
         AbstractIssue updatedGithubIssue = getNewGithubIssue();
         updatedGithubIssue.setDescription(updatedDescription);
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
 
         // Mocking
         Mockito.when(issueRepository.findByRemoteIssueIdAndRepository_repositoryName(existingGithubIssue.getRemoteIssueId(),

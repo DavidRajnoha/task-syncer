@@ -68,7 +68,7 @@ public class TaskSyncerService {
         AbstractIssue newIssue = webhookIssueDecoder.decode(request, project);
 
         // syncs the updated issue with the local database
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
         projectAccessor.syncIssue(newIssue);
 
     }
@@ -95,7 +95,7 @@ public class TaskSyncerService {
         // creates a new project
         Project project = new Project();
         project.setName(projectName);
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
 
 
         // Creates repository accessor
@@ -125,7 +125,7 @@ public class TaskSyncerService {
         }
 
         // saves the project
-        projectAccessor.save(); // todo: make it transactional
+        projectAccessor.saveProject(project); // todo: make it transactional
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
@@ -154,6 +154,7 @@ public class TaskSyncerService {
         projectAccessor.deleteProject(project);
     }
 
+
     public ResponseEntity<String> connectService(String projectName, String serviceName, String repoNamespace,
                                                  String repoName, String firstLoginCredential,
                                                  String secondLoginCredential, String hookOrConnect) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException, SynchronizationFailedException {
@@ -162,7 +163,7 @@ public class TaskSyncerService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
 
         //Initialize a projectAccessor - adds a project to the accessor and saves the project
-        projectAccessor.saveAndInitialize(project);
+        projectAccessor.saveProject(project);
 
         RepositoryAccessor repositoryAccessor = findRepositoryAccessor(serviceName);
 

@@ -32,7 +32,7 @@ public interface ProjectAccessor {
      *                Adds project to this.project field, so the project can be modified by other methods of the projectAccessor
      * @return project passed as an argument with filled in id
      */
-    Project saveAndInitialize(Project project);
+    Project saveProject(Project project);
 
 
     /**

@@ -86,7 +86,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
     }
 
     @Override
-    public Project saveAndInitialize(Project project) {
+    public Project saveProject(Project project) {
         this.project = projectRepository.save(project);
         return this.project;
     }
