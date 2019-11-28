@@ -86,8 +86,6 @@ public class ProjectAccessorTestsSyncIssue {
         githubRepository.setRepositoryName(ghRepositoryName);
 
         projectAccessor.saveProject(project);
-
-
     }
 
     @Test

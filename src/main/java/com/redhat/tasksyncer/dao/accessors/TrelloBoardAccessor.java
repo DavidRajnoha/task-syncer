@@ -85,14 +85,18 @@ public class TrelloBoardAccessor implements BoardAccessor {
 
             trelloCard = list.createCard(trelloCard);
 
-            // todo: think about using convert for converting just parameters which are contained in trelloCard and then use Card.update(convertedCard)
+            // todo: think about using convert for converting just parameters which are contained
+            //  in trelloCard and then use Card.update(convertedCard)
             AbstractCard card = TrelloCard.TrelloCardToCardConverter.convert(trelloCard, input);
 
             return cardRepository.save(card);
         }
 
-        // todo: handle column change
+        TList updatedList = trelloApi.getList(input.getColumn().getRemoteColumnId());
+
         Card trelloCard = TrelloCard.CardToTrelloCardConverter.convert(input);
+        trelloCard.setIdList(updatedList.getId());
+
         trelloApi.updateCard(trelloCard);  // we're ignoring response, we assume that everything went ok since no exception thrown
 
         return cardRepository.save(input);
