@@ -92,10 +92,7 @@ public class TrelloBoardAccessor implements BoardAccessor {
             return cardRepository.save(card);
         }
 
-        TList updatedList = trelloApi.getList(input.getColumn().getRemoteColumnId());
-
         Card trelloCard = TrelloCard.CardToTrelloCardConverter.convert(input);
-        trelloCard.setIdList(updatedList.getId());
 
         trelloApi.updateCard(trelloCard);  // we're ignoring response, we assume that everything went ok since no exception thrown
 

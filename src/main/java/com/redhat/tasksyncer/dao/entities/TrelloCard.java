@@ -65,6 +65,7 @@ public class TrelloCard extends AbstractCard {
             card.setName(input.getTitle());
             card.setDesc(input.getDescription());
             card.setDue(input.getDueDate());
+            card.setIdList(input.getColumn().getRemoteColumnId());
 
 //            input.getComments().forEach(comment -> {
 //                card.addComment(comment.getBody());
