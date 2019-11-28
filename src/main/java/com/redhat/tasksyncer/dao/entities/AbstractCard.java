@@ -20,7 +20,7 @@ public abstract class AbstractCard {
     private Long id;
 
     private String title;
-    @Column(length = 2048)
+    @Column(length = AbstractIssue.DESC_LENGTH)
     private String description;
     private String remoteCardId;
     private Date dueDate;

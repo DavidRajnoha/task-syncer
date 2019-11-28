@@ -141,8 +141,7 @@ public class Endpoints {
      * @param serviceName supported values: trello, jira, github, gitlab\
      * @param projectName name of the project you are trying to connect external service to
      * @param repoNamespace Trello - random value, namespace not required
-     *                      Jira - namespace of your account, NAMESPACE.atlassian.net
-     *                      Github - name of your account, github.com/NAME/repositoryName
+     *                      Jira - base URL of the instance (can be found in settings)    *                      Github - name of your account, github.com/NAME/repositoryName
      *                      Gitlab - gitlab namespace
      * @param repoName Trello - full id of the board you wish to connect, can be found at trello.com/your/board/url.json
      *                 Jira - project key - the three or two letter shortcut of the project name written in capital letters
