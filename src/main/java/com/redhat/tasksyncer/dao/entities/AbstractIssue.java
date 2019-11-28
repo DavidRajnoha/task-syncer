@@ -27,12 +27,14 @@ public abstract class AbstractIssue {
     public static final String STATE_CLOSED = "closed";
     public static final String STATE_REOPENED = "reopened";
 
+    public static final int DESC_LENGTH = 8168;
+
     @Id
     @GeneratedValue
     private Long id;
 
     private String title;
-    @Column(length = 2048)
+    @Column(length = DESC_LENGTH)
     private String description;
     @NotNull
     private String remoteIssueId;

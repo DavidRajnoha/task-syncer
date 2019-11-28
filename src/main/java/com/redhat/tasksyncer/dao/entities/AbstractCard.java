@@ -2,12 +2,10 @@ package com.redhat.tasksyncer.dao.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.gitlab4j.api.models.Milestone;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author Filip Cap
@@ -22,7 +20,7 @@ public abstract class AbstractCard {
     private Long id;
 
     private String title;
-    @Column(length = 2048)
+    @Column(length = AbstractIssue.DESC_LENGTH)
     private String description;
     private String remoteCardId;
     private Date dueDate;
