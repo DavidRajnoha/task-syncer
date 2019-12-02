@@ -22,9 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -65,6 +63,7 @@ public class TaskSyncerTests {
     private String snd = "secondLoginCredential";
     private String repoName = "repoName";
     private String repoNmsp = "repoNamespace";
+    private List<String> columnNames = new ArrayList<>();
 
 
     @Before
@@ -92,6 +91,8 @@ public class TaskSyncerTests {
 
         Mockito.when(projectAccessor.addRepository(jiraRepository)).thenReturn(jiraRepositoryAccessor);
 
+        columnNames.add("TODO");
+        columnNames.add("DONE");
     }
 
     @Test
@@ -128,7 +129,7 @@ public class TaskSyncerTests {
 
 
         service.createProject("new Project", "jira", repoNmsp, repoName, "boardName",
-                fst, snd, false);
+                fst, snd, false, columnNames);
 
 
         Mockito.verify(projectAccessor, Mockito.times(1)).addRepository(argumentCaptor.capture());
@@ -139,13 +140,14 @@ public class TaskSyncerTests {
         Project foundProject = projectArgumentCaptor.getValue();
 
         assertThat(foundProject.getName()).isEqualTo("new Project");
+        assertThat(foundProject.getColumnNames()).isEqualTo(columnNames);
     }
 
 
     @Test(expected = RepositoryTypeNotSupportedException.class)
     public void createProjectUnsupportedService_throwsException() throws RepositoryTypeNotSupportedException {
         service.createProject("random name", "UnsupportedServiceType", repoNmsp,
-                repoName,"boardName", fst, snd, false);
+                repoName,"boardName", fst, snd, false, columnNames);
     }
 
 

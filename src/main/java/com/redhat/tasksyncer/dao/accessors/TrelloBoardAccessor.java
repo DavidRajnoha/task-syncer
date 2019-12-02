@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Filip Cap
+ * @author Filip Cap, David Rajnoha
  */
 
 @Service
@@ -38,24 +38,28 @@ public class TrelloBoardAccessor implements BoardAccessor {
     private AbstractBoardRepository boardRepository;
     private AbstractCardRepository cardRepository;
     private AbstractColumnRepository columnRepository;
+    private TrelloColumnAccessor trelloCollumnAccessor;
 
     private Trello trelloApi;
 
     @Autowired
-    public TrelloBoardAccessor(AbstractBoardRepository boardRepository, AbstractCardRepository cardRepository, AbstractColumnRepository columnRepository) {
+    public TrelloBoardAccessor(AbstractBoardRepository boardRepository, AbstractCardRepository cardRepository,
+                               AbstractColumnRepository columnRepository, TrelloColumnAccessor trelloColumnAccessor) {
         this.boardRepository = boardRepository;
         this.cardRepository = cardRepository;
         this.columnRepository = columnRepository;
+        this.trelloCollumnAccessor = trelloColumnAccessor;
     }
 
     public BoardAccessor initializeAndSave(AbstractBoard board, String trelloApplicationKey, String trelloAccessToken){
         this.board = boardRepository.save(board);
         trelloApi = new TrelloImpl(trelloApplicationKey, trelloAccessToken, new RestTemplateHttpClient());
+        trelloCollumnAccessor.createItself(trelloApi);
         return this;
     }
 
     @Override
-    public AbstractBoard createBoard() throws HttpClientErrorException {
+    public AbstractBoard createBoard(List<String> columnNames) throws HttpClientErrorException {
         if(this.board.isCreated())
             return this.board;
 
@@ -70,8 +74,19 @@ public class TrelloBoardAccessor implements BoardAccessor {
 
         this.save();
 
-        this.createColumn("DONE");
-        this.createColumn("TODO");
+        if (columnNames.isEmpty()){
+            columnNames.add("TODO");
+            columnNames.add("DONE");
+        }
+
+        // For each name from the list column names creates column on the trello board
+        columnNames.forEach(columnName -> {
+            AbstractColumn column = trelloCollumnAccessor.createColumn(columnName, board.getRemoteBoardId());
+            board.addColumn(column);
+            columnRepository.save(column);
+        });
+
+        this.save();
 
         return board;
     }
@@ -96,7 +111,7 @@ public class TrelloBoardAccessor implements BoardAccessor {
 
         trelloApi.updateCard(trelloCard);  // we're ignoring response, we assume that everything went ok since no exception thrown
 
-        return cardRepository.save(input);
+            return cardRepository.save(input);
     }
 
     @Override
@@ -114,20 +129,20 @@ public class TrelloBoardAccessor implements BoardAccessor {
         this.board = boardRepository.save(board);
     }
 
-    @Override
-    public ColumnAccessor createColumn(String name) {
-        TrelloColumn newColumn = new TrelloColumn();
-        newColumn.setName(name);
-        newColumn.setBoard(board);
-
-        TrelloColumnAccessor newColumnAccessor = new TrelloColumnAccessor(newColumn, columnRepository, trelloApi);
-        newColumnAccessor = newColumnAccessor.createItself();
-
-        // this makes sure that this board is not outdated
-        this.board = (TrelloBoard) boardRepository.findById(this.board.getId()).get();  // todo generify
-
-        return newColumnAccessor;
-    }
+//    @Override
+//    public ColumnAccessor createColumn(String name) {
+//        TrelloColumn newColumn = new TrelloColumn();
+//        newColumn.setName(name);
+//        newColumn.setBoard(board);
+//
+//        TrelloColumnAccessor newColumnAccessor = new TrelloColumnAccessor(newColumn, columnRepository, trelloApi);
+//        newColumnAccessor = newColumnAccessor.createItself();
+//
+//        // this makes sure that this board is not outdated
+//        this.board = (TrelloBoard) boardRepository.findById(this.board.getId()).get();  // todo generify
+//
+//        return newColumnAccessor;
+//    }
 
     @Override
         public String deleteBoard(String trelloApplicationKey, String trelloAccessToken) throws IOException {

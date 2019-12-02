@@ -5,9 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
+import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import com.redhat.tasksyncer.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,9 +39,12 @@ public class Endpoints {
     @Autowired
     private AbstractRepositoryRepository repositoryRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     private TaskSyncerService service;
 
-
+    @Autowired
     public Endpoints(TaskSyncerService service) {
         this.service = service;
     }
@@ -155,7 +161,6 @@ public class Endpoints {
     @RequestMapping(path = "/service/{serviceName}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/{boardName}",
                     method = RequestMethod.PUT
     )
-
     public ResponseEntity<String> createProjectEndpoint(@PathVariable String projectName,
                                                 @PathVariable String serviceName,
                                                 @PathVariable String repoNamespace,
@@ -164,8 +169,28 @@ public class Endpoints {
                                                 @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                 @RequestParam("secondLoginCredential") String secondLoginCredential
     )  {
+        List<String> columnNames = new ArrayList<>();
+        columnNames.add("TODO");
+        columnNames.add("DONE");
+        return createProjectCustomColumnsEndpoint(projectName, serviceName, repoNamespace, repoName, boardName,
+                firstLoginCredential, secondLoginCredential, columnNames);
+    }
+
+    @RequestMapping(path = "/service/{serviceName}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/" +
+            "{boardName}/custom/columns",
+            method = RequestMethod.PUT
+    )
+    public ResponseEntity<String> createProjectCustomColumnsEndpoint(@PathVariable String projectName,
+                                                        @PathVariable String serviceName,
+                                                        @PathVariable String repoNamespace,
+                                                        @PathVariable String repoName,
+                                                        @PathVariable String boardName,
+                                                        @RequestParam("firstLoginCredential") String firstLoginCredential,
+                                                        @RequestParam("secondLoginCredential") String secondLoginCredential,
+                                                        @RequestParam List<String> columnNames){
         try {
-            return service.createProject(projectName, serviceName, repoNamespace, repoName, boardName, firstLoginCredential, secondLoginCredential, true);
+            return service.createProject(projectName, serviceName, repoNamespace, repoName, boardName,
+                    firstLoginCredential, secondLoginCredential, true, columnNames);
         } catch (RepositoryTypeNotSupportedException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Repository of service of type: " + serviceName +
@@ -174,6 +199,11 @@ public class Endpoints {
     }
 
 
+        @RequestMapping(path = "/project/{projectName}/setColumnNames", method = RequestMethod.PUT)
+    public ResponseEntity<String> setTrelloColumnNames(@PathVariable String projectName,
+                                                       @RequestParam List<String> columnNames){
+        return service.setColumnNames(projectName, columnNames);
+    }
 
     //GET REQUESTS
 
@@ -215,6 +245,14 @@ public class Endpoints {
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(issues);
+    }
+
+    @RequestMapping(path = "/project/{projectName}", method = RequestMethod.GET)
+    public String getProject(@PathVariable String projectName) throws JsonProcessingException {
+        Project project = projectRepository.findProjectByName(projectName).
+                orElseThrow(IllegalArgumentException::new);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(project);
     }
 
 }

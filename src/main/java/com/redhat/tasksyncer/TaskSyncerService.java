@@ -20,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -58,8 +59,7 @@ public class TaskSyncerService {
     ) throws RepositoryTypeNotSupportedException, TrelloCalllbackNotAboutCardException, InvalidWebhookCallbackException {
         // if project the hook is pointed at does not exists, throws error
         // TODO: Swap error for HTTP response
-        Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name does not exist"));
+        Project project = doesProjectExist(projectName);
 
         AbstractWebhookIssueDecoder webhookIssueDecoder;
         webhookIssueDecoder = findWebhookIssueDecoder(serviceType);
@@ -87,7 +87,7 @@ public class TaskSyncerService {
 
     public ResponseEntity<String> createProject(String projectName, String serviceType, String repoNamespace, String repoName,
                                                 String boardName, String firstLoginCredential, String secondLoginCredential,
-                                                Boolean trello) throws RepositoryTypeNotSupportedException {
+                                                Boolean trello, List<String> columnNames) throws RepositoryTypeNotSupportedException {
         if (projectRepository.findProjectByName(projectName).isPresent()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Project with name " + projectName + "Already Exists");
         }
@@ -95,6 +95,7 @@ public class TaskSyncerService {
         // creates a new project
         Project project = new Project();
         project.setName(projectName);
+        project.setColumnNames(columnNames);
         projectAccessor.saveProject(project);
 
 
@@ -159,8 +160,7 @@ public class TaskSyncerService {
                                                  String repoName, String firstLoginCredential,
                                                  String secondLoginCredential, String hookOrConnect) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException, SynchronizationFailedException {
         // Project with projectName must be already created
-        Project project = projectRepository.findProjectByName(projectName)
-                .orElseThrow(() -> new IllegalArgumentException("Project with name " + projectName + " does not exist"));
+        Project project = doesProjectExist(projectName);
 
         //Initialize a projectAccessor - adds a project to the accessor and saves the project
         projectAccessor.saveProject(project);
@@ -191,6 +191,21 @@ public class TaskSyncerService {
         }
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("");
+    }
+
+
+    public ResponseEntity<String> setColumnNames(String projectName, List<String> columnNames){
+        Project project = doesProjectExist(projectName);
+        projectAccessor.saveProject(project);
+        projectAccessor.setColumnNames(columnNames);
+        projectAccessor.save();
+
+        return ResponseEntity.status(HttpStatus.OK).body("Column names set");
+    }
+
+    private Project doesProjectExist(String projectName) throws IllegalArgumentException{
+        return projectRepository.findProjectByName(projectName)
+                .orElseThrow(() -> new IllegalArgumentException("Project with name " + projectName + " does not exist"));
     }
 
 }

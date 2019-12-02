@@ -9,6 +9,7 @@ import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -95,4 +96,6 @@ public interface ProjectAccessor {
 
     RepositoryAccessor createRepositoryAccessor(AbstractRepository repository)
             throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException;
+
+    void setColumnNames(List<String> columnNames);
 }

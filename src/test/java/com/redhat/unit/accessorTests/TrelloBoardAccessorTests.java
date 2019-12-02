@@ -1,13 +1,12 @@
 package com.redhat.unit.accessorTests;
 
 import com.julienvey.trello.Trello;
+import com.julienvey.trello.domain.Board;
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.TList;
 import com.redhat.tasksyncer.dao.accessors.TrelloBoardAccessor;
-import com.redhat.tasksyncer.dao.entities.AbstractCard;
-import com.redhat.tasksyncer.dao.entities.AbstractColumn;
-import com.redhat.tasksyncer.dao.entities.TrelloCard;
-import com.redhat.tasksyncer.dao.entities.TrelloColumn;
+import com.redhat.tasksyncer.dao.accessors.TrelloColumnAccessor;
+import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
@@ -19,10 +18,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -32,12 +32,15 @@ import static org.mockito.Mockito.*;
 public class TrelloBoardAccessorTests {
 
 
-    @MockBean
+    @Mock
     private AbstractCardRepository mockCardRepository = Mockito.mock(AbstractCardRepository.class);
-    @MockBean
+    @Mock
     private AbstractBoardRepository mockBoardRepository;
-    @MockBean
+    @Mock
     private AbstractColumnRepository mockColumnRepository;
+    @Mock
+    private TrelloColumnAccessor mockColumnAccessor = Mockito.mock(TrelloColumnAccessor.class);
+
 
 
     @Mock
@@ -48,6 +51,9 @@ public class TrelloBoardAccessorTests {
     private Card mockTCard = Mockito.mock(Card.class);
 
     private TrelloBoardAccessor trelloBoardAccessorUnderTest;
+
+    @Mock
+    private AbstractBoard mockBoard = Mockito.mock(TrelloBoard.class);
 
     private AbstractCard newCard;
     private String newTitle = "newTitle";
@@ -64,10 +70,13 @@ public class TrelloBoardAccessorTests {
     @Before
     public void setup() throws NoSuchFieldException {
         trelloBoardAccessorUnderTest = new TrelloBoardAccessor(
-                mockBoardRepository, mockCardRepository, mockColumnRepository);
+                mockBoardRepository, mockCardRepository, mockColumnRepository, mockColumnAccessor);
+
 
         FieldSetter.setField(trelloBoardAccessorUnderTest, trelloBoardAccessorUnderTest
                 .getClass().getDeclaredField("trelloApi"), mockTrelloApi);
+        FieldSetter.setField(trelloBoardAccessorUnderTest, trelloBoardAccessorUnderTest.getClass()
+        .getDeclaredField("board"), mockBoard);
 
         newCard = new TrelloCard();
         newCard.setTitle(newTitle);
@@ -91,6 +100,11 @@ public class TrelloBoardAccessorTests {
         doCallRealMethod().when(mockTList).setId(anyString());
         Mockito.when(mockTList.getId()).thenCallRealMethod();
 
+        doCallRealMethod().when(mockBoard).setRemoteBoardId(anyString());
+        Mockito.when(mockBoard.getRemoteBoardId()).thenCallRealMethod();
+        Mockito.when(mockBoard.getColumns()).thenCallRealMethod();
+        doCallRealMethod().when(mockBoard).addColumn(any());
+
         doAnswer(i -> {
             Card argument = i.getArgument(0);
             argument.setIdList(mockTList.getId());
@@ -104,6 +118,22 @@ public class TrelloBoardAccessorTests {
         });
 
         doAnswer(returnsFirstArg()).when(mockCardRepository).save(any());
+
+        doAnswer(returnsFirstArg()).when(mockBoardRepository).save(any());
+
+        doAnswer(i -> {
+            Board trelloBoard = new Board();
+            trelloBoard.setId("id");
+            return trelloBoard;
+        }).when(mockTrelloApi).createBoard(any(), any(), any());
+
+
+        doAnswer(i -> {
+            AbstractColumn column = new TrelloColumn();
+            column.setName(i.getArgument(0));
+            return column;
+        }).when(mockColumnAccessor).createColumn(any(), any());
+
     }
 
     @Test
@@ -145,6 +175,34 @@ public class TrelloBoardAccessorTests {
         assertThat(createdCard.getDesc()).isEqualTo(newDescription);
         assertThat(createdCard.getName()).isEqualTo(newTitle);
         assertThat(createdCard.getIdList()).isEqualTo(remoteColumnIssueId);
+    }
+
+    @Test
+    public void createBoardCreatesColumns(){
+        ArgumentCaptor<String> capturedColumnNames = ArgumentCaptor.forClass(String.class);
+
+        List<String> columnNames = new ArrayList<>();
+        columnNames.add("DONE");
+        columnNames.add("IN PROGRESS");
+        columnNames.add("TODO");
+
+
+
+        // Execution
+        AbstractBoard board = trelloBoardAccessorUnderTest.createBoard(columnNames);
+
+        // Verification one
+        verify(mockColumnAccessor, times(columnNames.size())).createColumn(capturedColumnNames.capture(), any());
+        List<String> createdNames = capturedColumnNames.getAllValues();
+
+        assertThat(createdNames).isEqualTo(columnNames);
+
+        // Verification two
+        List<String> boardColumnNames = new ArrayList<>();
+        board.getColumns().forEach(abstractColumn -> boardColumnNames.add(abstractColumn.getName()));
+
+        assertThat(boardColumnNames).isEqualTo(columnNames);
+
     }
 
 

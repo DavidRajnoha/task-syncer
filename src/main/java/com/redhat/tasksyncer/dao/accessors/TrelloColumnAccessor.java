@@ -4,31 +4,42 @@ import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.TList;
 import com.redhat.tasksyncer.dao.entities.TrelloColumn;
 import com.redhat.tasksyncer.dao.repositories.AbstractColumnRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Filip Cap
  */
+@Service
+@EntityScan(basePackages = {"com.redhat.tasksyncer.dao.entities"})
 public class TrelloColumnAccessor extends ColumnAccessor {
-    private TrelloColumn column;
     private AbstractColumnRepository columnRepository;
     private Trello trelloApi;
 
-    public TrelloColumnAccessor(TrelloColumn column, AbstractColumnRepository columnRepository, Trello trelloApi) {
+    @Autowired
+    public TrelloColumnAccessor(AbstractColumnRepository columnRepository) {
 
-        this.column = column;
         this.columnRepository = columnRepository;
-        this.trelloApi = trelloApi;
+
     }
 
-    public TrelloColumnAccessor createItself() {
-        TList list = trelloApi.createList(column.getName(), column.getBoard().getRemoteBoardId());
-        column.setRemoteColumnId(list.getId());
-
-        this.save();
+    public TrelloColumnAccessor createItself(Trello trelloApi) {
+        this.trelloApi = trelloApi;
         return this;
     }
 
-    public void save() {
-        this.column = columnRepository.save(column);
+    public TrelloColumn createColumn(String name, String remoteBoardId){
+        TList list = trelloApi.createList(name, remoteBoardId);
+
+        TrelloColumn column = new TrelloColumn();
+        column.setRemoteColumnId(list.getId());
+        column.setName(name);
+
+        return column;
+    }
+
+    public void save(TrelloColumn column) {
+        columnRepository.save(column);
     }
 }

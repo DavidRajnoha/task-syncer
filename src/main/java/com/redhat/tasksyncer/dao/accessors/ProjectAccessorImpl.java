@@ -43,6 +43,7 @@ public class ProjectAccessorImpl implements ProjectAccessor{
 
     private Project project;
 
+
     private Map<String, RepositoryAccessor> repositoryAccessors;
 
     @Autowired
@@ -69,7 +70,8 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         this.boardAccessor = boardAccessor.initializeAndSave(board, trelloApplicationKey, trelloAccessToken);
 
         // Creates the board on trello, creates two columns - done and todo
-        AbstractBoard b = this.boardAccessor.createBoard();
+        AbstractBoard b = this.boardAccessor.createBoard(project.getColumnNames());
+
         // Adds this board to this project
         b.setProject(project);
         boardAccessor.save();
@@ -244,6 +246,11 @@ public class ProjectAccessorImpl implements ProjectAccessor{
     public void deleteProject(Project project) {
         if (this.project == project) this.project = null;
         projectRepository.delete(project);
+    }
+
+    public void setColumnNames(List<String> columnNames){
+        project.setColumnNames(columnNames);
+        projectRepository.save(project);
     }
 
 }

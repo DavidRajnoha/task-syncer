@@ -29,6 +29,9 @@ public class Project{
     @JsonManagedReference
     private List<AbstractRepository> repositories;
 
+    @ElementCollection
+    private List<String> columnNames = new ArrayList<>();
+
     public Project() {
     }
 
@@ -98,5 +101,13 @@ public class Project{
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<String> getColumnNames() {
+        return columnNames;
+    }
+
+    public void setColumnNames(List<String> columnNames) {
+        this.columnNames = columnNames;
     }
 }
