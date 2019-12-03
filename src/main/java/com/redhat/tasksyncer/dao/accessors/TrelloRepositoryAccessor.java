@@ -95,4 +95,10 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
     public AbstractRepository createRepositoryOfType() {
         return new TrelloRepository();
     }
+
+    @Override
+    public Map<String, String> isMappingValid(Map<String, String> mapping) {
+
+        return mapping;
+    }
 }

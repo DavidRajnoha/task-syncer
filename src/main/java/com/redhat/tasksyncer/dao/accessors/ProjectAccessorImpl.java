@@ -6,6 +6,7 @@ import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.dao.repositories.ProjectRepository;
 import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
+import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
@@ -109,9 +110,15 @@ public class ProjectAccessorImpl implements ProjectAccessor{
      * Takes a subclass of the AbstractRepository class and creates new accessor for this class.
      * The accessor is then used to sync the issues from the particular repository with the internal database
      * */
-    public RepositoryAccessor addRepository(AbstractRepository repository)
-            throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException {
+    public RepositoryAccessor addRepository(AbstractRepository repository,
+                                            Map<String, String> columnMapping)
+            throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException, InvalidMappingException {
         RepositoryAccessor repositoryAccessor = createRepositoryAccessor(repository);
+
+        if (columnMapping != null) {
+            repositoryAccessor.setColumnMapping(columnMapping);
+        }
+
         try {
             doSync(repositoryAccessor);
         } catch (CannotConnectToRepositoryException exception){
@@ -234,12 +241,13 @@ public class ProjectAccessorImpl implements ProjectAccessor{
         return issue;
     }
 
-    public void hookRepository(AbstractRepository repository, String webhookUrl) throws
+    public void hookRepository(AbstractRepository repository, String webhookUrl,
+                               Map<String, String> columnMapping) throws
             RepositoryTypeNotSupportedException, IOException, SynchronizationFailedException, GitLabApiException,
-            CannotConnectToRepositoryException {
+            CannotConnectToRepositoryException, InvalidMappingException {
         RepositoryAccessor repositoryAccessor;
         //Adds the repository to the project, syncs it and returns the particular repository Accessor
-        repositoryAccessor = addRepository(repository);
+        repositoryAccessor = addRepository(repository, columnMapping);
         repositoryAccessor.createWebhook(webhookUrl);
     }
 

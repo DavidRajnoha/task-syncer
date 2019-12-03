@@ -12,28 +12,40 @@ import org.gitlab4j.api.webhook.IssueEvent;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class GitlabIssueTests {
 
-    Issue glIssueOne;
-    Issue glIssueTwo;
-    Assignee assignee;
-    List<String> labels;
+    private Issue glIssueOne;
+    private Issue glIssueTwo;
+    private Issue glIssueThree;
+    private Assignee assignee;
+    private List<String> labels;
 
-    Label label;
-    String label_name = "label";
-    User user;
-    String assigneeName = "assignee";
-    String titleOne = "Title_one";
-    String description = "description";
-    Date dueDate = new Date();
-    Date createdAt = new Date();
-    Date closedAt = new Date();
+    private Map<String, String> columnMapping = new HashMap<>();
+
+    private Label label;
+    private String label_name = "label";
+    private User user;
+    private String assigneeName = "assignee";
+    private String titleOne = "Title_one";
+    private String description = "description";
+    private Date dueDate = new Date();
+    private Date createdAt = new Date();
+    private Date closedAt = new Date();
+
+    private static final String CLOSED = "CLOSED";
+    private static final String OPENED = "OPENED";
+    private static final String REOPENED = "REOPENED";
+    private static final String DONE_CUSTOM = "DONE";
+    private static final String TODO_CUSTOM = "NEXT";
+
+
+    private IssueEvent issueEventStates = new IssueEvent();
+    private IssueEvent.ObjectAttributes objectAttributesStates = new IssueEvent.ObjectAttributes();
+
 
     @Before
     public void setUp(){
@@ -63,17 +75,26 @@ public class GitlabIssueTests {
         glIssueOne.setClosedBy(user);
         glIssueOne.setLabels(labels);
 
+
         glIssueTwo = new Issue();
         glIssueTwo.setId(2);
+
+        glIssueThree = new Issue();
+        glIssueThree.setId(5);
+
+        columnMapping.put(AbstractIssue.STATE_OPENED, TODO_CUSTOM);
+        columnMapping.put(AbstractIssue.STATE_CLOSED, DONE_CUSTOM);
+        columnMapping.put(AbstractIssue.STATE_REOPENED, TODO_CUSTOM);
+
+        objectAttributesStates.setId(4);
 
     }
 
     @Test
     public void whenConvertingInput_thenAllFieldsShouldBeTransmitted(){
-        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter.convert(glIssueOne);
+        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter.convert(glIssueOne, columnMapping);
         assertThat(convertedIssue.getIssueType()).isEqualTo(IssueType.GITLAB);
         assertThat(convertedIssue.getTitle()).isEqualTo(titleOne);
-        assertThat(convertedIssue.getState()).isEqualTo(AbstractIssue.STATE_CLOSED);
         assertThat(convertedIssue.getDescription()).isEqualTo(description);
         assertThat(convertedIssue.getDueDate()).isEqualTo(dueDate);
         assertThat(convertedIssue.getCreatedAt()).isEqualTo(createdAt);
@@ -85,6 +106,40 @@ public class GitlabIssueTests {
 
         assert(convertedIssue.getLabels().contains(label_name));
     }
+
+    @Test
+    public void whenConvertingClosedInput_thenStateIsMappedAccordingToMapping(){
+        whenConvertingInput_thenStateIsMappedAccordingToMapping(
+                Constants.IssueState.CLOSED, DONE_CUSTOM
+        );
+    }
+
+    @Test
+    public void whenConvertingOpenedInput_thenStateIsMappedAccordingToMapping(){
+        whenConvertingInput_thenStateIsMappedAccordingToMapping(
+                Constants.IssueState.OPENED, TODO_CUSTOM
+        );
+    }
+
+    @Test
+    public void whenConvertingReopenedInput_thenStateIsMappedAccordingToMapping(){
+        whenConvertingInput_thenStateIsMappedAccordingToMapping(
+                Constants.IssueState.REOPENED, TODO_CUSTOM);
+    }
+
+    private void whenConvertingInput_thenStateIsMappedAccordingToMapping(
+            Constants.IssueState setState, String customState){
+        glIssueThree.setState(setState);
+
+        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter
+                .convert(glIssueThree, columnMapping);
+
+        assertThat(convertedIssue.getState()).isEqualTo(customState);
+    }
+
+
+
+
 
     @Test
     public void whenConvertingIssueEvent_thenAllFieldsAreCorrectlyCreated(){
@@ -101,7 +156,8 @@ public class GitlabIssueTests {
         issueEvent.setObjectAttributes(objectAttributes);
 
 
-        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter.convert(issueEvent.getObjectAttributes());
+        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter
+                .convert(issueEvent.getObjectAttributes(), columnMapping);
 
         assertThat(convertedIssue.getIssueType()).isEqualTo(IssueType.GITLAB);
         assertThat(convertedIssue.getTitle()).isEqualTo(titleOne);
@@ -111,13 +167,41 @@ public class GitlabIssueTests {
 
         // IssueEvent.ObjectAttributes does not have method to
         // assertThat(convertedIssue.getCreatedAt()).isEqualTo(createdAt);
+    }
 
 
+    @Test
+    public void whenConvertingOpenedIssueEvent_thenStateIsSetAccordingToMapping(){
+       whenConvertingIssueEvent_thenStateIsSetAccordingToMapping("opened", TODO_CUSTOM);
+    }
+
+
+    @Test
+    public void whenConvertingClosedIssueEvent_thenStateIsSetAccordingToMapping(){
+        whenConvertingIssueEvent_thenStateIsSetAccordingToMapping("closed", DONE_CUSTOM);
+    }
+
+    @Test
+    public void whenConvertingReopenedIssueEvent_thenStateIsSetAccordingToMapping(){
+        whenConvertingIssueEvent_thenStateIsSetAccordingToMapping("reopened", TODO_CUSTOM);
+    }
+
+
+    private void whenConvertingIssueEvent_thenStateIsSetAccordingToMapping(String setState,
+                                                                           String customState){
+        objectAttributesStates.setState(setState);
+        issueEventStates.setObjectAttributes(objectAttributesStates);
+
+        AbstractIssue convertedIssue = GitlabIssue.ObjectToGitlabIssueConverter
+                .convert(issueEventStates.getObjectAttributes(), columnMapping);
+
+        assertThat(convertedIssue.getState()).isEqualTo(customState);
     }
 
     @Test
     public void whenConvertingInputWithNullValuesButId_thenIsIssueErrorlessProcessed(){
-        AbstractIssue foundIssue = GitlabIssue.ObjectToGitlabIssueConverter.convert(glIssueTwo);
+        AbstractIssue foundIssue = GitlabIssue.ObjectToGitlabIssueConverter
+                .convert(glIssueTwo, columnMapping);
 
         assertThat(foundIssue.getRemoteIssueId()).isEqualTo(String.valueOf(2));
     }

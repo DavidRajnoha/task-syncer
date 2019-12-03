@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -117,10 +116,12 @@ public class Endpoints {
                                                       @PathVariable String repoNamespace,
                                                       @PathVariable String repoName,
                                                       @RequestParam("firstLoginCredential") String firstLoginCredential,
-                                                      @RequestParam("secondLoginCredential") String secondLoginCredential) {
+                                                      @RequestParam("secondLoginCredential") String secondLoginCredential,
+                                                      @RequestParam(required = false) List<String> columnNames,
+                                                      @RequestParam(required = false) List<String> columnMapping){
         try {
             return service.connectService(projectName, serviceName, repoNamespace, repoName, firstLoginCredential,
-                    secondLoginCredential, hookOrConnect);
+                    secondLoginCredential, hookOrConnect, columnMapping, columnNames);
         } catch (CannotConnectToRepositoryException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Could not connect to the " + serviceName +
@@ -135,7 +136,6 @@ public class Endpoints {
                     "failed");
         }
     }
-
 
     //CREATE PROJECT
     /**
@@ -169,15 +169,18 @@ public class Endpoints {
                                                 @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                 @RequestParam("secondLoginCredential") String secondLoginCredential
     )  {
-        List<String> columnNames = new ArrayList<>();
-        columnNames.add("TODO");
-        columnNames.add("DONE");
-        return createProjectCustomColumnsEndpoint(projectName, serviceName, repoNamespace, repoName, boardName,
-                firstLoginCredential, secondLoginCredential, columnNames);
+        try {
+            return service.createProject(projectName, serviceName, repoNamespace, repoName, boardName,
+                    firstLoginCredential, secondLoginCredential, true);
+        } catch (RepositoryTypeNotSupportedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Repository of service of type: " + serviceName +
+                    " is not implemented");
+        }
     }
 
     @RequestMapping(path = "/service/{serviceName}/new/project/{projectName}/{repoNamespace}/{repoName}/to/trello/" +
-            "{boardName}/custom/columns",
+            "{boardName}/custom/columns/and/mapping",
             method = RequestMethod.PUT
     )
     public ResponseEntity<String> createProjectCustomColumnsEndpoint(@PathVariable String projectName,
@@ -187,16 +190,19 @@ public class Endpoints {
                                                         @PathVariable String boardName,
                                                         @RequestParam("firstLoginCredential") String firstLoginCredential,
                                                         @RequestParam("secondLoginCredential") String secondLoginCredential,
-                                                        @RequestParam List<String> columnNames){
+                                                        @RequestParam List<String> columnNames,
+                                                        @RequestParam List<String> columnMapping){
         try {
             return service.createProject(projectName, serviceName, repoNamespace, repoName, boardName,
-                    firstLoginCredential, secondLoginCredential, true, columnNames);
+                    firstLoginCredential, secondLoginCredential, true, true, columnNames, columnMapping);
         } catch (RepositoryTypeNotSupportedException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Repository of service of type: " + serviceName +
                     " is not implemented");
         }
     }
+
+
 
 
         @RequestMapping(path = "/project/{projectName}/setColumnNames", method = RequestMethod.PUT)

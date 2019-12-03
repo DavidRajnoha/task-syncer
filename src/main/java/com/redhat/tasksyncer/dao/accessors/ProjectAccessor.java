@@ -4,12 +4,14 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
+import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import com.redhat.tasksyncer.exceptions.RepositoryTypeNotSupportedException;
 import com.redhat.tasksyncer.exceptions.SynchronizationFailedException;
 import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -47,7 +49,9 @@ public interface ProjectAccessor {
      *
      * @param repository you wish to add to the project
      */
-    RepositoryAccessor addRepository(AbstractRepository repository) throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException;
+    RepositoryAccessor addRepository(AbstractRepository repository,
+                                     Map<String, String> columnMapping)
+            throws RepositoryTypeNotSupportedException, CannotConnectToRepositoryException, InvalidMappingException;
 
     /**
      * @param newIssue - AbstractIssue you wish to update
@@ -76,8 +80,9 @@ public interface ProjectAccessor {
      *
      * @throws RepositoryTypeNotSupportedException - The creation of webhooks on Jira is not implemented yet
      */
-    void hookRepository(AbstractRepository repository, String webhookUrl) throws RepositoryTypeNotSupportedException,
-            IOException, SynchronizationFailedException, GitLabApiException, CannotConnectToRepositoryException;
+    void hookRepository(AbstractRepository repository, String webhookUrl,
+                        Map<String, String> columnNames) throws RepositoryTypeNotSupportedException,
+            IOException, SynchronizationFailedException, GitLabApiException, CannotConnectToRepositoryException, InvalidMappingException;
 
     /**
      * Saves the project associated with the projectAccessor

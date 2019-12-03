@@ -6,9 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Filip Cap
@@ -48,6 +46,9 @@ public abstract class AbstractRepository {
     @JsonBackReference
     private Project project;
 
+    @ElementCollection
+    private Map<String, String> columnMapping = new HashMap<>();
+
 
     public AbstractRepository() {
     }
@@ -82,6 +83,14 @@ public abstract class AbstractRepository {
 
     public void setIssues(List<AbstractIssue> issues) {
         this.issues = issues;
+    }
+
+    public Map<String, String> getColumnMapping(){
+        return this.columnMapping;
+    }
+
+    public void setColumnMapping(Map<String, String> columnMapping){
+        this.columnMapping = columnMapping;
     }
 
     public void addIssue(AbstractIssue issue) {

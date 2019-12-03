@@ -53,7 +53,7 @@ public class ProjectAccessorTests {
 
 
     @Before
-    public void setup(){
+    public void setup() throws NoSuchFieldException {
         abstractRepository = new GitlabRepository();
         abstractRepository.setRepositoryName("repoName");
 

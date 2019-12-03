@@ -6,10 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.persistence.Entity;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -95,6 +92,7 @@ public class JiraIssue extends AbstractIssue {
 
             return issue;
         }
+
 
         public static Set<AbstractIssue> getSubtasks(Issue input){
             Set<AbstractIssue> subIssues = new HashSet<>();

@@ -79,4 +79,10 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         return new GithubRepository();
     }
 
+    @Override
+    public Map<String, String> isMappingValid(Map<String, String> mapping) {
+
+        return mapping;
+    }
+
 }

@@ -166,7 +166,7 @@ public class ProjectAccessorTestsSyncIssue {
         newGithubIssue.setRemoteIssueId(remoteIssueId);
         newGithubIssue.setTitle(title);
         newGithubIssue.setDescription(description);
-        newGithubIssue.setState(AbstractIssue.STATE_OPENED);
+        newGithubIssue.setState("TODO");
         newGithubIssue.setRepository(githubRepository);
 
         return newGithubIssue;

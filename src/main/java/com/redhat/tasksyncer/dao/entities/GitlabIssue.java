@@ -6,10 +6,7 @@ import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.webhook.IssueEvent;
 
 import javax.persistence.Entity;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Filip Cap
@@ -21,7 +18,7 @@ public class GitlabIssue extends AbstractIssue {
     }
 
     public static class ObjectToGitlabIssueConverter {
-        public static GitlabIssue convert(Issue input) {
+        public static GitlabIssue convert(Issue input, Map<String, String> columnMapping) {
             GitlabIssue issue = new GitlabIssue();
 
             issue.setRemoteIssueId(input.getId().toString());
@@ -40,18 +37,18 @@ public class GitlabIssue extends AbstractIssue {
             Optional.ofNullable(input.getClosedBy()).ifPresent(user -> issue.setClosedBy(user.getName()));
 
 
-
             if(input.getState() == Constants.IssueState.OPENED)
-                issue.setState(AbstractIssue.STATE_OPENED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
             if(input.getState() == Constants.IssueState.CLOSED)
-                issue.setState(AbstractIssue.STATE_CLOSED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
             if(input.getState() == Constants.IssueState.REOPENED)
-                issue.setState(AbstractIssue.STATE_REOPENED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
 
             return issue;
         }
 
-        public static GitlabIssue convert(IssueEvent.ObjectAttributes input) {
+        public static GitlabIssue convert(IssueEvent.ObjectAttributes input,
+                                          Map<String, String> columnMapping) {
             GitlabIssue issue = new GitlabIssue();
 
             issue.setRemoteIssueId(input.getId().toString());
@@ -61,13 +58,15 @@ public class GitlabIssue extends AbstractIssue {
             issue.setCreatedAt(input.getCreatedAt());
 
             if(Objects.equals(input.getState(), Constants.IssueState.OPENED.toString()))
-                issue.setState(AbstractIssue.STATE_OPENED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
             if(Objects.equals(input.getState(), Constants.IssueState.CLOSED.toString()))
-                issue.setState(AbstractIssue.STATE_CLOSED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
             if(Objects.equals(input.getState(), Constants.IssueState.REOPENED.toString()))
-                issue.setState(AbstractIssue.STATE_REOPENED);
+                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
 
             return issue;
         }
+
+
     }
 }

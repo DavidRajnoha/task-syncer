@@ -14,6 +14,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 
 /**
  * @author Filip Cap
@@ -55,7 +56,7 @@ public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
 
         IssueEvent.ObjectAttributes oa = ie.getObjectAttributes();
 
-        AbstractIssue issue = GitlabIssue.ObjectToGitlabIssueConverter.convert(oa);
+        AbstractIssue issue = GitlabIssue.ObjectToGitlabIssueConverter.convert(oa, new HashMap<>());
         issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(parseRepositoryName(ie.getRepository().getName()), project.getId()));
 
         return issue;

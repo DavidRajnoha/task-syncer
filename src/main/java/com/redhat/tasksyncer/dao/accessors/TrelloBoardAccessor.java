@@ -42,6 +42,8 @@ public class TrelloBoardAccessor implements BoardAccessor {
 
     private Trello trelloApi;
 
+
+
     @Autowired
     public TrelloBoardAccessor(AbstractBoardRepository boardRepository, AbstractCardRepository cardRepository,
                                AbstractColumnRepository columnRepository, TrelloColumnAccessor trelloColumnAccessor) {
@@ -75,8 +77,8 @@ public class TrelloBoardAccessor implements BoardAccessor {
         this.save();
 
         if (columnNames.isEmpty()){
-            columnNames.add("TODO");
-            columnNames.add("DONE");
+            columnNames.add(AbstractColumn.TODO_DEFAULT);
+            columnNames.add(AbstractColumn.DONE_DEFAULT);
         }
 
         // For each name from the list column names creates column on the trello board

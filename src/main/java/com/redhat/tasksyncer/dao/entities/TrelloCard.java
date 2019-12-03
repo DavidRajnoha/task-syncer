@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 public class TrelloCard extends AbstractCard {
-    
+
     public TrelloCard() {
         super();
     }
@@ -33,14 +33,9 @@ public class TrelloCard extends AbstractCard {
 
             // todo: use mapping to determine proper column
             if (issue.getState() != null) {
-                if (issue.getState().equals(AbstractIssue.STATE_OPENED) || issue.getState().equals(AbstractIssue.STATE_REOPENED)) {
-                    card.setColumn(columns.stream().filter(c -> c.getName().equals("TODO")).collect(Collectors.toList()).get(0));
-                } else {
-                    card.setColumn(columns.stream().filter(c -> c.getName().equals("DONE")).collect(Collectors.toList()).get(0));
-                }
-            } else {
-                card.setColumn(columns.stream().filter(c -> c.getName().equals("DONE")).collect(Collectors.toList()).get(0));
+                card.setColumn(columns.stream().filter(c -> c.getName().equals(issue.getState())).collect(Collectors.toList()).get(0));
             }
+
             return card;
         }
     }

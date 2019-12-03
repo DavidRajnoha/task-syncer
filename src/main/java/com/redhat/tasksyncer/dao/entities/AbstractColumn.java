@@ -32,6 +32,9 @@ public abstract class AbstractColumn {
     @JsonBackReference
     private AbstractBoard board;
 
+    public static final String TODO_DEFAULT = "TODO";
+    public static final String DONE_DEFAULT = "DONE";
+
 
     public AbstractColumn() {
     }

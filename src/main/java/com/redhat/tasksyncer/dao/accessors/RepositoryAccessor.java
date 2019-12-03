@@ -4,10 +4,12 @@ import com.redhat.tasksyncer.dao.entities.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
+import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import org.gitlab4j.api.GitLabApiException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Filip Cap, David Rajnoha
@@ -25,12 +27,16 @@ public abstract class RepositoryAccessor {
 
     public abstract AbstractRepository createRepositoryOfType();
 
+    protected abstract Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException;
+
+
     /**
      * Creates new repository accessor that is connected to the external service (for example the trelloApi etc. fields
      * are initiated and ready to communicate with the ext. service)
      * */
     public RepositoryAccessor getConnectedInstance(AbstractRepository repository) throws CannotConnectToRepositoryException {
-        this.repository = repository;
+
+        initializeRepository(repository);
 
         try {
             this.connectToRepository();
@@ -39,6 +45,10 @@ public abstract class RepositoryAccessor {
         }
 
         return this;
+    }
+
+    public void initializeRepository(AbstractRepository repository){
+        this.repository = repository;
     }
 
     public void save() {
@@ -70,6 +80,11 @@ public abstract class RepositoryAccessor {
 
         return repository;
     };
+
+
+    public void setColumnMapping(Map<String, String> columnMapping) throws InvalidMappingException {
+        repository.setColumnMapping(isMappingValid(columnMapping));
+    }
 }
 
 
