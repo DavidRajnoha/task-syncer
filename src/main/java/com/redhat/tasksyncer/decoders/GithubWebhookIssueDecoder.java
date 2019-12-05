@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.decoders;
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GithubIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
@@ -36,8 +37,12 @@ public class GithubWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
             e.printStackTrace();
             throw new InvalidWebhookCallbackException("The callback was not parsed correctly");
         }
-        AbstractIssue gitHubIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue());
-        gitHubIssue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(issueEventPayload.getRepository().getName(), project.getId()));
+        AbstractRepository repository = (repositoryRepository.findByRepositoryNameAndProject_Id(issueEventPayload.getRepository().getName(), project.getId()));
+
+        AbstractIssue gitHubIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue(),
+                repository.getColumnMapping());
+
+        gitHubIssue.setRepository(repository);
 
         return gitHubIssue;
     }

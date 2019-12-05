@@ -13,7 +13,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -36,6 +38,8 @@ public class GithubIssueTests {
 
     MockHttpServletRequest servletRequest;
 
+    Map<String, String> columnMapping = new LinkedHashMap<>();
+
 
     @Before
     public void setup() throws IOException {
@@ -48,6 +52,8 @@ public class GithubIssueTests {
         servletRequest.setContent(ghIssueCallback.getBytes());
 
 
+        columnMapping.put("OPEN", AbstractIssue.STATE_OPENED);
+        columnMapping.put("CLOSED", AbstractIssue.STATE_CLOSED);
   /*    Throws NullPointerException, because some field that can not be set here is empty...
 
         ghIssue.setTitle(titleOne);
@@ -62,12 +68,14 @@ public class GithubIssueTests {
         GHEventPayload.Issue issueEventPayload = GitHub.connectAnonymously().parseEventPayload(servletRequest.getReader(), GHEventPayload.Issue.class);
 
 
-        AbstractIssue convertedIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue());
+        AbstractIssue convertedIssue = GithubIssue.ObjectToGithubIssueConverter.convert(issueEventPayload.getIssue()
+                , columnMapping);
         assertThat(convertedIssue.getIssueType()).isEqualTo(IssueType.GITHUB);
         assertThat(convertedIssue.getTitle()).isEqualTo("Issue");
         //TODO: Check why are the plus signs there
         assertThat(convertedIssue.getDescription()).isEqualTo("Example+Issue+Webhook+Callback+for+Testing");
         assertThat(convertedIssue.getAssignee()).isEqualTo("DavidRajnoha");
+        assertThat(convertedIssue.getState()).isEqualTo(AbstractIssue.STATE_OPENED);
         assert(convertedIssue.getLabels().contains("bug"));
     }
 
@@ -77,6 +85,6 @@ public class GithubIssueTests {
 
         GHEventPayload.Issue emptyIssueEventPayload = GitHub.connectAnonymously().parseEventPayload(servletRequest.getReader(), GHEventPayload.Issue.class);
 
-        GithubIssue.ObjectToGithubIssueConverter.convert(emptyIssueEventPayload.getIssue());
+        GithubIssue.ObjectToGithubIssueConverter.convert(emptyIssueEventPayload.getIssue(), columnMapping);
     }
 }

@@ -2,12 +2,11 @@ package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueState;
 
 import javax.persistence.Entity;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ public class GithubIssue extends AbstractIssue {
 
     public static class ObjectToGithubIssueConverter {
 
-        public static GithubIssue convert(GHIssue input) {
+        public static GithubIssue convert(GHIssue input, Map<String, String> columnMapping) {
             GithubIssue issue = new GithubIssue();
 
             //set RemoteIssueId
@@ -81,13 +80,18 @@ public class GithubIssue extends AbstractIssue {
 
 
             //Dealing with state
-            if(Objects.equals(input.getState(), GHIssueState.OPEN)){
-                issue.setState(AbstractIssue.STATE_OPENED);
+//            if(Objects.equals(input.getState(), GHIssueState.OPEN)){
+//                issue.setState(AbstractIssue.STATE_OPENED);
+//            }
+//            if(Objects.equals(input.getState(), GHIssueState.CLOSED)){
+//                issue.setState(AbstractIssue.STATE_CLOSED);
+//            }
+
+            String issueState = columnMapping.get(input.getState().name().toUpperCase());
+            if (issueState != null) {
+                issue.setState(issueState);
             }
 
-            if(Objects.equals(input.getState(), GHIssueState.CLOSED)){
-                issue.setState(AbstractIssue.STATE_CLOSED);
-            }
 
             return issue;
         }

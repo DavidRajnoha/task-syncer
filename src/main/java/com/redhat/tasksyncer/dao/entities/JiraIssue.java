@@ -19,7 +19,7 @@ public class JiraIssue extends AbstractIssue {
     }
 
     public static class ObjectToJiraIssueConverter{
-        public static JiraIssue convert(Issue input) {
+        public static JiraIssue convert(Issue input, Map<String, String> columnMapping) {
             JiraIssue issue = new JiraIssue();
 
             issue.setRemoteIssueId(input.getKey());
@@ -50,21 +50,24 @@ public class JiraIssue extends AbstractIssue {
             input.getFixVersions();
 
 
-            //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each porject has different issue states)
-            if (input.getStatus().getName().equals("Next"))
-                issue.setState(AbstractIssue.STATE_OPENED);
-            else if (input.getStatus().getName().toLowerCase().equals("opened"))
-                issue.setState(AbstractIssue.STATE_OPENED);
-            else if (input.getStatus().getName().equals("Next"))
-                issue.setState(AbstractIssue.STATE_OPENED);
-            else issue.setState(AbstractIssue.STATE_CLOSED);
+//            //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each porject has different issue states)
+//            if (input.getStatus().getName().equals("Next"))
+//                issue.setState(AbstractIssue.STATE_OPENED);
+//            else if (input.getStatus().getName().toLowerCase().equals("opened"))
+//                issue.setState(AbstractIssue.STATE_OPENED);
+//            else if (input.getStatus().getName().equals("Next"))
+//                issue.setState(AbstractIssue.STATE_OPENED);
+//            else issue.setState(AbstractIssue.STATE_CLOSED);
+
+            String jiraState = input.getStatus().getName().toUpperCase();
+            issue.setState(columnMapping.get(jiraState));
 
             return issue;
         }
 
 
         //
-        public static AbstractIssue convert(JSONObject input) throws JSONException {
+        public static AbstractIssue convert(JSONObject input, Map<String, String> columnMapping) throws JSONException {
             AbstractIssue issue = new JiraIssue();
 
 
@@ -79,16 +82,18 @@ public class JiraIssue extends AbstractIssue {
             issue.setTitle(inputFields.getString("summary"));
             issue.setDescription(inputFields.optString("description"));
 
-            String status = inputFields.getJSONObject("status").getString("name");
+            // Sets state based on the mapping
+            String jiraState = inputFields.getJSONObject("status").getString("name").toUpperCase();
+            issue.setState(columnMapping.get(jiraState));
 
-            //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each project has different issue states, the mapping will be set by the user)
-            if(status.equals("open"))
-                issue.setState(STATE_OPENED);
-            else if (status.equals("Backlog"))
-                issue.setState(STATE_OPENED);
-            else if(status.equals("Closed"))
-                issue.setState(STATE_CLOSED);
-            else issue.setState(STATE_OPENED);
+//            //TODO: rework so the Issue States are not hardcoded here, but set as a parameter (Each project has different issue states, the mapping will be set by the user)
+//            if(status.equals("open"))
+//                issue.setState(STATE_OPENED);
+//            else if (status.equals("Backlog"))
+//                issue.setState(STATE_OPENED);
+//            else if(status.equals("Closed"))
+//                issue.setState(STATE_CLOSED);
+//            else issue.setState(STATE_OPENED);
 
             return issue;
         }

@@ -3,6 +3,7 @@ package com.redhat.tasksyncer.dao.accessors;
 import com.redhat.tasksyncer.dao.entities.*;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import org.kohsuke.github.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,7 +52,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
 
         // converts every issue using the GithubIssue convertor
         return issuesStream
-                .map(GithubIssue.ObjectToGithubIssueConverter::convert)
+                .map(issue -> GithubIssue.ObjectToGithubIssueConverter.convert(issue, repository.getColumnMapping()))
                 .collect(Collectors.toList());
     }
 
@@ -60,6 +61,9 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
         Set<GHEvent> events = new HashSet<>();
         //The webhook is triggered by all issues events - not comments!!
         events.add(GHEvent.ISSUES);
+
+        //TODO: DO based on reflection
+        webHookUrlString = webHookUrlString.replace("<service>", "github");
 
         URL webHookUrl = new URL(webHookUrlString);
 
@@ -80,9 +84,24 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) {
+    public Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException {
 
-        return mapping;
+        Map<String, String> upperCaseMap = new LinkedHashMap<>();
+
+        for (String key : mapping.keySet()){
+            String value  = mapping.get(key);
+
+            key = key.toUpperCase();
+
+            if (!key.equals(GHIssueState.OPEN.name()) &&
+                    !key.equals(GHIssueState.CLOSED.name())){
+                throw new InvalidMappingException("State " + key + " is not valid GitHub Issue state");
+            }
+
+            upperCaseMap.put(key, value);
+        }
+
+        return upperCaseMap;
     }
 
 }

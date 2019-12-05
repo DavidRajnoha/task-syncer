@@ -52,13 +52,14 @@ public class JiraWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
     private AbstractIssue decodeIssue(JSONObject input, AbstractRepositoryRepository repositoryRepository, Project project)
             throws JSONException {
-        AbstractIssue issue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
 
         AbstractRepository repository = repositoryRepository
                 .findByRepositoryNameAndProject_Id(input.getJSONObject("issue")
                         .getJSONObject("fields")
                         .getJSONObject("project")
                         .getString("key"), project.getId());
+
+        AbstractIssue issue = JiraIssue.ObjectToJiraIssueConverter.convert(input, repository.getColumnMapping());
         issue.setRepository(repository);
 
         // if the callback is about subissue, then sends the subIssue to the update method wrapped in container issue with

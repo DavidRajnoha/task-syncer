@@ -10,10 +10,7 @@ import javax.persistence.Entity;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author David Rajnoha
@@ -28,7 +25,7 @@ public class TrelloIssue extends AbstractIssue {
 
     // TODO: upgrade the library julienvy.trello so the commented fields can be assigned
     public static class ObjectToTrelloIssueConvertor {
-        public static TrelloIssue convert(Card trelloCard){
+        public static TrelloIssue convert(Card trelloCard, Map<String, String> collumnMapping){
             TrelloIssue trelloIssue = new TrelloIssue();
 
             trelloIssue.setTitle(trelloCard.getName());
@@ -45,14 +42,16 @@ public class TrelloIssue extends AbstractIssue {
             }));
             trelloIssue.setLabel(labels);
 
-            trelloIssue.setState(STATE_OPENED);
+
+            // sets state based on mapping
+            trelloIssue.setState(collumnMapping.get(trelloCard.getIdList()));
 
             return trelloIssue;
         }
 
 
         // TODO: Wait till I know the precise structure of the webhook callback
-        public static AbstractIssue convert(JSONObject input) throws JSONException, TrelloCalllbackNotAboutCardException {
+        public static AbstractIssue convert(JSONObject input, Map<String, String> columnMapping) throws JSONException, TrelloCalllbackNotAboutCardException {
             AbstractIssue trelloIssue = new TrelloIssue();
 
             if (input.getJSONObject("action").getJSONObject("data").has("card")) {
@@ -71,6 +70,11 @@ public class TrelloIssue extends AbstractIssue {
                     trelloIssue.setLabel(labels);
                 }
 
+                // TODO: set state according to webhook
+                if (input.getJSONObject("action").getJSONObject("data").has("listAfter")){
+                    trelloIssue.setState(columnMapping.get(
+                            input.getJSONObject("action").getJSONObject("data").getJSONObject("listAfter").get("id").toString()));
+                }
 
 
                 return trelloIssue;

@@ -230,7 +230,8 @@ public class TaskSyncerService {
         if (hookOrConnect.toLowerCase().equals("hook")) {
             try {
                 // creates webhook pointing to local adress
-                projectAccessor.hookRepository(repository, githubWebhookURLString.replace("{projectName}", projectName), null);
+                projectAccessor.hookRepository(repository,
+                        githubWebhookURLString.replace("{projectName}", projectName), columnMapping);
             } catch (IOException | GitLabApiException e) {
                 e.printStackTrace();
                 repositoryAccessor.deleteRepository(repository);

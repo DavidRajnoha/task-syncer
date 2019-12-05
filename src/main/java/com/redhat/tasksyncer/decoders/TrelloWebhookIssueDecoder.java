@@ -2,6 +2,7 @@ package com.redhat.tasksyncer.decoders;
 
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
@@ -35,9 +36,12 @@ public class TrelloWebhookIssueDecoder extends AbstractWebhookIssueDecoder {
 
         AbstractIssue issue;
         try {
-            issue = TrelloIssue.ObjectToTrelloIssueConvertor.convert(input);
-            issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(input.getJSONObject("action")
+            AbstractRepository repository = (repositoryRepository.findByRepositoryNameAndProject_Id(input.getJSONObject("action")
                     .getJSONObject("data").getJSONObject("board").get("id").toString(), project.getId()));
+
+            issue = TrelloIssue.ObjectToTrelloIssueConvertor.convert(input, repository.getColumnMapping());
+
+            issue.setRepository(repository);
         } catch (JSONException e){
             e.printStackTrace();
             throw new InvalidWebhookCallbackException("Error processing the webhook");

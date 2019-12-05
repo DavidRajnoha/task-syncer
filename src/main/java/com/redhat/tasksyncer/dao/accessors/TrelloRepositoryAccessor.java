@@ -9,6 +9,7 @@ import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.TrelloIssue;
 import com.redhat.tasksyncer.dao.entities.TrelloRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
+import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,8 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
     public List<AbstractIssue> downloadAllIssues() throws IOException, GitLabApiException {
         Stream<Card> trelloCards = trelloApi.getBoardCards((repository.getRepositoryName())).stream();
 
-        return trelloCards.map(TrelloIssue.ObjectToTrelloIssueConvertor::convert).collect(Collectors.toList());
+        return trelloCards.map(card -> TrelloIssue.ObjectToTrelloIssueConvertor
+                .convert(card, repository.getColumnMapping())).collect(Collectors.toList());
     }
 
     @Override
@@ -59,6 +61,10 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
         HttpURLConnection connection  = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
+
+        //TODO: Do based on reflection
+        webhook = webhook.replace("<service>", "trello");
+
 
         Map<String, String> parameters = new HashMap<>();
        parameters.put("token", repository.getSecondLoginCredential());
@@ -97,7 +103,17 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
     }
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) {
+    public Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException {
+
+//        TODO: make this work
+//        List<String> tListIds = trelloApi.getBoard(repository.getProject().getBoard().getRemoteBoardId()).getLists()
+//                .stream().map(TList::getId).collect(Collectors.toList());
+//
+//        for (String columnId : mapping.keySet()){
+//            if (!tListIds.contains(columnId)){
+//                throw new InvalidMappingException("Mapped list doesn't exist in your trello board");
+//            }
+//        }
 
         return mapping;
     }

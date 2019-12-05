@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +30,6 @@ import java.util.stream.StreamSupport;
 public class JiraRepositoryAccessor extends RepositoryAccessor {
     // JQL for searching issues corresponding to particular project, the KEY will be replaced by the project key
     private static final String JQL = "project=KEY";
-    //TODO: This is configured for the JIRA Cloud Solution, the URL of the local server solution may (and will) be different
 
     // private static final String URL = "https://NAMESPACE.atlassian.net";
     private static final String URL = "http://NAMESPACE";
@@ -82,7 +82,8 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
         return  issuesStream
                 .map(input -> {
                     // Converts each issue using
-                    AbstractIssue abstractIssue = JiraIssue.ObjectToJiraIssueConverter.convert(input);
+                    AbstractIssue abstractIssue = JiraIssue.ObjectToJiraIssueConverter.convert(input,
+                            repository.getColumnMapping());
 
                     // For each subtasks from input appends this subtask to the Jira Issue and adds repository to the
                     // child issue
@@ -110,9 +111,14 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
 
     @Override
     public Map<String, String> isMappingValid(Map<String, String> mapping) {
+        Map<String, String> upperCaseMap = new LinkedHashMap<>();
 
-        return mapping;
+        for (String key : mapping.keySet()){
+            String value  = mapping.get(key);
+            key = key.toUpperCase();
+            upperCaseMap.put(key, value);
+        }
+
+        return upperCaseMap;
     }
-
-
 }
