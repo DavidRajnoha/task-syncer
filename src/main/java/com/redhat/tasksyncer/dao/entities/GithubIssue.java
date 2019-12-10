@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
+import org.kohsuke.github.GHException;
 import org.kohsuke.github.GHIssue;
 
 import javax.persistence.Entity;
@@ -60,7 +61,7 @@ public class GithubIssue extends AbstractIssue {
                     });
                     issue.setComments(comments);
                 }
-            } catch (IOException e) { e.printStackTrace(); }
+            } catch (IOException | GHException e) { e.printStackTrace(); }
 
             //set CreatedAt
             try {
