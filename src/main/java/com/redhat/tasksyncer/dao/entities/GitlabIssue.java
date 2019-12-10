@@ -1,12 +1,13 @@
 package com.redhat.tasksyncer.dao.entities;
 
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
-import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.webhook.IssueEvent;
 
 import javax.persistence.Entity;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Filip Cap
@@ -37,12 +38,14 @@ public class GitlabIssue extends AbstractIssue {
             Optional.ofNullable(input.getClosedBy()).ifPresent(user -> issue.setClosedBy(user.getName()));
 
 
-            if(input.getState() == Constants.IssueState.OPENED)
-                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
-            if(input.getState() == Constants.IssueState.CLOSED)
-                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
-            if(input.getState() == Constants.IssueState.REOPENED)
-                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
+//            if(input.getState() == Constants.IssueState.OPENED)
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
+//            if(input.getState() == Constants.IssueState.CLOSED)
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
+//            if(input.getState() == Constants.IssueState.REOPENED)
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
+
+            issue.setState(columnMapping.get(input.getState().toString()));
 
             return issue;
         }
@@ -57,12 +60,15 @@ public class GitlabIssue extends AbstractIssue {
 
             issue.setCreatedAt(input.getCreatedAt());
 
-            if(Objects.equals(input.getState(), Constants.IssueState.OPENED.toString()))
-                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
-            if(Objects.equals(input.getState(), Constants.IssueState.CLOSED.toString()))
-                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
-            if(Objects.equals(input.getState(), Constants.IssueState.REOPENED.toString()))
-                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
+//            if(Objects.equals(input.getState(), Constants.IssueState.OPENED.toString()))
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_OPENED));
+//            if(Objects.equals(input.getState(), Constants.IssueState.CLOSED.toString()))
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_CLOSED));
+//            if(Objects.equals(input.getState(), Constants.IssueState.REOPENED.toString()))
+//                issue.setState(columnMapping.get(AbstractIssue.STATE_REOPENED));
+
+            issue.setState(columnMapping.get(input.getState()));
+
 
             return issue;
         }

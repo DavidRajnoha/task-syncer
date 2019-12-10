@@ -78,6 +78,7 @@ public class GitlabIssueTests {
 
         glIssueTwo = new Issue();
         glIssueTwo.setId(2);
+        glIssueTwo.setState(Constants.IssueState.OPENED);
 
         glIssueThree = new Issue();
         glIssueThree.setId(5);

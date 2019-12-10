@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.decoders;
 
 import com.redhat.tasksyncer.dao.entities.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.AbstractRepository;
 import com.redhat.tasksyncer.dao.entities.GitlabIssue;
 import com.redhat.tasksyncer.dao.entities.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
@@ -14,7 +15,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 
 /**
  * @author Filip Cap
@@ -55,9 +55,11 @@ public class GitlabWebhookIssueDecoder extends AbstractWebhookIssueDecoder{
         this.ie = null;
 
         IssueEvent.ObjectAttributes oa = ie.getObjectAttributes();
+        AbstractRepository repository = repositoryRepository
+                .findByRepositoryNameAndProject_Id(parseRepositoryName(ie.getRepository().getName()), project.getId());
 
-        AbstractIssue issue = GitlabIssue.ObjectToGitlabIssueConverter.convert(oa, new HashMap<>());
-        issue.setRepository(repositoryRepository.findByRepositoryNameAndProject_Id(parseRepositoryName(ie.getRepository().getName()), project.getId()));
+        AbstractIssue issue = GitlabIssue.ObjectToGitlabIssueConverter.convert(oa, repository.getColumnMapping());
+        issue.setRepository(repository);
 
         return issue;
     }
