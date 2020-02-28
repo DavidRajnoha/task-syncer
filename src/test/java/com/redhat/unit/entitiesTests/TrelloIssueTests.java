@@ -2,8 +2,8 @@ package com.redhat.unit.entitiesTests;
 
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.Label;
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.TrelloIssue;
+import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.issues.TrelloIssue;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import com.redhat.tasksyncer.exceptions.TrelloCalllbackNotAboutCardException;
 import org.json.JSONException;

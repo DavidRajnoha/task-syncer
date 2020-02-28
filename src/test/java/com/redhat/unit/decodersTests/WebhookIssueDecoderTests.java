@@ -1,6 +1,12 @@
 package com.redhat.unit.decodersTests;
 
-import com.redhat.tasksyncer.dao.entities.*;
+import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.issues.JiraIssue;
+import com.redhat.tasksyncer.dao.entities.issues.TrelloIssue;
+import com.redhat.tasksyncer.dao.entities.projects.Project;
+import com.redhat.tasksyncer.dao.entities.repositories.AbstractRepository;
+import com.redhat.tasksyncer.dao.entities.repositories.JiraRepository;
+import com.redhat.tasksyncer.dao.entities.repositories.TrelloRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 import com.redhat.tasksyncer.decoders.JiraWebhookIssueDecoder;

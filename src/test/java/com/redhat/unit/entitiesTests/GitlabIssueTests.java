@@ -1,7 +1,7 @@
 package com.redhat.unit.entitiesTests;
 
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.GitlabIssue;
+import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.issues.GitlabIssue;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.models.Assignee;

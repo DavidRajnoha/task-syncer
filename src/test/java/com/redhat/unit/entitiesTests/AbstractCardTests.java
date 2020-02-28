@@ -1,13 +1,11 @@
 package com.redhat.unit.entitiesTests;
 
 
-import com.redhat.tasksyncer.dao.entities.AbstractCard;
-import com.redhat.tasksyncer.dao.entities.AbstractColumn;
-import com.redhat.tasksyncer.dao.entities.TrelloCard;
-import com.redhat.tasksyncer.dao.entities.TrelloColumn;
+import com.redhat.tasksyncer.dao.entities.trello.AbstractCard;
+import com.redhat.tasksyncer.dao.entities.trello.AbstractColumn;
+import com.redhat.tasksyncer.dao.entities.trello.TrelloCard;
+import com.redhat.tasksyncer.dao.entities.trello.TrelloColumn;
 import org.junit.Before;
-import org.junit.Test;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
 public class AbstractCardTests {
@@ -24,16 +22,7 @@ public class AbstractCardTests {
         oldCard = new TrelloCard();
         newCard = new TrelloCard();
 
-        newCard.setTitle(title);
-        newCard.setDescription(description);
         newCard.setColumn(column);
     }
 
-    @Test
-    public void updateProperties_updatesProperties(){
-        oldCard.updateProperties(newCard);
-        assertThat(oldCard.getTitle()).isEqualTo(newCard.getTitle());
-        assertThat(oldCard.getDescription()).isEqualTo(newCard.getDescription());
-        assertThat(oldCard.getColumn()).isEqualTo(newCard.getColumn());
-    }
 }

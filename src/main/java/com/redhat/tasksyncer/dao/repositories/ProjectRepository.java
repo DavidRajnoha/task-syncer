@@ -1,6 +1,6 @@
 package com.redhat.tasksyncer.dao.repositories;
 
-import com.redhat.tasksyncer.dao.entities.Project;
+import com.redhat.tasksyncer.dao.entities.projects.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

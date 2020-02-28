@@ -1,9 +1,9 @@
 package com.redhat.tasksyncer.decoders;
 
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.AbstractRepository;
-import com.redhat.tasksyncer.dao.entities.GitlabIssue;
-import com.redhat.tasksyncer.dao.entities.Project;
+import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.repositories.AbstractRepository;
+import com.redhat.tasksyncer.dao.entities.issues.GitlabIssue;
+import com.redhat.tasksyncer.dao.entities.projects.Project;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;
 import org.gitlab4j.api.GitLabApiException;

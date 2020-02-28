@@ -10,9 +10,9 @@
 //import com.atlassian.jira.rest.client.api.domain.Issue;
 //import com.atlassian.jira.rest.client.api.domain.SearchResult;
 //import com.atlassian.util.concurrent.Promise;
-//import com.redhat.tasksyncer.dao.accessors.JiraRepositoryAccessor;
-//import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-//import com.redhat.tasksyncer.dao.entities.JiraRepository;
+//import com.redhat.tasksyncer.dao.accessors.repository.JiraRepositoryAccessor;
+//import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+//import com.redhat.tasksyncer.dao.entities.repositories.JiraRepository;
 //import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 //import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 //import org.junit.Before;

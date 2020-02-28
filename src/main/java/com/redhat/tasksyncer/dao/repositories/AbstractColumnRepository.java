@@ -1,6 +1,6 @@
 package com.redhat.tasksyncer.dao.repositories;
 
-import com.redhat.tasksyncer.dao.entities.AbstractColumn;
+import com.redhat.tasksyncer.dao.entities.trello.AbstractColumn;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.redhat.unit.entitiesTests;
 
-import com.redhat.tasksyncer.dao.entities.AbstractIssue;
-import com.redhat.tasksyncer.dao.entities.GithubIssue;
+import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
+import com.redhat.tasksyncer.dao.entities.issues.GithubIssue;
 import com.redhat.tasksyncer.dao.enumerations.IssueType;
 import org.junit.Before;
 import org.junit.Test;
