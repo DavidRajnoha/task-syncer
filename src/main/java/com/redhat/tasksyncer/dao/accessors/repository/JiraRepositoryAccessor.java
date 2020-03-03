@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -29,7 +30,7 @@ public class JiraRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) {
+    public Map<String, String> isMappingValid(List<String> columnNames, Map<String, String> mapping) {
         Map<String, String> upperCaseMap = new LinkedHashMap<>();
 
         for (String key : mapping.keySet()){

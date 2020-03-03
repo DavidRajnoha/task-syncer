@@ -2,7 +2,6 @@ package com.redhat.tasksyncer.dao.accessors.remoteRepository;
 
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.GithubIssue;
-import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.kohsuke.github.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,8 +24,7 @@ public class GithubRemoteRepositoryAccessor extends RemoteRepositoryAccessor {
     private GHRepository ghRepository;
 
     @Autowired
-    public GithubRemoteRepositoryAccessor(AbstractRepositoryRepository repositoryRepository) {
-        super(repositoryRepository);
+    public GithubRemoteRepositoryAccessor() {
     }
 
 

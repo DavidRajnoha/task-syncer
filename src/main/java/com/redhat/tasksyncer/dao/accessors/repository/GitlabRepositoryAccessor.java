@@ -41,7 +41,7 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
 
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException {
+    public Map<String, String> isMappingValid(List<String> columnNames, Map<String, String> mapping) throws InvalidMappingException {
         if (mapping.size() != 3){
             throw new InvalidMappingException("The mapping for gitlab must contain exactly three entries");
         }
@@ -62,9 +62,6 @@ public class GitlabRepositoryAccessor extends RepositoryAccessor {
             }
         }
 
-
-        // WARNING: Repository might not be initialized
-        List<String> columnNames = repository.getProject().getColumnNames().orElseThrow(() -> new InvalidMappingException("msg"));
         for (String value : mapping.values()) {
             if (!columnNames.contains(value)) {
                 throw new InvalidMappingException("The mapping contains non existing column: "

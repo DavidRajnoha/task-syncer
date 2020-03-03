@@ -2,10 +2,8 @@ package com.redhat.tasksyncer.dao.accessors.remoteRepository;
 
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.repositories.AbstractRepository;
-import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.CannotConnectToRepositoryException;
 import org.gitlab4j.api.GitLabApiException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,13 +12,8 @@ import java.util.List;
  * @author Filip Cap, David Rajnoha
  */
 public abstract class RemoteRepositoryAccessor {
-    protected AbstractRepositoryRepository repositoryRepository;
     protected AbstractRepository repository;
 
-    @Autowired
-    public RemoteRepositoryAccessor(AbstractRepositoryRepository repositoryRepository) {
-        this.repositoryRepository = repositoryRepository;
-    }
 
     // Online service accessing
 

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 /**
 * @author David Rajnoha
@@ -29,7 +30,7 @@ public class GithubRepositoryAccessor extends RepositoryAccessor {
     }
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException {
+    public Map<String, String> isMappingValid(List<String> columnNames, Map<String, String> mapping) throws InvalidMappingException {
 
         Map<String, String> upperCaseMap = new LinkedHashMap<>();
 

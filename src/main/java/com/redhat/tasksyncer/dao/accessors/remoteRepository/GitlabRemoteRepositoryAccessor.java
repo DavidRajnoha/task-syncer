@@ -2,7 +2,6 @@ package com.redhat.tasksyncer.dao.accessors.remoteRepository;
 
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.GitlabIssue;
-import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
@@ -27,8 +26,7 @@ public class GitlabRemoteRepositoryAccessor extends RemoteRepositoryAccessor {
     private GitLabApi gitlabApi;
 
     @Autowired
-    public GitlabRemoteRepositoryAccessor(AbstractRepositoryRepository repositoryRepository) {
-        super(repositoryRepository);
+    public GitlabRemoteRepositoryAccessor() {
     }
 
 

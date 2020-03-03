@@ -7,6 +7,7 @@ import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -28,7 +29,8 @@ public class TrelloRepositoryAccessor extends RepositoryAccessor{
     }
 
     @Override
-    public Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException {
+    public Map<String, String> isMappingValid(List<String> columnNames, Map<String, String> mapping)
+            throws InvalidMappingException {
 
 //        TODO: make this work
 //        List<String> tListIds = trelloApi.getBoard(repository.getProject().getBoard().getRemoteBoardId()).getLists()

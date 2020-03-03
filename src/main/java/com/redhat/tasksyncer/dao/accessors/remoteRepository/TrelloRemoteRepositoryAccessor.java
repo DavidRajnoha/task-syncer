@@ -7,7 +7,6 @@ import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 import com.redhat.tasksyncer.dao.accessors.trello.TrelloBoardAccessor;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.TrelloIssue;
-import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,8 +33,7 @@ public class TrelloRemoteRepositoryAccessor extends RemoteRepositoryAccessor {
     private Trello trelloApi;
 
     @Autowired
-    public TrelloRemoteRepositoryAccessor(AbstractRepositoryRepository repositoryRepository) {
-        super(repositoryRepository);
+    public TrelloRemoteRepositoryAccessor() {
     }
 
 

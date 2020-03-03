@@ -6,35 +6,31 @@ import java.util.List;
 
 
 /**
- * @author Filip Cap, David Rajnoha
+ * @author David Rajnoha
  */
 public interface ProjectAccessor {
 
 
     /**
-     * @param project - the project you wish to access and modify with this project accessor
-     *                <p>
-     *                Adds project to this.project field, so the project can be modified by other methods of the projectAccessor
-     * @return project passed as an argument with filled in id
+     * Deletes the project defined by the projectName
      */
-    Project saveProject(Project project);
-
+    void deleteProject(String projectName);
 
     /**
-     * Saves the project associated with the projectAccessor
+     * Creates project with the name as the argument, adds the columnNames
+     * passed in the secondArg to it
+     *
+     * @param projectName - name of the newly created project, unique
+     * @param columnNames - names of the column used for the mapping when
+     *                    getting issues from remote repositories
      */
-    void save();
-
-    /**
-     * Deletes the project passed as argument
-     */
-    void deleteProject(Project project);
-
-
-    void setColumnNames(List<String> columnNames);
-
-
     void createProject(String projectName, List<String> columnNames);
 
+    /**
+     * Gets project based on the passed name
+     *
+     * @param projectName unique identifier of the project
+     * @return project with projectName
+     */
     Project getProject(String projectName);
 }

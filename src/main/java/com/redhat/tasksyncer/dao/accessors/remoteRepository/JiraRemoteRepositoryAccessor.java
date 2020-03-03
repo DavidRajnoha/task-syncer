@@ -5,7 +5,6 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.JiraIssue;
-import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import org.gitlab4j.api.GitLabApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,8 +31,7 @@ public class JiraRemoteRepositoryAccessor extends RemoteRepositoryAccessor {
     private JiraRestClient jiraRestClient;
 
     @Autowired
-    public JiraRemoteRepositoryAccessor(AbstractRepositoryRepository repositoryRepository) {
-        super(repositoryRepository);
+    public JiraRemoteRepositoryAccessor() {
     }
 
 

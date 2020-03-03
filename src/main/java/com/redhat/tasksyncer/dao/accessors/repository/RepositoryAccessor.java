@@ -5,6 +5,7 @@ import com.redhat.tasksyncer.dao.entities.repositories.AbstractRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
 import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +19,7 @@ public abstract class RepositoryAccessor {
 
     public abstract AbstractRepository createRepositoryOfType();
 
-    protected abstract Map<String, String> isMappingValid(Map<String, String> mapping) throws InvalidMappingException;
+    public abstract Map<String, String> isMappingValid(List<String> columnNames, Map<String, String> mapping) throws InvalidMappingException;
 
 
     public AbstractRepository getRepository(String name, String projectName){
@@ -35,7 +36,8 @@ public abstract class RepositoryAccessor {
         repository.setRepositoryName(repoName);
         repository.setRepositoryNamespace(repoNamespace);
         repository.setProject(project);
-        repository.setColumnMapping(isMappingValid(columnMapping));
+        repository.setColumnMapping(isMappingValid(project.getColumnNames()
+                .orElseThrow(() -> new InvalidMappingException("")), columnMapping));
 
         return repositoryRepository.save(repository);
 

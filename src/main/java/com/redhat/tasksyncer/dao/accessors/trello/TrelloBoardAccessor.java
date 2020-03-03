@@ -28,8 +28,6 @@ public class TrelloBoardAccessor extends AbstractTrelloAccessor implements Board
 
     private AbstractBoardRepository boardRepository;
 
-
-
     @Autowired
     public TrelloBoardAccessor(AbstractBoardRepository boardRepository) {
         this.boardRepository = boardRepository;
