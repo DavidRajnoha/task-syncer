@@ -28,6 +28,7 @@ public class TrelloIssue extends AbstractIssue {
         public static TrelloIssue convert(Card trelloCard, Map<String, String> collumnMapping){
             TrelloIssue trelloIssue = new TrelloIssue();
 
+            trelloIssue.setDeleted(trelloCard.isClosed());
             trelloIssue.setTitle(trelloCard.getName());
             trelloIssue.setDescription(trelloCard.getDesc());
             trelloIssue.setRemoteIssueId(trelloCard.getIdShort());
@@ -65,7 +66,7 @@ public class TrelloIssue extends AbstractIssue {
                 trelloIssue.setAssignee(input.getJSONObject("action").getJSONObject("data").has("member") ?
                         input.getJSONObject("action").getJSONObject("data").getJSONObject("member").get("name").toString() : null);
                 if (input.getJSONObject("action").getJSONObject("data").has("label")) {
-                    Set<String> labels = trelloIssue.getLabels();
+                    Set<String> labels = trelloIssue.getLabels().get();
                     labels.add(input.getJSONObject("action").getJSONObject("data").getJSONObject("member").get("name").toString());
                     trelloIssue.setLabel(labels);
                 }

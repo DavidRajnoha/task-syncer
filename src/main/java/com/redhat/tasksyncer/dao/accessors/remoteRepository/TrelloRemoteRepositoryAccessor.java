@@ -4,7 +4,7 @@ import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.http.RestTemplateHttpClient;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloBoardAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloBoardAccessor;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.TrelloIssue;
 import org.gitlab4j.api.GitLabApiException;

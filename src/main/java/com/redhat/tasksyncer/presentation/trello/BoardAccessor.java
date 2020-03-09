@@ -1,4 +1,4 @@
-package com.redhat.tasksyncer.dao.accessors.trello;
+package com.redhat.tasksyncer.presentation.trello;
 
 import com.redhat.tasksyncer.dao.entities.projects.Project;
 

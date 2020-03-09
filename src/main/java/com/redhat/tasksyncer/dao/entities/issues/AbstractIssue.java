@@ -50,6 +50,7 @@ public abstract class AbstractIssue {
     private Set<String> labels;
 //    private Milestone milestone;
     private Boolean hasCard;
+    private Boolean deleted;
 
     @OneToMany(targetEntity = Comment.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Comment> comments;
@@ -253,8 +254,8 @@ public abstract class AbstractIssue {
         this.assignee = assignee;
     }
 
-    public Set<String> getLabels() {
-        return labels;
+    public Optional<Set<String>> getLabels() {
+        return Optional.ofNullable(labels);
     }
 
     public void setLabel(Set<String> labels) {
@@ -307,5 +308,13 @@ public abstract class AbstractIssue {
 
     public void setHasCard(Boolean hasCard) {
         this.hasCard = hasCard;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }

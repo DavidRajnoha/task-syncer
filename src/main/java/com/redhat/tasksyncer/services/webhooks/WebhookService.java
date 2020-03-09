@@ -2,7 +2,7 @@ package com.redhat.tasksyncer.services.webhooks;
 
 import com.redhat.tasksyncer.dao.accessors.issue.AbstractIssueAccessor;
 import com.redhat.tasksyncer.dao.accessors.project.ProjectAccessor;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloCardAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloCardAccessor;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.decoders.AbstractWebhookIssueDecoder;
 import com.redhat.tasksyncer.exceptions.InvalidWebhookCallbackException;

@@ -49,6 +49,27 @@ public class CreateController {
     }
 
 
+    /**
+     * Connects the repository from external service with existing project in tasksyncer
+     *
+     * @param firstLoginCredential Trello - app key; Jira - email@adress; Github - email@adress; GitLab - instance URL
+     * @param secondLoginCredential Trello - token; Jira - API token; Github - password; Gitlab - AuthKey
+     * @param serviceName supported values: trello, jira, github, gitlab
+     * @param projectName name of the project you are trying to connect external service to
+
+     * @param repoNamespace Trello - random value, namespace not required
+     *                      Jira - url of your instance
+     *                      Github - name of your account, github.com/NAME/repositoryName
+     *                      Gitlab - gitlab namespace
+     * @param repoName Trello - full id of the board you wish to connect, can be found at trello.com/your/board/url.json
+     *                 Jira - project key - the three or two letter shortcut of the project name written in capital letters
+     *                 Github - repository name, github.com/namespace/REPOSITORY_NAME
+     *                 Gitlab - project name
+     *
+     *
+     * @return Http ResponseEntity; 400 when serviceName is not valid; 503 when there was an error in communication with
+     * external service
+     * */
     @RequestMapping(path = "/v1/service/{serviceName}/project/{projectName}/connect/{repoNamespace}/{repoName}",
             method = RequestMethod.POST
     ) public ResponseEntity<String> connectServiceEndpoint(@PathVariable String serviceName,

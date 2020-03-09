@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<requirements project-id="3Scale">
+    <properties>
+        <property name="lookup-method" value="name"/>
+    </properties>
+    <requirement approver-ids="drajnoha:approved"
+                 id="issueOne REQ"
+                 planned-in-ids="2.8_ER1"
+                 initial-estimate="1d"
+                 priority-id="high"
+                 severity-id="should_have"
+                 status-id="approved">
+        <title>issueOne REQ</title>
+        <description>descOne</description>
+        <custom-fields>
+            <custom-field id="reqtype" content="functional"/>
+        </custom-fields>
+    </requirement>
+    <requirement approver-ids="drajnoha:approved"
+                 id="issueTwo REQ"
+                 planned-in-ids="2.8_ER1"
+                 initial-estimate="1d"
+                 priority-id="high"
+                 severity-id="should_have"
+                 status-id="approved">
+        <title>issueTwo REQ</title>
+        <description>descTwo</description>
+        <custom-fields>
+            <custom-field id="reqtype" content="functional"/>
+        </custom-fields>
+    </requirement>
+    <requirement approver-ids="drajnoha:approved"
+                 id="issueThree REQ"
+                 planned-in-ids="2.8_ER1"
+                 initial-estimate="1d"
+                 priority-id="high"
+                 severity-id="should_have"
+                 status-id="approved">
+        <title>issueThree REQ</title>
+        <description>descThree</description>
+        <custom-fields>
+            <custom-field id="reqtype" content="functional"/>
+        </custom-fields>
+    </requirement>
+    <requirement approver-ids="drajnoha:approved"
+                 id="issueFour REQ"
+                 planned-in-ids="2.8_ER1"
+                 initial-estimate="1d"
+                 priority-id="high"
+                 severity-id="should_have"
+                 status-id="approved">
+        <title>issueFour REQ</title>
+        <description>descFour</description>
+        <custom-fields>
+            <custom-field id="reqtype" content="functional"/>
+        </custom-fields>
+    </requirement>
+</requirements>

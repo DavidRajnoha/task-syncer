@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testcases project-id="3Scale">
+  <properties>
+    <property name="lookup-method" value="custom"/>
+  </properties>
+
+  <testcase id="Test:issueOne" approver-ids="drajnoha:approved" status-id="approved">
+    <title>Test: issueOne</title>
+    <description>descOne</description>
+    <custom-fields>
+      <custom-field content="automated" id="caseautomation"/>
+      <custom-field content="high" id="caseimportance"/>
+      <custom-field content="acceptance" id="caselevel"/>
+      <custom-field content="negative" id="caseposneg"/>
+      <custom-field content="functional" id="testtype"/>
+      <custom-field content="All automation scripts are available at https://github.com/3scale/3scale-amp-tests/"
+                    id="automation_script"/>
+    </custom-fields>
+    <linked-work-items>
+        <linked-work-item lookup-method="name" workitem-id="issueOne REQ" role-id="verifies"/>
+    </linked-work-items>
+
+  </testcase>
+  <testcase id="Test:issueTwo" approver-ids="drajnoha:approved" status-id="approved">
+  <title>Test: issueTwo</title>
+  <description>descTwo</description>
+  <custom-fields>
+    <custom-field content="notautomated" id="caseautomation"/>
+    <custom-field content="high" id="caseimportance"/>
+    <custom-field content="acceptance" id="caselevel"/>
+    <custom-field content="negative" id="caseposneg"/>
+    <custom-field content="functional" id="testtype"/>
+    <custom-field content="All automation scripts are available at https://github.com/3scale/3scale-amp-tests/"
+                  id="automation_script"/>
+  </custom-fields>
+  <linked-work-items>
+    <linked-work-item lookup-method="name" workitem-id="issueTwo REQ" role-id="verifies"/>
+  </linked-work-items>
+  </testcase>
+
+
+  <testcase id="Test:issueThree" approver-ids="drajnoha:approved" status-id="approved">
+  <title>Test: issueThree</title>
+  <description>descThree</description>
+  <custom-fields>
+    <custom-field content="automated" id="caseautomation"/>
+    <custom-field content="high" id="caseimportance"/>
+    <custom-field content="acceptance" id="caselevel"/>
+    <custom-field content="negative" id="caseposneg"/>
+    <custom-field content="functional" id="testtype"/>
+    <custom-field content="All automation scripts are available at https://github.com/3scale/3scale-amp-tests/"
+                  id="automation_script"/>
+  </custom-fields>
+  <linked-work-items>
+    <linked-work-item lookup-method="name" workitem-id="issueThree REQ" role-id="verifies"/>
+  </linked-work-items>
+  </testcase>
+
+
+  <testcase id="Test:issueFour" approver-ids="drajnoha:approved" status-id="approved">
+  <title>Test: issueFour</title>
+  <description>descFour</description>
+  <custom-fields>
+    <custom-field content="notautomated" id="caseautomation"/>
+    <custom-field content="high" id="caseimportance"/>
+    <custom-field content="acceptance" id="caselevel"/>
+    <custom-field content="negative" id="caseposneg"/>
+    <custom-field content="functional" id="testtype"/>
+    <custom-field content="All automation scripts are available at https://github.com/3scale/3scale-amp-tests/"
+                  id="automation_script"/>
+  </custom-fields>
+  <linked-work-items>
+    <linked-work-item lookup-method="name" workitem-id="issueFour REQ" role-id="verifies"/>
+  </linked-work-items>
+  </testcase>
+
+</testcases>

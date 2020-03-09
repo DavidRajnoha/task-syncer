@@ -2,9 +2,9 @@ package com.redhat.tasksyncer.services.presentation;
 
 import com.redhat.tasksyncer.dao.accessors.issue.AbstractIssueAccessor;
 import com.redhat.tasksyncer.dao.accessors.project.ProjectAccessor;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloBoardAccessor;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloCardAccessor;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloColumnAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloBoardAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloCardAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloColumnAccessor;
 import com.redhat.tasksyncer.dao.entities.trello.AbstractColumn;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.projects.Project;

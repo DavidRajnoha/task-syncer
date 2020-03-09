@@ -1,0 +1,35 @@
+<testsuites>
+    <properties>
+        <property name="polarion-project-id" value="3Scale"/>
+        <property name="polarion-lookup-method" value="custom"/>
+        <property name="polarion-testrun-title" value="2.8_ER1 tests"/>
+    </properties>
+    <testsuite tests="4">
+        <testcase name="Result: issueOne">
+            <failure type="failure"/>
+            <properties>
+                <property name="polarion-testcase-id" value="Test: issueOne"/>
+            </properties>
+        </testcase>
+
+        <testcase name="Result: issueTwo">
+            <skipped type="skipped"/>
+            <properties>
+                <property name="polarion-testcase-id" value="Test: issueTwo"/>
+            </properties>
+        </testcase>
+
+        <testcase name="Result: issueThree">
+            <error type="error"/>
+            <properties>
+                <property name="polarion-testcase-id" value="Test: issueThree"/>
+            </properties>
+        </testcase>
+
+        <testcase name="Result: issueFour">
+            <properties>
+                <property name="polarion-testcase-id" value="Test: issueFour"/>
+            </properties>
+        </testcase>
+    </testsuite>
+</testsuites>

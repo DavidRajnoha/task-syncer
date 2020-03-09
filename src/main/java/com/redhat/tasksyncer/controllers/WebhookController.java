@@ -22,8 +22,9 @@ public class WebhookController {
     private WebhookService webhookService;
     private TrelloService trelloService;
 
-    public WebhookController(WebhookService webhookService){
+    public WebhookController(WebhookService webhookService, TrelloService trelloService){
         this.webhookService = webhookService;
+        this.trelloService = trelloService;
     }
 
     /**
@@ -77,7 +78,8 @@ public class WebhookController {
                                                HttpServletRequest request
     ) throws TrelloCalllbackNotAboutCardException, InvalidWebhookCallbackException, RepositoryTypeNotSupportedException {
 
-        AbstractIssue issue = webhookService.processHook(serviceName, request, projectName);
+        AbstractIssue issue = webhookService.processHook(projectName, request, serviceName);
+
         trelloService.updateCard(issue);
 
         return ResponseEntity.status(HttpStatus.OK).body("Webhook processed");
