@@ -76,7 +76,7 @@ public class GithubIssueTests {
         assertThat(convertedIssue.getDescription()).isEqualTo("Example+Issue+Webhook+Callback+for+Testing");
         assertThat(convertedIssue.getAssignee()).isEqualTo("DavidRajnoha");
         assertThat(convertedIssue.getState()).isEqualTo(AbstractIssue.STATE_OPENED);
-        assert(convertedIssue.getLabels().contains("bug"));
+        assert(convertedIssue.getLabels().get().contains("bug"));
     }
 
     @Test public void whenConvertingInputWithNullFields_thenNoUncheckedExceptionIsThrown() throws IOException {

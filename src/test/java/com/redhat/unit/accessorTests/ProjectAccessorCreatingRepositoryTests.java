@@ -5,7 +5,7 @@
 //import com.redhat.tasksyncer.dao.accessors.project.ProjectAccessorImpl;
 //import com.redhat.tasksyncer.dao.accessors.repository.GitlabRepositoryAccessor;
 //import com.redhat.tasksyncer.dao.accessors.repository.RepositoryAccessor;
-//import com.redhat.tasksyncer.dao.accessors.trello.BoardAccessor;
+//import com.redhat.tasksyncer.presentation.trello.BoardAccessor;
 //import com.redhat.tasksyncer.dao.entities.projects.Project;
 //import com.redhat.tasksyncer.dao.entities.repositories.AbstractRepository;
 //import com.redhat.tasksyncer.dao.entities.repositories.GitlabRepository;

@@ -120,8 +120,9 @@ public class JiraIssueTests {
 //        assertThat(convertedIssue.getClosedBy()).isEqualTo(assigneeName);
         assertThat(convertedIssue.getRemoteIssueId()).isEqualTo("JIR-1");
 
+        assertThat(convertedIssue.getLabels().isPresent());
 
-        assert(convertedIssue.getLabels().contains(label_name));
+        assert(convertedIssue.getLabels().get().contains(label_name));
     }
 
     @Test

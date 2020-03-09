@@ -1,8 +1,8 @@
 //package com.redhat.integration.networkConnectionTests;
 //
-//import com.redhat.tasksyncer.dao.accessors.trello.BoardAccessor;
-//import com.redhat.tasksyncer.dao.accessors.trello.TrelloBoardAccessor;
-//import com.redhat.tasksyncer.dao.accessors.trello.TrelloColumnAccessor;
+//import com.redhat.tasksyncer.presentation.trello.BoardAccessor;
+//import com.redhat.tasksyncer.presentation.trello.TrelloBoardAccessor;
+//import com.redhat.tasksyncer.presentation.trello.TrelloColumnAccessor;
 //import com.redhat.tasksyncer.dao.entities.trello.TrelloBoard;
 //import com.redhat.tasksyncer.dao.repositories.AbstractBoardRepository;
 //import com.redhat.tasksyncer.dao.repositories.AbstractCardRepository;

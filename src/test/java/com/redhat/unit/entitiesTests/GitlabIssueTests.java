@@ -105,7 +105,8 @@ public class GitlabIssueTests {
         assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(1));
 
 
-        assert(convertedIssue.getLabels().contains(label_name));
+        assertThat(convertedIssue.getLabels().isPresent());
+        assertThat(convertedIssue.getLabels().get().contains(label_name));
     }
 
     @Test

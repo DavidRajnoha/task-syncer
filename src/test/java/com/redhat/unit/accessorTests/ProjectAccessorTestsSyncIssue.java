@@ -1,7 +1,7 @@
 //package com.redhat.unit.accessorTests;
 //
 //
-//import com.redhat.tasksyncer.dao.accessors.trello.BoardAccessor;
+//import com.redhat.tasksyncer.presentation.trello.BoardAccessor;
 //import com.redhat.tasksyncer.dao.accessors.project.ProjectAccessor;
 //import com.redhat.tasksyncer.dao.accessors.project.ProjectAccessorImpl;
 //import com.redhat.tasksyncer.dao.accessors.repository.RepositoryAccessor;

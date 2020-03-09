@@ -72,7 +72,8 @@ public class TrelloIssueTests {
         assertThat(convertedIssue.getRemoteIssueId()).isEqualTo(String.valueOf(remoteIssueId));
         assertThat(convertedIssue.getState()).isEqualTo("TODO");
 
-        assert(convertedIssue.getLabels().contains(label_name));
+        assertThat(convertedIssue.getLabels().isPresent());
+        assert(convertedIssue.getLabels().get().contains(label_name));
 
     }
 

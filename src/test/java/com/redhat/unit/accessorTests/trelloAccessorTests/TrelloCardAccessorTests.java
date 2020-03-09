@@ -1,11 +1,10 @@
 package com.redhat.unit.accessorTests.trelloAccessorTests;
 
 import com.julienvey.trello.Trello;
-import com.julienvey.trello.domain.Board;
 import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.TList;
-import com.redhat.tasksyncer.dao.accessors.trello.AbstractTrelloAccessor;
-import com.redhat.tasksyncer.dao.accessors.trello.TrelloCardAccessor;
+import com.redhat.tasksyncer.presentation.trello.AbstractTrelloAccessor;
+import com.redhat.tasksyncer.presentation.trello.TrelloCardAccessor;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.issues.TrelloIssue;
 import com.redhat.tasksyncer.dao.entities.trello.AbstractCard;
@@ -110,13 +109,6 @@ public class TrelloCardAccessorTests {
             mockTList.setId(remoteId);
             return mockTList;
         });
-
-        doAnswer(i -> {
-            Board trelloBoard = new Board();
-            trelloBoard.setId("id");
-            return trelloBoard;
-        }).when(mockTrelloApi).createBoard(any(), any(), any());
-
     }
 
     @Test

@@ -8,7 +8,6 @@ import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.dao.entities.repositories.JiraRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractIssueRepository;
 import com.redhat.tasksyncer.dao.repositories.AbstractRepositoryRepository;
-import com.redhat.tasksyncer.exceptions.InvalidMappingException;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import org.mockito.MockitoAnnotations;
 import java.net.URI;
 import java.util.*;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertTrue;
 
 public class JiraAccessorTest {
@@ -103,15 +101,15 @@ public class JiraAccessorTest {
     }
 
 
-    @Test
-    public void settingUpNonExistingColumnsThrowsMapping(){
-        Map<String, String> incorrectMapping = new LinkedHashMap<>();
-        incorrectMapping.put("not Correct", AbstractIssue.STATE_OPENED);
-        incorrectMapping.put("definitely not Correct", AbstractIssue.STATE_CLOSED);
-
-        assertThatThrownBy(() -> repositoryAccessorUnderTest.isMappingValid(null, incorrectMapping))
-                .isInstanceOf(InvalidMappingException.class);
-    }
+//    @Test
+//    public void settingUpNonExistingColumnsThrowsMapping(){
+//        Map<String, String> incorrectMapping = new LinkedHashMap<>();
+//        incorrectMapping.put("not Correct", AbstractIssue.STATE_OPENED);
+//        incorrectMapping.put("definitely not Correct", AbstractIssue.STATE_CLOSED);
+//
+//        assertThatThrownBy(() -> repositoryAccessorUnderTest.isMappingValid(null, incorrectMapping))
+//                .isInstanceOf(InvalidMappingException.class);
+//    }
 
 
 }
