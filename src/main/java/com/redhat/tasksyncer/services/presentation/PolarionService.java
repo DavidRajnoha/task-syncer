@@ -53,13 +53,13 @@ public class PolarionService {
 
             TimeUnit.SECONDS.sleep(10);
 
-            importToPolarion(testCasesXmlCreator, issues, polarionId, testCycle, url, "result", username,
+            importToPolarion(testCasesXmlCreator, issues, polarionId, testCycle, url, "testcase", username,
                     password);
 
             TimeUnit.SECONDS.sleep(15);
 
 
-            importToPolarion(resultsXmlCreator, issues, polarionId, testCycle, url, "result", username,
+            importToPolarion(resultsXmlCreator, issues, polarionId, testCycle, url, "xunit", username,
                     password);
 
         } catch (InvalidPolarionStateException e) {
