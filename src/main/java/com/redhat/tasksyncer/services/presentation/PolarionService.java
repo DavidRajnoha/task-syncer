@@ -37,6 +37,25 @@ public class PolarionService {
         this.issueAccessor = issueAccessor;
     }
 
+    public void pushOnlyResultsToPolarion(String projectName, String polarionId,  String url, String username, String password, String testCycle){
+
+        List<AbstractIssue> issues = issueAccessor.getProject(projectName);
+        if (issues.size() == 0){
+            // TODO: probably also throw exception
+            return;
+        }
+
+        try{
+            importToPolarion(resultsXmlCreator, issues, polarionId, testCycle, url, "xunit", username,
+                    password);
+
+        } catch (InvalidPolarionStateException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     public void pushToPolarion(String projectName, String polarionId,  String url, String username, String password, String testCycle)
             throws InterruptedException {
 
@@ -51,12 +70,12 @@ public class PolarionService {
             importToPolarion(requirementsXmlCreator, issues, polarionId, testCycle, url, "requirement", username,
                     password);
 
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(30);
 
             importToPolarion(testCasesXmlCreator, issues, polarionId, testCycle, url, "testcase", username,
                     password);
 
-            TimeUnit.SECONDS.sleep(15);
+            TimeUnit.SECONDS.sleep(60);
 
 
             importToPolarion(resultsXmlCreator, issues, polarionId, testCycle, url, "xunit", username,

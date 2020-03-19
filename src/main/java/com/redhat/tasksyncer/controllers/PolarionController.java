@@ -38,4 +38,17 @@ public class PolarionController {
         return ResponseEntity.ok().body("Polarion successfully synced");
     }
 
+    @RequestMapping(path = "/v1/project/{projectName}/polarion/{polarionProjectId}/results")
+    public ResponseEntity<String> pushOnlyResultsToPolarion(@PathVariable String projectName,
+                                                 @PathVariable String polarionProjectId,
+                                                 @RequestParam String url,
+                                                 @RequestParam String username,
+                                                 @RequestParam String password,
+                                                 @RequestParam String testcycle
+    ){
+        polarionService.pushOnlyResultsToPolarion(projectName, polarionProjectId, url, username, password, testcycle);
+
+        return ResponseEntity.ok().body("Polarion successfully synced");
+    }
+
 }
