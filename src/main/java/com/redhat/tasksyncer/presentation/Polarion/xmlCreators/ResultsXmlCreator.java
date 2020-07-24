@@ -14,6 +14,13 @@ import java.util.List;
 @Component
 public class ResultsXmlCreator extends AbstractXmlCreator {
 
+
+    /**
+     * Takes an issue and creates a xml structure representing a polarion result, issue state corresponds to the
+     * polarion result
+     * @param issue to convert to a result
+     * @return the xml structure representing the issue as a polarion result
+     */
     public Element issueToResult(AbstractIssue issue) throws InvalidPolarionStateException {
         Element testResult = DocumentHelper.createElement("testcase");
         testResult.addAttribute("name", resultTitle(issue.getTitle()));
@@ -36,14 +43,23 @@ public class ResultsXmlCreator extends AbstractXmlCreator {
         return testResult;
     }
 
+
+    /**
+     * Composes a document used to import the issues to polarion as test results
+     *
+     * @param issues a list of issues to import
+     * @param projectId an ID of the polarion project
+     * @param approver a name of the polarion user with a permission to approve the issue, should be also the user whose
+     *                 credentials are going to be used while importing the issues
+     * @param testCycle a name of rhe current testcycle
+     * @return a document used to import the issues to polarion as results
+     */
     public Document createXml(List<AbstractIssue> issues, String projectId, String approver,  String testCycle)
             throws InvalidPolarionStateException {
-        List<AbstractIssue> filteredIssues = getActiveIssues(issues);
-
 
         // Could be nice lambda expression but exceptions are stupid
         List<Element> elements = new ArrayList<>();
-        for (AbstractIssue issue : filteredIssues) {
+        for (AbstractIssue issue : issues) {
             Element issueToResult = issueToResult(issue);
             elements.add(issueToResult);
         }

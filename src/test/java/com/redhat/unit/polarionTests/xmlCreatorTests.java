@@ -39,31 +39,28 @@ public class xmlCreatorTests {
         AbstractIssue issueFour = new TrelloIssue();
 
         AbstractIssue issueWrongState  = new TrelloIssue();
-        AbstractIssue issueDeleted = new TrelloIssue();
 
 
         Set<String> labelsOne = new HashSet<>();
         labelsOne.add("Automation done");
         labelsOne.add("Something else");
 
-        setFields(issueOne, "issueOne", "descOne", labelsOne, "failure", Boolean.FALSE);
-        setFields(issueTwo, "issueTwo", "descTwo", null, "skipped", Boolean.FALSE);
-        setFields(issueThree, "issueThree", "descThree", labelsOne, "error", Boolean.FALSE);
-        setFields(issueFour, "issueFour", "descFour", null, "passed", Boolean.FALSE);
+        setFields(issueOne, "issueOne", "descOne", labelsOne, "failure");
+        setFields(issueTwo, "issueTwo", "descTwo", null, "skipped");
+        setFields(issueThree, "issueThree", "descThree", labelsOne, "error");
+        setFields(issueFour, "issueFour", "descFour", null, "passed");
 
-        setFields(issueWrongState, "wrongState", "wrongDesc", null, "invalidState",
-                Boolean.FALSE);
-        setFields(issueDeleted, "issueDeleted", "deleted", null, "passed", Boolean.TRUE);
+        setFields(issueWrongState, "wrongState", "wrongDesc", null, "invalidState");
 
         issues.remove(issueWrongState);
     }
 
-    private void setFields(AbstractIssue issue, String title, String description, Set<String> labels, String state, Boolean deleted){
+    private void setFields(AbstractIssue issue, String title, String description, Set<String> labels, String state){
         issue.setTitle(title);
         issue.setDescription(description);
         issue.setLabel(labels);
         issue.setState(state);
-        issue.setDeleted(deleted);
+        issue.setDeleted(Boolean.TRUE);
 
         issues.add(issue);
     }

@@ -15,6 +15,13 @@ import java.util.stream.Collectors;
 @Component
 public class TestCasesXmlCreator extends AbstractXmlCreator {
 
+
+    /**
+     * Takes an issue and creates a xml structure representing a polarion result, issue state corresponds to the
+     * polarion test case
+     * @param issue to convert to a result
+     * @return the xml structure representing the issue as a polarion test case
+     */
     public Element issueToTestCase(AbstractIssue issue, String approver){
         Element testCase = DocumentHelper.createElement("testcase");
         testCase.addAttribute("id", testCaseTitle(issue.getTitle()))
@@ -49,8 +56,17 @@ public class TestCasesXmlCreator extends AbstractXmlCreator {
     }
 
 
+    /**
+     * Composes a document used to import the issues to polarion as test cases
+     *
+     * @param issues a list of issues to import
+     * @param projectId an ID of the polarion project
+     * @param approver a name of the polarion user with a permission to approve the issue, should be also the user whose
+     *                 credentials are going to be used while importing the issues
+     * @param testCycle a name of rhe current testcycle
+     * @return a document used to import the issues to polarion as test cases
+     */
     public Document createXml(List<AbstractIssue> issues, String projectId, String approver, String testCycle){
-        issues = getActiveIssues(issues);
 
         List<Element> elements = issues.stream()
                 .map((AbstractIssue issue1) -> issueToTestCase(issue1, approver))

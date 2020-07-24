@@ -23,6 +23,15 @@ public class PolarionImporter {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * takes a xml document and uploads this document to polarion through polarion xunit importer service
+     * @param document xml containing the data to upload
+     * @param url of the polarion importer endpoint
+     * @param type whether the document contains info about requests, test cases or results
+     * @param username polarion username
+     * @param password polarion password
+     * @return body of the confirmation response from the polarion importer service
+     */
     public String importToPolarion(Document document, String url, String type, String username, String password) {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
