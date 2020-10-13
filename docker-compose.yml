@@ -1,0 +1,16 @@
+version: '3'
+services:
+  backend: 
+    build: .
+    links:
+      - db
+    ports: 
+      - "9000:9000"
+  db:
+    image: postgres
+    environment:
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: pass
+        POSTGRES_DB: db
+    ports:
+      - "5432:5432"
