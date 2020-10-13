@@ -1,6 +1,7 @@
 package com.redhat.tasksyncer.controllers;
 
 
+import com.redhat.tasksyncer.exceptions.ProjectNotFoundException;
 import com.redhat.tasksyncer.services.presentation.PolarionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,11 +47,12 @@ public class PolarionController {
                                                  @RequestParam String username,
                                                  @RequestParam String password,
                                                  @RequestParam String testCycle,
-                                                 @RequestParam(required = false) List<String> ignoreTitles
+                                                 @RequestParam(required = false) List<String> ignoreTitles,
+                                                 @RequestParam(required = false) List<String> ignoreLabels
     ){
         try {
             polarionService.pushToPolarion(projectName, polarionProjectId, url, username, password, testCycle,
-                    ignoreTitles);
+                    ignoreTitles, ignoreLabels);
         } catch (InterruptedException e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Something went wrong");
@@ -79,11 +81,17 @@ public class PolarionController {
                                                  @RequestParam String username,
                                                  @RequestParam String password,
                                                  @RequestParam String testCycle,
-                                                 @RequestParam(required = false) List<String> ignoreTitles
+                                                 @RequestParam(required = false) List<String> ignoreTitles,
+                                                 @RequestParam(required = false) List<String> ignoreLabels
 
     ){
-        polarionService.pushOnlyResultsToPolarion(projectName, polarionProjectId, url, username, password, testCycle,
-                ignoreTitles);
+        try {
+            polarionService.pushOnlyResultsToPolarion(projectName, polarionProjectId, url, username, password, testCycle,
+                    ignoreTitles, ignoreLabels);
+        } catch (ProjectNotFoundException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Something went wrong");
+        }
 
         return ResponseEntity.ok().body("Polarion successfully synced");
     }

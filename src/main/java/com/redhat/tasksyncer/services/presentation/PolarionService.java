@@ -4,6 +4,7 @@ package com.redhat.tasksyncer.services.presentation;
 import com.redhat.tasksyncer.dao.accessors.issue.AbstractIssueAccessor;
 import com.redhat.tasksyncer.dao.entities.issues.AbstractIssue;
 import com.redhat.tasksyncer.exceptions.InvalidPolarionStateException;
+import com.redhat.tasksyncer.exceptions.ProjectNotFoundException;
 import com.redhat.tasksyncer.presentation.Polarion.PolarionImporter;
 import com.redhat.tasksyncer.presentation.Polarion.xmlCreators.AbstractXmlCreator;
 import com.redhat.tasksyncer.presentation.Polarion.xmlCreators.RequirementsXmlCreator;
@@ -53,19 +54,24 @@ public class PolarionService {
      * @param ignoreTitles a list of issue titles that should not be pushed to the polarion
      */
     public void pushOnlyResultsToPolarion(String projectName, String polarionId,  String url, String username,
-                                          String password, String testCycle, List<String> ignoreTitles){
+                                          String password, String testCycle, List<String> ignoreTitles,
+                                          List<String> ignoreLabels) throws ProjectNotFoundException {
 
 
         List<AbstractIssue> issues = issueAccessor.getProject(projectName);
         if (issues.size() == 0){
-            // TODO: probably also throw exception
-            return;
+            throw new ProjectNotFoundException("There are no issues for the given project, have you synced the issues" +
+                    "from trello?");
         }
 
         issues = getActiveIssues(issues);
 
         if (ignoreTitles != null){
             issues = filterByTitles(issues, ignoreTitles);
+        }
+
+        if (ignoreLabels != null){
+            issues = filterByLabel(issues, ignoreLabels);
         }
 
 
@@ -98,12 +104,12 @@ public class PolarionService {
      * @throws InterruptedException
      */
     public void pushToPolarion(String projectName, String polarionId,  String url, String username, String password,
-                               String testCycle, List<String> ignoreTitles)
+                               String testCycle, List<String> ignoreTitles, List<String> ignoreLabels)
             throws InterruptedException {
 
         List<AbstractIssue> issues = issueAccessor.getProject(projectName);
         if (issues.size() == 0){
-            // TODO: probably also throw exception
+            // TODO: throw exception
             return;
         }
 
@@ -111,6 +117,10 @@ public class PolarionService {
 
         if (ignoreTitles != null){
             issues = filterByTitles(issues, ignoreTitles);
+        }
+
+        if (ignoreLabels != null){
+            issues = filterByLabel(issues, ignoreLabels);
         }
 
 
@@ -174,6 +184,18 @@ public class PolarionService {
                 .collect(Collectors.toList());
     }
 
+    private List<AbstractIssue> filterByLabel(List<AbstractIssue> issues, List<String> labels) {
+        return issues.stream().filter(issue -> {
+            boolean filterOut = false;
+            for (String label: labels) {
+                if ( issue.getLabels().isPresent() && issue.getLabels().get().contains(label)) {
+                     filterOut = true;
+                }
+            }
+            return ! filterOut;
+        }).collect(Collectors.toList());
+    }
+
     /**
      * Filters out the inactive issues
      *
@@ -182,6 +204,7 @@ public class PolarionService {
      */
     private List<AbstractIssue> getActiveIssues(List<AbstractIssue> issues){
         return issues.stream().filter(issue -> !issue.getDeleted())
+                .filter(issue -> ! (issue.getState() == null))
                 .filter(issue -> !issue.getState().equals(DO_NOT_TEST))
                 .collect(Collectors.toList());
     }
